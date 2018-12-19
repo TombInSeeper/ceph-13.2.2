@@ -3995,6 +3995,12 @@ int BlueStore::write_meta(const std::string& key, const std::string& value)
 {
   bluestore_bdev_label_t label;
   string p = path + "/block";
+
+#ifdef WITH_OCSSD
+  p = path + "/block.db";
+  dout(0) << "ocssd: " << __func__ << " We have to write_meta to bluefs device "  << dendl;
+#endif
+
   int r = _read_bdev_label(cct, p, &label);
   if (r < 0) {
     return ObjectStore::write_meta(key, value);
@@ -4009,6 +4015,10 @@ int BlueStore::read_meta(const std::string& key, std::string *value)
 {
   bluestore_bdev_label_t label;
   string p = path + "/block";
+#ifdef WITH_OCSSD
+  p = path + "/block.db";
+  dout(0) << "ocssd: " << __func__ << " We have to write_meta to bluefs device "  << dendl;
+#endif
   int r = _read_bdev_label(cct, p, &label);
   if (r < 0) {
     return ObjectStore::read_meta(key, value);
@@ -4453,9 +4463,14 @@ int BlueStore::_open_fm(bool create)
     fm->allocate(0, reserved, t);
 
     if (cct->_conf->bluestore_bluefs) {
+#ifdef WITH_OCSSD
+      ceph_assert(bluefs_extents.empty());
+      reserved = 0;
+#else
       ceph_assert(bluefs_extents.num_intervals() == 1);
       interval_set<uint64_t>::iterator p = bluefs_extents.begin();
       reserved = round_up_to(p.get_start() + p.get_len(), min_alloc_size);
+#endif
       dout(20) << __func__ << " reserved 0x" << std::hex << reserved << std::dec
 	       << " for bluefs" << dendl;
       bufferlist bl;
@@ -4463,6 +4478,7 @@ int BlueStore::_open_fm(bool create)
       t->set(PREFIX_SUPER, "bluefs_extents", bl);
       dout(20) << __func__ << " bluefs_extents 0x" << std::hex << bluefs_extents
 	       << std::dec << dendl;
+
     }
 
     if (cct->_conf->bluestore_debug_prefill > 0) {
@@ -4557,6 +4573,10 @@ int BlueStore::_open_alloc()
   dout(1) << __func__ << " loaded " << byte_u_t(bytes)
 	  << " in " << num << " extents"
 	  << dendl;
+
+#ifdef WITH_OCSSD
+  ceph_assert(bluefs_extents.empty());
+#endif
 
   // also mark bluefs space as allocated
   for (auto e = bluefs_extents.begin(); e != bluefs_extents.end(); ++e) {
@@ -4791,11 +4811,10 @@ int BlueStore::_open_db(bool create, bool to_repair_db)
              << cpp_strerror(r) << dendl;
         goto free_bluefs;
       }
-
       if (bluefs->bdev_support_label(BlueFS::BDEV_DB)) {
         r = _check_or_set_bdev_label(
-	  bfn,
-	  bluefs->get_block_device_size(BlueFS::BDEV_DB),
+          bfn,
+          bluefs->get_block_device_size(BlueFS::BDEV_DB),
           "bluefs db", create);
         if (r < 0) {
           derr << __func__
@@ -4805,26 +4824,38 @@ int BlueStore::_open_db(bool create, bool to_repair_db)
         }
       }
       if (create) {
-	bluefs->add_block_extent(
-	  BlueFS::BDEV_DB,
-	  SUPER_RESERVED,
-	  bluefs->get_block_device_size(BlueFS::BDEV_DB) - SUPER_RESERVED);
+	      bluefs->add_block_extent(
+        BlueFS::BDEV_DB,
+        SUPER_RESERVED,
+        bluefs->get_block_device_size(BlueFS::BDEV_DB) - SUPER_RESERVED);
       }
       bluefs_shared_bdev = BlueFS::BDEV_SLOW;
       bluefs_single_shared_device = false;
-    } else {
+    }
+    else {
       r = -errno;
       if (::lstat(bfn.c_str(), &st) == -1) {
-	r = 0;
-	bluefs_shared_bdev = BlueFS::BDEV_DB;
+        r = 0;
+        bluefs_shared_bdev = BlueFS::BDEV_DB;
+#ifdef WITH_OCSSD
+        derr << "ocssd: " << __func__ << " " << bfn << " symlink doesn't exist. But we need block.db as bluefs's main device."
+             << cpp_strerror(r) << dendl;
+        derr << "ocssd: " << __func__ << " " <<  "You should check your ceph.conf "
+        << "and make sure you have set bluestore_block_db_path"
+        << dendl;
+        r = -errno;
+        goto free_bluefs;
+#endif
       } else {
-	derr << __func__ << " " << bfn << " symlink exists but target unusable: "
-	     << cpp_strerror(r) << dendl;
-	goto free_bluefs;
+        derr << __func__ << " " << bfn << " symlink exists but target unusable: "
+             << cpp_strerror(r) << dendl;
+        goto free_bluefs;
       }
     }
 
-    // shared device
+    // shared devic
+    // OCSSD::We need to add /block to bluefs block devices ; But not add extents to it;
+    // We also keep bluefs can see 3 devices , but promise shared_dev's total size is zero forever;
     bfn = path + "/block";
     // never trim here
     r = bluefs->add_block_device(bluefs_shared_bdev, bfn, false);
@@ -4833,7 +4864,9 @@ int BlueStore::_open_db(bool create, bool to_repair_db)
 	   << cpp_strerror(r) << dendl;
       goto free_bluefs;
     }
+
     if (create) {
+#ifndef WITH_OCSSD
       // note: we always leave the first SUPER_RESERVED (8k) of the device unused
       uint64_t initial =
 	bdev->get_size() * (cct->_conf->bluestore_bluefs_min_ratio +
@@ -4853,6 +4886,10 @@ int BlueStore::_open_db(bool create, bool to_repair_db)
 			       cct->_conf->bluefs_alloc_size);
       bluefs->add_block_extent(bluefs_shared_bdev, start, initial);
       bluefs_extents.insert(start, initial);
+#else
+      bluefs_extents.clear();
+      dout(0) << "ocssd: " << __func__ << " skip adding extents to bluefs" << dendl;
+#endif
     }
 
     bfn = path + "/block.wal";
@@ -4927,12 +4964,20 @@ int BlueStore::_open_db(bool create, bool to_repair_db)
       // we have both block.db and block; tell rocksdb!
       // note: the second (last) size value doesn't really matter
       ostringstream db_paths;
+
       uint64_t db_size = bluefs->get_block_device_size(BlueFS::BDEV_DB);
+
+#ifdef WITH_OCSSD
+      // But in ocssd case , we only need block.db ; donot
+      db_paths << fn << ","
+         << (uint64_t)(db_size * 95 / 100) << " ";
+#else
       uint64_t slow_size = bluefs->get_block_device_size(BlueFS::BDEV_SLOW);
       db_paths << fn << ","
                << (uint64_t)(db_size * 95 / 100) << " "
                << fn + ".slow" << ","
                << (uint64_t)(slow_size * 95 / 100);
+#endif
       kv_options["db_paths"] = db_paths.str();
       dout(10) << __func__ << " set db_paths to " << db_paths.str() << dendl;
     }
@@ -4940,9 +4985,13 @@ int BlueStore::_open_db(bool create, bool to_repair_db)
     if (create) {
       env->CreateDir(fn);
       if (kv_options.count("separate_wal_dir"))
-	env->CreateDir(fn + ".wal");
+	      env->CreateDir(fn + ".wal");
+
+#ifndef WITH_OCSSD
       if (kv_options.count("rocksdb_db_paths"))
-	env->CreateDir(fn + ".slow");
+	      env->CreateDir(fn + ".slow");
+#endif
+
     }
   } else if (create) {
     int r = ::mkdir(fn.c_str(), 0755);
@@ -5049,8 +5098,16 @@ void BlueStore::_close_db()
   }
 }
 
-int BlueStore::_reconcile_bluefs_freespace()
+int BlueStore::
+_reconcile_bluefs_freespace()
 {
+
+#ifdef WITH_OCSSD
+  // Should not be called
+  dout(10) << __func__ << dendl;
+  ceph_assert(false);
+#endif
+
   dout(10) << __func__ << dendl;
   interval_set<uint64_t> bset;
   int r = bluefs->get_block_extents(bluefs_shared_bdev, &bset);
@@ -5106,6 +5163,12 @@ void BlueStore::_dump_alloc_on_rebalance_failure()
 
 int BlueStore::_balance_bluefs_freespace(PExtentVector *extents)
 {
+#ifdef WITH_OCSSD
+  // Should not be called
+  dout(10) << __func__ << dendl;
+  ceph_assert(false);
+#endif
+
   int ret = 0;
   ceph_assert(bluefs);
 
@@ -5674,9 +5737,14 @@ int BlueStore::_mount(bool kv_only, bool open_db)
     goto out_coll;
 
   if (bluefs) {
+
+#ifdef WITH_OCSSD
+  dout(0) << "ocssd:" << " No need to _reconcile_bluefs_freespace " << dendl;
+#else
     r = _reconcile_bluefs_freespace();
     if (r < 0)
       goto out_coll;
+#endif
   }
 
   _kv_start();
@@ -5959,6 +6027,9 @@ int BlueStore::_fsck(bool deep, bool repair)
   }
 
   if (bluefs) {
+#ifdef WITH_OCSSD
+    ceph_assert(bluefs_extents.empty());
+#endif
     for (auto e = bluefs_extents.begin(); e != bluefs_extents.end(); ++e) {
       apply(
         e.get_start(), e.get_len(), fm->get_alloc_size(), used_blocks,
@@ -6912,9 +6983,14 @@ int BlueStore::statfs(struct store_statfs_t *buf)
   if (bluefs) {
     // part of our shared device is "free" according to BlueFS, but we
     // can't touch bluestore_bluefs_min of it.
+#ifdef WITH_OCSSD
+    int64_t shared_available = 0;
+#else
     int64_t shared_available = std::min(
       bluefs->get_free(bluefs_shared_bdev),
       bluefs->get_total(bluefs_shared_bdev) - cct->_conf->bluestore_bluefs_min);
+#endif
+
     if (shared_available > 0) {
       bfree += shared_available;
     }
@@ -9135,23 +9211,29 @@ void BlueStore::_kv_sync_thread()
       // transaction is ready for commit.
       throttle_bytes.put(costs);
 
+
+      // Disable bluefs free space balance
       PExtentVector bluefs_gift_extents;
       if (bluefs &&
-	  after_flush - bluefs_last_balance >
-	  cct->_conf->bluestore_bluefs_balance_interval) {
-	bluefs_last_balance = after_flush;
-	int r = _balance_bluefs_freespace(&bluefs_gift_extents);
-	ceph_assert(r >= 0);
-	if (r > 0) {
-	  for (auto& p : bluefs_gift_extents) {
-	    bluefs_extents.insert(p.offset, p.length);
-	  }
-	  bufferlist bl;
-	  encode(bluefs_extents, bl);
-	  dout(10) << __func__ << " bluefs_extents now 0x" << std::hex
-		   << bluefs_extents << std::dec << dendl;
-	  synct->set(PREFIX_SUPER, "bluefs_extents", bl);
-	}
+          after_flush - bluefs_last_balance >
+          cct->_conf->bluestore_bluefs_balance_interval) {
+      bluefs_last_balance = after_flush;
+  #ifdef WITH_OCSSD
+        int r = 0;
+  #else
+        int r = _balance_bluefs_freespace(&bluefs_gift_extents);
+  #endif
+        ceph_assert(r >= 0);
+        if (r > 0) {
+          for (auto& p : bluefs_gift_extents) {
+            bluefs_extents.insert(p.offset, p.length);
+          }
+          bufferlist bl;
+          encode(bluefs_extents, bl);
+          dout(10) << __func__ << " bluefs_extents now 0x" << std::hex
+             << bluefs_extents << std::dec << dendl;
+          synct->set(PREFIX_SUPER, "bluefs_extents", bl);
+        }
       }
 
       // cleanup sync deferred keys
@@ -9217,15 +9299,21 @@ void BlueStore::_kv_sync_thread()
       }
 
       if (bluefs) {
-	if (!bluefs_gift_extents.empty()) {
-	  _commit_bluefs_freespace(bluefs_gift_extents);
-	}
-	if (!bluefs_extents_reclaiming.empty()) {
-	  dout(0) << __func__ << " releasing old bluefs 0x" << std::hex
-		   << bluefs_extents_reclaiming << std::dec << dendl;
-	  alloc->release(bluefs_extents_reclaiming);
-	  bluefs_extents_reclaiming.clear();
-	}
+#ifdef WITH_OCSSD
+        // OCSSD::RESERVERD
+        ceph_assert(bluefs_extents_reclaiming.empty());
+        dout(30) << " ocssd:" << __func__ << " bluefs_extents_reclaiming" << " is empty!!!" << dendl;
+#else
+      if (!bluefs_gift_extents.empty()) {
+        _commit_bluefs_freespace(bluefs_gift_extents);
+      }
+      if (!bluefs_extents_reclaiming.empty()) {
+        dout(0) << __func__ << " releasing old bluefs 0x" << std::hex
+           << bluefs_extents_reclaiming << std::dec << dendl;
+        alloc->release(bluefs_extents_reclaiming);
+        bluefs_extents_reclaiming.clear();
+      }
+#endif
       }
 
       l.lock();
@@ -11255,7 +11343,7 @@ int BlueStore::_do_write(
   o->extent_map.fault_range(db, offset, length);
 
 #ifdef WITH_OCSSD
-  dout(30) << __func__ << "Start _occsd_*write" << dendl;
+  dout(30) << __func__ << " Start _occsd_*write" << dendl;
   _ocssd_do_write_data(txc, c, o, offset, length, bl, &wctx);
 #else
   _do_write_data(txc, c, o, offset, length, bl, &wctx);
