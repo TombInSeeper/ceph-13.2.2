@@ -35,6 +35,12 @@
 #include "include/interval_set.h"
 #define SPDK_PREFIX "spdk:"
 
+
+#ifndef WITH_OCSSD
+#define WITH_OCSSD
+#endif
+
+
 class CephContext;
 
 /// track in-flight io
@@ -138,6 +144,9 @@ public:
   uint64_t get_size() const { return size; }
   uint64_t get_block_size() const { return block_size; }
 
+
+
+
   /// hook to provide utilization of thinly-provisioned device
   virtual bool get_thin_utilization(uint64_t *total, uint64_t *avail) const {
     return false;
@@ -194,6 +203,11 @@ public:
   virtual int invalidate_cache(uint64_t off, uint64_t len) = 0;
   virtual int open(const std::string& path) = 0;
   virtual void close() = 0;
+
+
+
+    ///
+    virtual uint64_t  get_reserve_size() const { return 0 ;}
 
 protected:
   bool is_valid_io(uint64_t off, uint64_t len) const {

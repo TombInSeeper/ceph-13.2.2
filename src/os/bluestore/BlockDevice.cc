@@ -32,6 +32,11 @@
 #include "libpmem.h"
 #endif
 
+
+#if defined(WITH_OCSSD)
+#include "OCDevice.h"
+#endif
+
 #include "common/debug.h"
 #include "common/EventTrace.h"
 #include "common/errno.h"
@@ -87,6 +92,28 @@ BlockDevice *BlockDevice::create(CephContext* cct, const string& path,
 				 aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv)
 {
   string type = "kernel";
+  dout(10) << __func__ << " target path = " << path << dendl;
+#ifdef WITH_OCSSD
+  // May be ocssd prefix
+  std::string ocssd_prefix , p;
+  if( path.size() > 6 ) {
+    ocssd_prefix = path.substr(0, 6);
+    p = path.substr(6,path.size());
+    if (ocssd_prefix == "ocssd:")
+    {
+      type = "ocssd";
+      dout(10) << __func__ << " Probe main block device : " << p << dendl;
+      return new OCDevice(cct,cb,cbpriv,d_cb,d_cbpriv);
+    }
+    else
+    {
+      dout(10) << __func__ << " Not main block device : " << path << dendl;
+    }
+  }
+#else
+
+#endif
+
   char buf[PATH_MAX + 1];
   int r = ::readlink(path.c_str(), buf, sizeof(buf) - 1);
   if (r >= 0) {

@@ -50,7 +50,7 @@ class BlueStoreRepairer;
 
 //#define DEBUG_CACHE
 //#define DEBUG_DEFERRED
-#define WITH_OCSSD
+
 
 
 
@@ -78,6 +78,7 @@ enum {
   l_bluestore_submit_lat,
   l_bluestore_commit_lat,
   l_bluestore_read_lat,
+  //OCSSD
   l_bluestore_read_onode_meta_lat,
   l_bluestore_read_wait_aio_lat,
   l_bluestore_compress_lat,
@@ -114,6 +115,7 @@ enum {
   l_bluestore_write_small_deferred,
   l_bluestore_write_small_pre_read,
   l_bluestore_write_small_new,
+
   l_bluestore_txc,
   l_bluestore_onode_reshard,
   l_bluestore_blob_split,
@@ -1857,8 +1859,13 @@ private:
   interval_set<uint64_t> bluefs_extents_reclaiming; ///< currently reclaiming
 
 
+  #ifdef WITH_OCSSD
+  //std::atomic<uint64_t> txc_alloc_seq = {0}; /// OCSSD::record global alloc times
+  //This mutex is necessary ,we cannot promise that the order of calling aio_write is the same as preallocating
 
-  std::atomic<uint64_t> txc_alloc_seq = {0}; /// OCSSD::record global alloc times
+  std::mutex ocssd_data_log_lock;              /// OCSSD::for sequency of data log
+
+  #endif
 
   std::mutex deferred_lock;
   std::atomic<uint64_t> deferred_seq = {0};

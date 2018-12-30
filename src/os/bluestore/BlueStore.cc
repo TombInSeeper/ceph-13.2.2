@@ -80,6 +80,12 @@ const string PREFIX_PREALLOC_INFO = "Q" ; //
 
 // reserve: label (4k) + bluefs super (4k), which means we start at 8k.
 #define SUPER_RESERVED  8192
+//#ifdef WITH_OCSSD
+//#undef SUPER_RESERVED
+//#define SUPER_RESERVED (256 * 1024 * 1024)
+//#endif
+
+
 
 #define OBJECT_MAX_SIZE 0xffffffff // 32 bits
 
@@ -4383,8 +4389,26 @@ int BlueStore::_open_bdev(bool create)
 {
   ceph_assert(bdev == NULL);
   string p = path + "/block";
+
+  //ADD PREFIX SO THAT BlockDevice::create CAN Identify It
+  p = string("ocssd:") + p;
+  dout(0) << __func__ << " ocdevice path : " << p << dendl;
+  if(create)
+  {
+#ifdef WITH_OCSSD
+    dout(10) << __func__ << " ocdevice(creating): delete core dump files " << dendl;
+    std::string cmd = std::string(" rm -rf ") + "/tmp" + string("/*.core");
+    system(cmd.c_str());
+#endif
+  }
+
   uint64_t dev_size;
   bdev = BlockDevice::create(cct, p, aio_cb, static_cast<void*>(this), discard_cb, static_cast<void*>(this));
+
+  //REMOVE PREFIX
+  p = path + "/block";
+
+
   int r = bdev->open(p);
   if (r < 0)
     goto fail;
@@ -4460,11 +4484,20 @@ int BlueStore::_open_fm(bool create)
     uint64_t reserved = round_up_to(
       std::max<uint64_t>(SUPER_RESERVED, min_alloc_size),
       min_alloc_size);
+
+#ifdef WITH_OCSSD
+    if(bdev->get_reserve_size()){
+      reserved = std::max<uint64_t>(reserved,bdev->get_reserve_size());
+    }
+#endif
+
     fm->allocate(0, reserved, t);
 
     if (cct->_conf->bluestore_bluefs) {
 #ifdef WITH_OCSSD
       ceph_assert(bluefs_extents.empty());
+      //OK, no need to reserve the 8K space ,as it is on block.db now ;
+      //But as BitmapFreeListManager
       reserved = 0;
 #else
       ceph_assert(bluefs_extents.num_intervals() == 1);
@@ -6014,7 +6047,7 @@ int BlueStore::_fsck(bool deep, bool repair)
 
   used_blocks.resize(fm->get_alloc_units());
   apply(
-    0, std::max<uint64_t>(min_alloc_size, SUPER_RESERVED), fm->get_alloc_size(), used_blocks,
+    0, std::max<uint64_t>({min_alloc_size, SUPER_RESERVED , bdev->get_reserve_size()} ), fm->get_alloc_size(), used_blocks,
     [&](uint64_t pos, mempool_dynamic_bitset &bs) {
 	ceph_assert(pos < bs.size());
       bs.set(pos);
@@ -8742,29 +8775,29 @@ void BlueStore::_txc_finalize_kv(TransContext *txc, KeyValueDB::Transaction t)
   }
 
 #ifdef WITH_OCSSD
-  // For crash consistency , we must record space allocation information before AIOs .
-  if(!pallocated->empty())
-  {
-    bufferlist bl;
-    encode(*pallocated , bl);
-
-    uint64_t seq = txc_alloc_seq.load();
-    ++txc_alloc_seq;
-    std:: string key;
-    _key_encode_u64(seq , &key);
-
-    dout(30) << " ocssd:" << __func__ << " key=" << key.c_str() << " value.size="<< bl.length() << dendl;
-
-    auto async_t = db->get_transaction();
-    async_t->set(PREFIX_PREALLOC_INFO, key , bl);
-    db->submit_transaction(async_t);
-
-
-    // After this write transaction is completed , this kv pair will be removed;
-    // We promise the kv pair are set only once
-    // KV transaction will be submitted soon , after data AIOs are all completed
-    txc->t->rm_single_key(PREFIX_PREALLOC_INFO,key);
-  }
+//  // For crash consistency , we must record space allocation information before AIOs .
+//  if(!pallocated->empty())
+//  {
+//    bufferlist bl;
+//    encode(*pallocated , bl);
+//
+//    uint64_t seq = txc_alloc_seq.load();
+//    ++txc_alloc_seq;
+//    std:: string key;
+//    _key_encode_u64(seq , &key);
+//
+//    dout(30) << " ocssd:" << __func__ << " key=" << key.c_str() << " value.size="<< bl.length() << dendl;
+//
+//    auto async_t = db->get_transaction();
+//    async_t->set(PREFIX_PREALLOC_INFO, key , bl);
+//    db->submit_transaction(async_t);
+//
+//
+//    // After this write transaction is completed , this kv pair will be removed;
+//    // We promise the kv pair are set only once
+//    // KV transaction will be submitted soon , after data AIOs are all completed
+//    txc->t->rm_single_key(PREFIX_PREALLOC_INFO,key);
+//  }
 #endif
 
   // update freelist with non-overlap sets
@@ -8894,25 +8927,35 @@ void BlueStore::_txc_finish(TransContext *txc)
 
 void BlueStore::_txc_release_alloc(TransContext *txc)
 {
-  // it's expected we're called with lazy_release_lock already taken!
-  if (likely(!cct->_conf->bluestore_debug_no_reuse_blocks)) {
-    int r = 0;
-    if (cct->_conf->bdev_enable_discard && cct->_conf->bdev_async_discard) {
-      r = bdev->queue_discard(txc->released);
-      if (r == 0) {
-	dout(10) << __func__ << "(queued) " << txc << " " << std::hex
-		 << txc->released << std::dec << dendl;
-	goto out;
-      }
-    } else if (cct->_conf->bdev_enable_discard) {
-      for (auto p = txc->released.begin(); p != txc->released.end(); ++p) {
-	  bdev->discard(p.get_start(), p.get_len());
-      }
+//  // it's expected we're called with lazy_release_lock already taken!
+//  if (likely(!cct->_conf->bluestore_debug_no_reuse_blocks)) {
+//    int r = 0;
+//    if (cct->_conf->bdev_enable_discard && cct->_conf->bdev_async_discard) {
+//      r = bdev->queue_discard(txc->released);
+//      if (r == 0) {
+//	dout(10) << __func__ << "(queued) " << txc << " " << std::hex
+//		 << txc->released << std::dec << dendl;
+//	goto out;
+//      }
+//    } else if (cct->_conf->bdev_enable_discard) {
+//      for (auto p = txc->released.begin(); p != txc->released.end(); ++p) {
+//	      bdev->discard(p.get_start(), p.get_len());
+//      }
+//    }
+
+#ifdef WITH_OCSSD
+    dout(10) << "ocssd::" << __func__  << txc << " " << std::hex
+           << txc->released << std::dec << " to discard" << dendl;
+    for (auto p = txc->released.begin(); p != txc->released.end(); ++p) {
+      bdev->discard(p.get_start(), p.get_len());
     }
+#else
     dout(10) << __func__ << "(sync) " << txc << " " << std::hex
              << txc->released << std::dec << dendl;
     alloc->release(txc->released);
-  }
+#endif
+
+
 
 out:
   txc->allocated.clear();
@@ -9024,6 +9067,7 @@ void BlueStore::_kv_start()
     Finisher *f = new Finisher(cct, oss.str(), "finisher");
     finishers.push_back(f);
   }
+
 
   deferred_finisher.start();
   for (auto f : finishers) {
@@ -9567,36 +9611,6 @@ int BlueStore::_ocssd_alloc_replay()
 {
   dout(10) << __func__ << " start" << dendl;
   int count = 0;
-  auto cleanup = [ & ](interval_set<uint64_t> &prealloc) -> int {
-    dout(30) << " OCSSD: erase prealloc:" << prealloc << dendl;
-      // Indicate device erasing these dirty blocks here
-      // TODO:OCSSD
-      {
-        //Erase Blocks
-      }
-      // If not full in a block , then mark these pages invalid
-      {
-        // Mark invalid
-        // We need a "Bitmap Invalid List"
-        // We should well define how LBA maps to PPA
-
-      }
-    return 0;
-  };
-  KeyValueDB::Iterator it = db->get_iterator(PREFIX_PREALLOC_INFO);
-  for(it->lower_bound(string()); it->valid() ; it->next(),count++)
-  {
-    dout(20) << __func__ << " replay" << pretty_binary_string(it->key()) << dendl;
-    interval_set<uint64_t> prealloc_of_uncompleted_io;
-    auto p = it->value().begin();
-    decode(prealloc_of_uncompleted_io, p);
-    int r = cleanup( prealloc_of_uncompleted_io );
-    if(r < 0)
-    {
-      dout(1) << __func__ << "ERROR occurs !!" << dendl;
-      return r;
-    }
-  }
   if(!count)
   {
     dout(10) << __func__  << "Good! There is no bad I/O since the last running time" << dendl;
@@ -10776,137 +10790,127 @@ int BlueStore::_do_alloc_write(
   PExtentVector prealloc;
   prealloc.reserve(2 * wctx->writes.size());;
   int prealloc_left = 0;
-  prealloc_left = alloc->allocate(
-    need, min_alloc_size, need,
-    0, &prealloc);
-  ceph_assert(prealloc_left == (int64_t)need);
-  dout(20) << __func__ << " prealloc " << prealloc << dendl;
-  auto prealloc_pos = prealloc.begin();
 
-  for (auto& wi : wctx->writes) {
-    BlobRef b = wi.b;
-    bluestore_blob_t& dblob = b->dirty_blob();
-    uint64_t b_off = wi.b_off;
-    bufferlist *l = &wi.bl;
-    uint64_t final_length = wi.blob_length;
-    uint64_t csum_length = wi.blob_length;
-    if (wi.compressed) {
-      final_length = wi.compressed_bl.length();
-      csum_length = final_length;
-      l = &wi.compressed_bl;
-      dblob.set_compressed(wi.blob_length, wi.compressed_len);
-    } else if (wi.new_blob) {
-      // initialize newly created blob only
-      ceph_assert(dblob.is_mutable());
-      unsigned csum_order;
-      if (l->length() != wi.blob_length) {
-        // hrm, maybe we could do better here, but let's not bother.
-        dout(20) << __func__ << " forcing csum_order to block_size_order "
-                << block_size_order << dendl;
-	csum_order = block_size_order;
-      } else {
-        csum_order = std::min(wctx->csum_order, ctz(l->length()));
-      }
-      // try to align blob with max_blob_size to improve
-      // its reuse ratio, e.g. in case of reverse write
-      uint32_t suggested_boff =
-       (wi.logical_offset - (wi.b_off0 - wi.b_off)) % max_bsize;
-      if ((suggested_boff % (1 << csum_order)) == 0 &&
-           suggested_boff + final_length <= max_bsize &&
-           suggested_boff > b_off) {
-        dout(20) << __func__ << " forcing blob_offset to 0x"
-                 << std::hex << suggested_boff << std::dec << dendl;
-        ceph_assert(suggested_boff >= b_off);
-        csum_length += suggested_boff - b_off;
-        b_off = suggested_boff;
-      }
-      if (csum != Checksummer::CSUM_NONE) {
-        dout(20) << __func__ << " initialize csum setting for new blob " << *b
-                 << " csum_type " << Checksummer::get_csum_type_string(csum)
-                 << " csum_order " << csum_order
-                 << " csum_length 0x" << std::hex << csum_length << std::dec
-                 << dendl;
-        dblob.init_csum(csum, csum_order, csum_length);
-      }
-    }
 
-    PExtentVector extents;
-    int64_t left = final_length;
-    while (left > 0) {
-      ceph_assert(prealloc_left > 0);
-      if (prealloc_pos->length <= left) {
-	prealloc_left -= prealloc_pos->length;
-	left -= prealloc_pos->length;
-	txc->statfs_delta.allocated() += prealloc_pos->length;
-	extents.push_back(*prealloc_pos);
-	++prealloc_pos;
-      } else {
-	extents.emplace_back(prealloc_pos->offset, left);
-	prealloc_pos->offset += left;
-	prealloc_pos->length -= left;
-	prealloc_left -= left;
-	txc->statfs_delta.allocated() += left;
-	left = 0;
-	break;
+  {
+    //
+    std::lock_guard<std::mutex> l(this->ocssd_data_log_lock);
+
+    prealloc_left = alloc->allocate(need, min_alloc_size, need, 0, &prealloc);
+    ceph_assert(prealloc_left == (int64_t) need);
+    dout(20) << __func__ << " prealloc " << prealloc << " wctx->writes->size():" << wctx->writes.size() << dendl;
+    auto prealloc_pos = prealloc.begin();
+
+    for (auto &wi : wctx->writes) {
+      BlobRef b = wi.b;
+      bluestore_blob_t &dblob = b->dirty_blob();
+      uint64_t b_off = wi.b_off;
+      bufferlist *l = &wi.bl;
+      uint64_t final_length = wi.blob_length;
+      uint64_t csum_length = wi.blob_length;
+      if (wi.compressed) {
+        final_length = wi.compressed_bl.length();
+        csum_length = final_length;
+        l = &wi.compressed_bl;
+        dblob.set_compressed(wi.blob_length, wi.compressed_len);
+      } else if (wi.new_blob) {
+        // initialize newly created blob only
+        ceph_assert(dblob.is_mutable());
+        unsigned csum_order;
+        if (l->length() != wi.blob_length) {
+          // hrm, maybe we could do better here, but let's not bother.
+          dout(20) << __func__ << " forcing csum_order to block_size_order " << block_size_order << dendl;
+          csum_order = block_size_order;
+        } else {
+          csum_order = std::min(wctx->csum_order, ctz(l->length()));
+        }
+        // try to align blob with max_blob_size to improve
+        // its reuse ratio, e.g. in case of reverse write
+        uint32_t suggested_boff = (wi.logical_offset - (wi.b_off0 - wi.b_off)) % max_bsize;
+        if ((suggested_boff % (1 << csum_order)) == 0 && suggested_boff + final_length <= max_bsize &&
+            suggested_boff > b_off) {
+          dout(20) << __func__ << " forcing blob_offset to 0x" << std::hex << suggested_boff << std::dec << dendl;
+          ceph_assert(suggested_boff >= b_off);
+          csum_length += suggested_boff - b_off;
+          b_off = suggested_boff;
+        }
+        if (csum != Checksummer::CSUM_NONE) {
+          dout(20) << __func__ << " initialize csum setting for new blob " << *b << " csum_type "
+                   << Checksummer::get_csum_type_string(csum) << " csum_order " << csum_order << " csum_length 0x"
+                   << std::hex << csum_length << std::dec << dendl;
+          dblob.init_csum(csum, csum_order, csum_length);
+        }
       }
-    }
-    for (auto& p : extents) {
-      txc->allocated.insert(p.offset, p.length);
-    }
-    dblob.allocated(p2align(b_off, min_alloc_size), final_length, extents);
 
-    dout(20) << __func__ << " blob " << *b << dendl;
-    if (dblob.has_csum()) {
-      dblob.calc_csum(b_off, *l);
-    }
-
-    if (wi.mark_unused) {
-      auto b_end = b_off + wi.bl.length();
-      if (b_off) {
-        dblob.add_unused(0, b_off);
+      PExtentVector extents;
+      int64_t left = final_length;
+      while (left > 0) {
+        ceph_assert(prealloc_left > 0);
+        if (prealloc_pos->length <= left) {
+          prealloc_left -= prealloc_pos->length;
+          left -= prealloc_pos->length;
+          txc->statfs_delta.allocated() += prealloc_pos->length;
+          extents.push_back(*prealloc_pos);
+          ++prealloc_pos;
+        } else {
+          extents.emplace_back(prealloc_pos->offset, left);
+          prealloc_pos->offset += left;
+          prealloc_pos->length -= left;
+          prealloc_left -= left;
+          txc->statfs_delta.allocated() += left;
+          left = 0;
+          break;
+        }
       }
-      if (b_end < wi.blob_length) {
-        dblob.add_unused(b_end, wi.blob_length - b_end);
+      for (auto &p : extents) {
+        txc->allocated.insert(p.offset, p.length);
       }
-    }
+      dblob.allocated(p2align(b_off, min_alloc_size), final_length, extents);
 
-    Extent *le = o->extent_map.set_lextent(coll, wi.logical_offset,
-                                           b_off + (wi.b_off0 - wi.b_off),
-                                           wi.length0,
-                                           wi.b,
-                                           nullptr);
-    wi.b->dirty_blob().mark_used(le->blob_offset, le->length);
-    txc->statfs_delta.stored() += le->length;
-    dout(20) << __func__ << "  lex " << *le << dendl;
-    _buffer_cache_write(txc, wi.b, b_off, wi.bl,
-                        wctx->buffered ? 0 : Buffer::FLAG_NOCACHE);
+      dout(20) << __func__ << " blob " << *b << dendl;
+      if (dblob.has_csum()) {
+        dblob.calc_csum(b_off, *l);
+      }
 
-    // queue io
-    if (!g_conf->bluestore_debug_omit_block_device_write) {
-      if (l->length() <= prefer_deferred_size.load()) {
-	dout(20) << __func__ << " deferring small 0x" << std::hex
-		 << l->length() << std::dec << " write via deferred" << dendl;
-	bluestore_deferred_op_t *op = _get_deferred_op(txc, o);
-	op->op = bluestore_deferred_op_t::OP_WRITE;
-	int r = b->get_blob().map(
-	  b_off, l->length(),
-	  [&](uint64_t offset, uint64_t length) {
-	    op->extents.emplace_back(bluestore_pextent_t(offset, length));
-	    return 0;
-	  });
-        ceph_assert(r == 0);
-	op->data = *l;
-      } else {
-	b->get_blob().map_bl(
-	  b_off, *l,
-	  [&](uint64_t offset, bufferlist& t) {
-	    bdev->aio_write(offset, t, &txc->ioc, false);
-	  });
+      if (wi.mark_unused) {
+        auto b_end = b_off + wi.bl.length();
+        if (b_off) {
+          dblob.add_unused(0, b_off);
+        }
+        if (b_end < wi.blob_length) {
+          dblob.add_unused(b_end, wi.blob_length - b_end);
+        }
+      }
+
+      Extent *le = o->extent_map.set_lextent(coll, wi.logical_offset, b_off + (wi.b_off0 - wi.b_off), wi.length0, wi.b,
+                                             nullptr);
+      wi.b->dirty_blob().mark_used(le->blob_offset, le->length);
+      txc->statfs_delta.stored() += le->length;
+      dout(20) << __func__ << "  lex " << *le << dendl;
+      _buffer_cache_write(txc, wi.b, b_off, wi.bl, wctx->buffered ? 0 : Buffer::FLAG_NOCACHE);
+
+      // queue io
+      if (!g_conf->bluestore_debug_omit_block_device_write) {
+        if (l->length() <= prefer_deferred_size.load()) {
+          dout(20) << __func__ << " deferring small 0x" << std::hex << l->length() << std::dec << " write via deferred"
+                   << dendl;
+          bluestore_deferred_op_t *op = _get_deferred_op(txc, o);
+          op->op = bluestore_deferred_op_t::OP_WRITE;
+          int r = b->get_blob().map(b_off, l->length(), [&](uint64_t offset, uint64_t length) {
+              op->extents.emplace_back(bluestore_pextent_t(offset, length));
+              return 0;
+          });
+          ceph_assert(r == 0);
+          op->data = *l;
+        } else {
+          b->get_blob().map_bl(b_off, *l, [&](uint64_t offset, bufferlist &t) {
+              bdev->aio_write(offset, t, &txc->ioc, false);
+          });
+        }
       }
     }
   }
-  ceph_assert(prealloc_pos == prealloc.end());
-  ceph_assert(prealloc_left == 0);
+
   return 0;
 }
 

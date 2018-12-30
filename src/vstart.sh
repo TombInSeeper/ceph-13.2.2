@@ -517,33 +517,32 @@ $DAEMONOPTS
         osd class load list = *
         osd class default list = *
 
-        filestore wbthrottle xfs ios start flusher = 10
-        filestore wbthrottle xfs ios hard limit = 20
-        filestore wbthrottle xfs inodes hard limit = 30
-        filestore wbthrottle btrfs ios start flusher = 10
-        filestore wbthrottle btrfs ios hard limit = 20
-        filestore wbthrottle btrfs inodes hard limit = 30
-        bluestore fsck on mount = true
-
+        bluestore fsck on mount = false
+        osd pool default min size = 1
+        osd pool default pg num = 100
+        osd pool default pgp num = 100
+        ;;;;; bluestore block size file size = 5GB
         bluestore block size = 5368709120
         bluestore block create = true
-	bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
+	    bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
         bluestore block db size = 67108864
         bluestore block db create = true
-	bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
+	    bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
         bluestore block wal size = 1048576000
         bluestore block wal create = true
 
-        ; kstore
-        kstore fsck on mount = true
         osd objectstore = $objectstore
 
-	; deferred write never be used
-	bluestore_min_alloc_size = 4096
-	bluestore_prefer_deferred_size_hdd = 0
-	bluestore_prefer_deferred_size_ssd = 0
+	    ;;deferred write never be used
+	    bluestore_min_alloc_size = 4096             ;must be 4KB
+	    bluestore_prefer_deferred_size_hdd = 0      ;must be 0
+	    bluestore_prefer_deferred_size_ssd = 0      ;must be 0
 
-	debug_bluestore = 30/30
+	    ;;extra options
+	    bluestore_csum_type = none ; default:crc32
+	    ;;bluestore_allocator = bitmap; default:stupid
+
+
 $COSDSHORT
 $extra_conf
 [mon]
@@ -806,16 +805,58 @@ EOF
 
 if [ "$debug" -eq 0 ]; then
     CMONDEBUG='
-        debug mon = 10
-        debug ms = 1'
+            debug objectcacher= 0/0
+            debug paxos= 0/0
+            debug journal= 0/0
+            debug mds= 0/0
+            debug lockdep= 0/0
+            debug auth= 0/0
+            debug mds_log= 0/0
+            debug mon= 0/0
+            debug perfcounter= 0/0
+            debug monc= 0/0
+            debug throttle= 0/0
+            debug mds_migrator= 0/0
+            debug mds_locker= 0/0
+            debug rgw= 0/0
+            debug finisher= 0/0
+            debug journaler= 0/0
+            debug bdev= 0/0
+            debug mds_balancer= 0/0
+            debug ms= 0/0
+            debug hadoop= 0/0
+            debug client= 0/0
+            debug context= 0/0
+            debug osd= 0/0
+            debug bluestore= 0/0
+            debug memdb= 0/0
+            debug bluefs= 0/0
+            debug objclass= 0/0
+            debug log= 0/0
+            debug filer= 0/0
+            debug rocksdb= 0/0
+            debug mds_log_expire= 0/0
+            debug crush= 0/0
+            debug optracker= 0/0
+            debug tp= 0/0
+            debug rados= 0/0
+            debug heartbeatmap= 0/0
+            debug buffer= 0/0
+            debug asok= 0/0
+            debug rbd= 0/0
+            debug filestore= 0/0
+            debug timer= 0/0
+            debug objecter= 0/0'
 else
     echo "** going verbose **"
     CMONDEBUG='
         debug mon = 20
         debug paxos = 20
-        debug auth = 20
-	debug mgrc = 20
-        debug ms = 1'
+	    debug mgrc = 20
+        debug ms = 1
+        debug bluestore = 30/30
+        debug bdev= 30/30
+        '
 fi
 
 if [ -n "$MON_ADDR" ]; then

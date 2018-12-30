@@ -16,7 +16,7 @@ set(libos_srcs
   memstore/MemStore.cc
   kstore/KStore.cc
   kstore/kstore_types.cc
-  fs/FS.cc)
+  fs/FS.cc bluestore/OCDevice.cc bluestore/OCDevice.h)
 
 if(WITH_BLUESTORE)
   list(APPEND libos_srcs
@@ -40,6 +40,11 @@ if(HAVE_LIBAIO)
     bluestore/KernelDevice.cc
     bluestore/aio.cc)
 endif()
+
+
+if(WITH_OCSSD)
+  list(APPEND libos_srcs bluestore/OCDevice.cc)
+endif(WITH_OCSSD)
 
 if(WITH_FUSE)
   list(APPEND libos_srcs

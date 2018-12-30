@@ -227,6 +227,9 @@ if(WITH_BLUESTORE)
   set(HAVE_LIBAIO ${AIO_FOUND})
 endif()
 
+option(WITH_OCSSD "Bluestore target device is openchannel" ON)
+
+
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "i386|i686|amd64|x86_64|AMD64|aarch64")
   option(WITH_SPDK "Enable SPDK" ON)
 else()
