@@ -428,7 +428,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fb239463-a751-42ca-86b4-d39acf30ba4a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
@@ -442,6 +441,7 @@
       <change beforePath="$PROJECT_DIR$/src/os/bluestore/BlockDevice.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/BlockDevice.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/os/bluestore/BlueStore.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/BlueStore.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/os/bluestore/BlueStore.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/BlueStore.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/objectstore/demo.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/objectstore/demo.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/vstart.sh" beforeDir="false" afterPath="$PROJECT_DIR$/src/vstart.sh" afterDir="false" />
     </list>
@@ -471,7 +471,7 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="cc" value="17821" />
+          <entry key="cc" value="17824" />
           <entry key="h" value="8386" />
           <entry key="sh" value="447" />
           <entry key="txt" value="448" />
@@ -482,7 +482,7 @@
           <entry key="Bash" value="447" />
           <entry key="CMakeLists.txt" value="448" />
           <entry key="Doxygen file" value="2" />
-          <entry key="ObjectiveC" value="26205" />
+          <entry key="ObjectiveC" value="26208" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -549,7 +549,7 @@
         <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.cc">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="508">
-              <caret line="183" column="4" lean-forward="true" selection-start-line="183" selection-start-column="4" selection-end-line="183" selection-end-column="4" />
+              <caret line="180" column="22" lean-forward="true" selection-start-line="180" selection-start-column="22" selection-end-line="180" selection-end-column="22" />
               <folding>
                 <element signature="e#41#66#0" expanded="true" />
               </folding>
@@ -710,7 +710,7 @@
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds">
     <option name="x" value="-4" />
-    <option name="y" value="-4" />
+    <option name="y" value="4" />
     <option name="width" value="1920" />
     <option name="height" value="1036" />
   </component>
@@ -3299,12 +3299,12 @@
       <workItem from="1546060122341" duration="4500000" />
       <workItem from="1546068627740" duration="12458000" />
       <workItem from="1546084216719" duration="7627000" />
-      <workItem from="1546093944683" duration="13743000" />
+      <workItem from="1546093944683" duration="15224000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="175837000" />
+    <option name="totallyTimeSpent" value="177318000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -3316,7 +3316,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-4" y="-4" width="1920" height="1036" extended-state="0" />
+    <frame x="-4" y="4" width="1920" height="1036" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.19806243" />
@@ -3675,7 +3675,7 @@
     <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.cc">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="508">
-          <caret line="183" column="4" lean-forward="true" selection-start-line="183" selection-start-column="4" selection-end-line="183" selection-end-column="4" />
+          <caret line="180" column="22" lean-forward="true" selection-start-line="180" selection-start-column="22" selection-end-line="180" selection-end-column="22" />
           <folding>
             <element signature="e#41#66#0" expanded="true" />
           </folding>

@@ -154,8 +154,6 @@ int OCDevice::write(uint64_t off, bufferlist& bl, bool buffered)
   else
   {
 
-
-
     void *data1 = (void *)data;
     auto l1 = s1->size - s1->nvm_obj_off;
     dout(10) << " OCDevice::write " << "I'm now tring to append data to TWO superblocks" <<
@@ -181,7 +179,7 @@ int OCDevice::write(uint64_t off, bufferlist& bl, bool buffered)
              " data length  = " << l2 <<
              "}"
              << dendl;
-    
+
     ceph_assert(s2->nvm_obj_off == 0);
     s1->append(fd , data1, l1);
     s2->append(fd , data2 ,l2);
