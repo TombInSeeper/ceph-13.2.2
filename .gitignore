@@ -64,7 +64,7 @@ GTAGS
 /examples/librados/librados_hello_world_c
 
 # common cmake build dir
-/build
+/clion-build
 
 # editor backup files etc.
 \#*\#

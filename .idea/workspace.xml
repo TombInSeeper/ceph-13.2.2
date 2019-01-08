@@ -430,119 +430,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fb239463-a751-42ca-86b4-d39acf30ba4a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.10" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.11" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.12" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.13" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.14" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.15" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.16" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.17" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.18" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.19" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.20" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.21" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.8" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/boost/project-config.jam.9" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/cli/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/cli/cli_addr.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/cli/cli_bbt.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/cli/cli_cmd.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/cli/cli_dev.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/cli/cli_scan_disk.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/cli/cli_vblk.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/cli/nvm_cli.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/cli/nvm_cli.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/include/liblightnvm.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/include/nvm_debug.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/objssd-nvme.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/objssd-nvme.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_lightnvm/lightnvm.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_lightnvm/nvm_be_ioctl.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_lightnvm/nvm_be_ioctl.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_nvme/nvm_aer.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_nvme/nvm_aer.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_nvme/nvm_async.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_nvme/nvm_async.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_nvme/nvm_baidu.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_nvme/nvm_cmb.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_nvme/nvm_cmb.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_nvme/nvme.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/be_nvme/nvme_ioctl.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/libnvm_full.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_addr.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_bbt.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_be.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_be.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_buf.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_cmd.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_cmd.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_dev.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_dev.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_spec.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_spec.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_vblk.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/src/nvm_vblk.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/all_tests.pat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/launch_fio.pl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/pci_power_off.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/pci_power_on.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_addr_conv.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_aer.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_async.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_bbt.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_cmb.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_dev.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_ext_cmd.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_fio_basic.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_fio_mixed.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_fio_stress.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_fio_workload.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_io_status.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_list.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_main.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_power_loss.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_ppa.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_reset.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/tests/test_vblk.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/cmocka/cmocka.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/cmocka/cmocka.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/cmocka/cmocka_private.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/cmocka/config.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/hal_timer.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/hal_timer.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/log_csv.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/log_csv.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/log_csv_diff.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/log_csv_show.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/libocssd/utils/test_lba.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/do_cmake.sh" beforeDir="false" afterPath="$PROJECT_DIR$/do_cmake.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/orange" beforeDir="false" afterPath="$PROJECT_DIR$/orange" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/orange/orange" beforeDir="false" afterPath="$PROJECT_DIR$/orange/orange" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/orange/orange.py" beforeDir="false" afterPath="$PROJECT_DIR$/orange/orange.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/orange/orange_meta_conf.py" beforeDir="false" afterPath="$PROJECT_DIR$/orange/orange_meta_conf.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/boost/b2" beforeDir="false" afterPath="$PROJECT_DIR$/src/boost/b2" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/boost/bjam" beforeDir="false" afterPath="$PROJECT_DIR$/src/boost/bjam" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/legacy_config_opts.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/legacy_config_opts.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/common/options.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/common/options.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/os/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/os/bluestore/BitmapFreelistManager.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/BitmapFreelistManager.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/os/bluestore/BlockDevice.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/BlockDevice.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/os/bluestore/BlockDevice.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/BlockDevice.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/os/bluestore/BlueStore.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/BlueStore.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/os/bluestore/BlueStore.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/BlueStore.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/os/bluestore/KernelDevice.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/KernelDevice.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/os/bluestore/StupidAllocator.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/StupidAllocator.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/objectstore/demo.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/objectstore/demo.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/vstart.sh" beforeDir="false" afterPath="$PROJECT_DIR$/src/vstart.sh" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/clion-build/" />
@@ -619,29 +510,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/libocssd/objssd-nvme.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="138">
-              <caret line="20" column="9" lean-forward="true" selection-start-line="20" selection-start-column="9" selection-end-line="20" selection-end-column="9" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/libocssd/objssd-nvme.c">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2139">
-              <caret line="12" column="17" lean-forward="true" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="17" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.h">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-1242">
-              <caret line="9" column="17" lean-forward="true" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="20" />
+              <caret line="9" column="17" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="20" />
               <folding>
                 <element signature="e#164#197#0" expanded="true" />
                 <element signature="e#425#444#0" expanded="true" />
@@ -757,7 +630,7 @@
     </packageJsonPaths>
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
-  <component name="ProjectFrameBounds" extendedState="1">
+  <component name="ProjectFrameBounds">
     <option name="width" value="1920" />
     <option name="height" value="1036" />
   </component>
@@ -3405,12 +3278,12 @@
       <workItem from="1546923105149" duration="24000" />
       <workItem from="1546923164572" duration="458000" />
       <workItem from="1546923958851" duration="1715000" />
-      <workItem from="1546925998635" duration="6468000" />
+      <workItem from="1546925998635" duration="6872000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="276458000" />
+    <option name="totallyTimeSpent" value="276862000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -3423,7 +3296,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1036" extended-state="1" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14477934" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -3436,10 +3308,10 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32994923" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.49730894" weight="0.7454338" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49730894" visible="true" weight="0.42123288" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5043057" side_tool="true" weight="0.6689498" />
       <window_info anchor="bottom" id="Version Control" order="10" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="CMake" order="11" sideWeight="0.4956943" visible="true" weight="0.2739726" />
+      <window_info anchor="bottom" id="CMake" order="11" sideWeight="0.4956943" weight="0.4326484" />
       <window_info active="true" anchor="bottom" id="Messages" order="12" visible="true" weight="0.32978722" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -3821,7 +3693,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/libocssd/objssd-nvme.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2139">
+        <state relative-caret-position="-1518">
           <caret line="12" column="17" lean-forward="true" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="17" />
         </state>
       </provider>
@@ -3836,7 +3708,7 @@
     <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1242">
-          <caret line="9" column="17" lean-forward="true" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="20" />
+          <caret line="9" column="17" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="20" />
           <folding>
             <element signature="e#164#197#0" expanded="true" />
             <element signature="e#425#444#0" expanded="true" />
