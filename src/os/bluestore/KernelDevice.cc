@@ -68,7 +68,14 @@ int KernelDevice::open(const string& p)
   int r = 0;
   dout(1) << __func__ << " path " << path << dendl;
 
-  fd_direct = ::open(path.c_str(), O_RDWR | O_DIRECT);
+  int direct_flag = 0;
+  if(cct->_conf->bdev_debug_use_ramdisk)
+    dout(0) << "Use ramdisk" << dendl;
+  else {
+    dout(0) << "Use disk" << dendl;
+    direct_flag |= O_DIRECT;
+  }
+  fd_direct = ::open(path.c_str(), O_RDWR | direct_flag);
   if (fd_direct < 0) {
     r = -errno;
     derr << __func__ << " open got: " << cpp_strerror(r) << dendl;

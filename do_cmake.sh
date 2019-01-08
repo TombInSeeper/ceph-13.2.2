@@ -1,5 +1,5 @@
 #!/bin/sh -x
-git submodule update --init --recursive
+#git submodule update --init --recursive
 build="clion-build"
 if test -e $build; then
     echo 'build dir already exists; rm -rf build and re-run'

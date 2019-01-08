@@ -154,7 +154,9 @@ public:
 
   struct AioContext {
     virtual void aio_finish(BlueStore *store) = 0;
-    virtual ~AioContext() {}
+    virtual ~AioContext() {
+      
+    }
   };
 
   /// cached buffer

@@ -3649,7 +3649,20 @@ std::vector<Option> get_global_options() {
 
     // --------------------------
     // bluestore
+    Option("bdev_ocssd_backend", Option::TYPE_STR, Option::LEVEL_DEV)
+    .set_default("mock")
+    .set_description(""),
 
+    Option("bdev_ocssd_enable", Option::TYPE_BOOL, Option::LEVEL_DEV)
+        .set_default(false)
+        .set_description("Skip O_DIRECT when open a device file"),
+
+    Option("bdev_debug_use_ramdisk", Option::TYPE_BOOL, Option::LEVEL_DEV)
+    .set_default(false)
+    .set_description("Skip O_DIRECT when open a device file"),
+
+
+    //--------------------------------
     Option("bdev_debug_inflight_ios", Option::TYPE_BOOL, Option::LEVEL_DEV)
     .set_default(false)
     .set_description(""),

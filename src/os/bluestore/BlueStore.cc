@@ -4594,6 +4594,51 @@ int BlueStore::_open_alloc()
   uint64_t num = 0, bytes = 0;
 
   dout(1) << __func__ << " opening allocation metadata" << dendl;
+
+  #ifdef WITH_OCSSD
+  //// THE CODE IS VALUEABLE
+  interval_set<uint64_t> freelist_set , written_set,invalid_set;
+  {
+    // initialize from freelist
+    fm->enumerate_reset();
+    uint64_t offset, length;
+    while (fm->enumerate_next(&offset, &length)) {
+      freelist_set.insert(offset, length);
+      bytes += length;
+    }
+    fm->enumerate_reset();
+
+    bdev->get_written_extents(written_set);
+    invalid_set.intersection_of(freelist_set , written_set );
+
+    if( !invalid_set.empty() ){
+      dout(1) << __func__ << std::hex << " WRITTEN_SET extents: " << written_set  << std::dec << dendl;
+      dout(1) << __func__ << std::hex << " INVALID_SET extents: " << invalid_set  << std::dec << dendl;
+      dout(1) << __func__ << std::hex << " FREE_SET extents: " << freelist_set  << std::dec << dendl;
+
+      for(auto it = invalid_set.begin() ; it != invalid_set.end() ; it++)
+      {
+        freelist_set.erase(it.get_start(), it.get_len());
+        bytes -= it.get_len();
+        ++num;
+      }
+
+    }
+    dout(1) << __func__ << std::hex << " loaded by FREELIST " << byte_u_t(bytes)
+            << " in " << num << " extents "
+            << " in " << freelist_set << " "
+            << dendl;
+
+    dout(1) << __func__ << " (sync) queue_discard <START> " << dendl;
+    bdev->queue_discard(invalid_set);
+    dout(1) << __func__ << " (sync) queue_discard <END> " << dendl;
+
+
+    for(auto it = freelist_set.begin() ; it!= freelist_set.end() ; it++){
+      alloc->init_add_free(it.get_start() , it.get_len());
+    }
+  }
+  #else
   // initialize from freelist
   fm->enumerate_reset();
   uint64_t offset, length;
@@ -4606,6 +4651,8 @@ int BlueStore::_open_alloc()
   dout(1) << __func__ << " loaded " << byte_u_t(bytes)
 	  << " in " << num << " extents"
 	  << dendl;
+
+  #endif
 
 #ifdef WITH_OCSSD
   ceph_assert(bluefs_extents.empty());
@@ -8944,10 +8991,17 @@ void BlueStore::_txc_release_alloc(TransContext *txc)
 //    }
 
 #ifdef WITH_OCSSD
-    dout(10) << "ocssd::" << __func__  << txc << " " << std::hex
-           << txc->released << std::dec << " to discard" << dendl;
-    for (auto p = txc->released.begin(); p != txc->released.end(); ++p) {
-      bdev->discard(p.get_start(), p.get_len());
+    if(!txc-> released.empty() && cct->_conf->bdev_ocssd_enable)
+    {
+      dout(10) << "ocssd::" << __func__  << txc << " " << std::hex
+               << txc->released << std::dec << " to discard" << dendl;
+      bdev->queue_discard( txc->released );
+    }
+    else
+    {
+      dout(10) << __func__ << "(sync) " << txc << " " << std::hex
+               << txc->released << std::dec << dendl;
+      alloc->release(txc->released);
     }
 #else
     dout(10) << __func__ << "(sync) " << txc << " " << std::hex
@@ -9609,13 +9663,6 @@ void BlueStore::_deferred_aio_finish(OpSequencer *osr)
 
 int BlueStore::_ocssd_alloc_replay()
 {
-  dout(10) << __func__ << " start" << dendl;
-  int count = 0;
-  if(!count)
-  {
-    dout(10) << __func__  << "Good! There is no bad I/O since the last running time" << dendl;
-  }
-  dout(10) << __func__ << " stop" << dendl;
   return 0;
 }
 
@@ -10781,21 +10828,19 @@ int BlueStore::_do_alloc_write(
       need += wi.blob_length;
     }
   }
+
   int r = alloc->reserve(need);
   if (r < 0) {
     derr << __func__ << " failed to reserve 0x" << std::hex << need << std::dec
-	 << dendl;
+         << dendl;
     return r;
   }
   PExtentVector prealloc;
-  prealloc.reserve(2 * wctx->writes.size());;
+  prealloc.reserve(2 * wctx->writes.size());
   int prealloc_left = 0;
-
-
   {
     //
     std::lock_guard<std::mutex> l(this->ocssd_data_log_lock);
-
     prealloc_left = alloc->allocate(need, min_alloc_size, need, 0, &prealloc);
     ceph_assert(prealloc_left == (int64_t) need);
     dout(20) << __func__ << " prealloc " << prealloc << " wctx->writes->size():" << wctx->writes.size() << dendl;

@@ -521,11 +521,25 @@ $DAEMONOPTS
         osd pool default min size = 1
         osd pool default pg num = 100
         osd pool default pgp num = 100
+
+        osd_enable_op_tracker = false
+        throttler_perf_counter = false
+        objecter_inflight_ops = 102400            ;MARK this option is mentioned by report
+        objecter_inflight_op_bytes = 1048576000   ;MARK this option is mentioned by report
+        ms_dispatch_throttle_bytes = 1048576000   ;MARK this option is mentioned by report
+        osd_client_message_size_cap = 0           ;MARK this option is mentioned by report
+        osd_client_message_cap = 0                ;MARK this option is mentioned by report
+
+
+
+        bdev_debug_use_ramdisk  = true;
+        bdev_ocssd_enable       = false;
+
         ;;;;; bluestore block size file size = 5GB
         bluestore block size = 5368709120
         bluestore block create = true
 	    bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
-        bluestore block db size = 67108864
+        bluestore block db size = 5368709120
         bluestore block db create = true
 	    bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
         bluestore block wal size = 1048576000

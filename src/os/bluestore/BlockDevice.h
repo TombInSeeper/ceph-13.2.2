@@ -206,8 +206,10 @@ public:
 
 
 
-    ///
-    virtual uint64_t  get_reserve_size() const { return 0 ;}
+  /// OCDdevice reserved
+  virtual uint64_t  get_reserve_size() const { return 0 ;}
+
+  virtual void   get_written_extents(interval_set<uint64_t>& p) {  };
 
 protected:
   bool is_valid_io(uint64_t off, uint64_t len) const {

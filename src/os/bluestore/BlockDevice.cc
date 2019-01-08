@@ -96,7 +96,7 @@ BlockDevice *BlockDevice::create(CephContext* cct, const string& path,
 #ifdef WITH_OCSSD
   // May be ocssd prefix
   std::string ocssd_prefix , p;
-  if( path.size() > 6 ) {
+  if( path.size() > 6  && cct->_conf->bdev_ocssd_enable) {
     ocssd_prefix = path.substr(0, 6);
     p = path.substr(6,path.size());
     if (ocssd_prefix == "ocssd:")

@@ -1,8 +1,13 @@
 //
 // Created by wuyue on 12/14/18.
 //
-
+extern "C" {
+  #include "libocssd/objssd-nvme.h"
+}
 #include "os/bluestore/Allocator.h"
+
+
+#include "include/interval_set.h"
 #include "include/buffer.h"
 
 //int main()
@@ -48,25 +53,13 @@
 //
 //}
 
-
-
-
-class LinearAllocator : public Allocator{
-
-  std::mutex  lock;
-
-  uint64_t    segment_size;
-
-
-
-};
-
-
 int main()
 {
 
   //Imagine we have a
+  dev_open("1234.blk");
 
 
 
+  return 0;
 }

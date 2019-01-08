@@ -16,7 +16,7 @@ set(libos_srcs
   memstore/MemStore.cc
   kstore/KStore.cc
   kstore/kstore_types.cc
-  fs/FS.cc bluestore/OCDevice.cc bluestore/OCDevice.h)
+  fs/FS.cc)
 
 if(WITH_BLUESTORE)
   list(APPEND libos_srcs
@@ -41,11 +41,6 @@ if(HAVE_LIBAIO)
     bluestore/aio.cc)
 endif()
 
-
-if(WITH_OCSSD)
-  list(APPEND libos_srcs bluestore/OCDevice.cc)
-endif(WITH_OCSSD)
-
 if(WITH_FUSE)
   list(APPEND libos_srcs
     FuseStore.cc)
@@ -62,6 +57,7 @@ if(HAVE_LIBXFS)
     fs/XFS.cc)
 endif()
 
+
 if(HAVE_LIBZFS)
   add_library(os_zfs_objs OBJECT
     filestore/ZFSFileStoreBackend.cc
@@ -76,7 +72,14 @@ if(WITH_SPDK)
     bluestore/NVMEDevice.cc)
 endif()
 
+if(WITH_OCSSD)
+  list(APPEND libos_srcs
+          bluestore/OCDevice.cc)
+endif()
+
 add_library(os STATIC ${libos_srcs} $<TARGET_OBJECTS:kv_objs>)
+target_link_libraries(os lightnvm)
+
 
 if(WITH_BLUEFS)
   add_library(bluefs SHARED 

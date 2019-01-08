@@ -236,7 +236,6 @@ bool BitmapFreelistManager::enumerate_next(uint64_t *offset, uint64_t *length)
     _key_decode_u64(p, &enumerate_offset);
     enumerate_bl = enumerate_p->value();
     ceph_assert(enumerate_offset == 0);
-
     ceph_assert(get_next_set_bit(enumerate_bl, 0) == 0);
 
   }

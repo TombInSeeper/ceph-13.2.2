@@ -140,6 +140,9 @@ int64_t StupidAllocator::allocate_int(
     }
   }
 
+  dout(-1) << __func__ << " ERROR , We cannot process it " << dendl;
+  ceph_assert(false);
+
   // search down (from origin, and skip searched extents by hint)
   for (bin = orig_bin; bin >= 0; --bin) {
     p = free[bin].begin();

@@ -862,7 +862,13 @@ if(NOT CEPH_BIG_ENDIAN)
 endif()
 
 add_subdirectory(kv)
+add_subdirectory(libocssd)
 add_subdirectory(os)
+
+
+
+
+
 
 set(cls_references_files objclass/class_api.cc)
 add_library(cls_references_objs OBJECT ${cls_references_files})
