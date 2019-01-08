@@ -429,12 +429,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb239463-a751-42ca-86b4-d39acf30ba4a" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/orange" beforeDir="false" afterPath="$PROJECT_DIR$/orange" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orange/orange" beforeDir="false" afterPath="$PROJECT_DIR$/orange/orange" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orange/orange.py" beforeDir="false" afterPath="$PROJECT_DIR$/orange/orange.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orange/orange_meta_conf.py" beforeDir="false" afterPath="$PROJECT_DIR$/orange/orange_meta_conf.py" afterDir="false" />
-    </list>
+    <list default="true" id="fb239463-a751-42ca-86b4-d39acf30ba4a" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/clion-build/" />
     <ignored path="$PROJECT_DIR$/src/os/bluestore/libocssd/cli/CMakeFiles/" />
@@ -452,7 +447,7 @@
     <session id="-1743232959">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="19" />
+          <entry key="project.closed" value="20" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.1" value="2" />
           <entry key="project.open.time.14" value="1" />
@@ -513,22 +508,7 @@
     </session>
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/.gitignore">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="460">
-              <caret line="29" column="10" lean-forward="true" selection-start-line="29" selection-start-column="10" selection-end-line="29" selection-end-column="10" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="450" />
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -619,6 +599,8 @@
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds">
+    <option name="x" value="-4" />
+    <option name="y" value="4" />
     <option name="width" value="1920" />
     <option name="height" value="1036" />
   </component>
@@ -648,6 +630,11 @@
             <path>
               <item name="ceph" type="b2602c69:ProjectViewProjectNode" />
               <item name="ceph-13.2.2" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ceph" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ceph-13.2.2" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -3249,12 +3236,12 @@
       <workItem from="1546923164572" duration="458000" />
       <workItem from="1546923958851" duration="1715000" />
       <workItem from="1546925998635" duration="6872000" />
-      <workItem from="1546951745318" duration="397000" />
+      <workItem from="1546951745318" duration="725000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="277259000" />
+    <option name="totallyTimeSpent" value="277587000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -3266,8 +3253,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1920" height="1036" extended-state="0" />
-    <editor active="true" />
+    <frame x="-4" y="4" width="1920" height="1036" extended-state="0" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14693218" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -3280,7 +3266,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32994923" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49730894" visible="true" weight="0.25799087" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49730894" visible="true" weight="0.48972604" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5043057" side_tool="true" weight="0.6689498" />
       <window_info anchor="bottom" id="Version Control" order="10" show_stripe_button="false" />
       <window_info anchor="bottom" id="CMake" order="11" sideWeight="0.4956943" weight="0.4326484" />
@@ -3642,15 +3628,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/.gitignore">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="460">
-          <caret line="29" column="10" lean-forward="true" selection-start-line="29" selection-start-column="10" selection-end-line="29" selection-end-column="10" />
+        <state relative-caret-position="-416">
+          <caret line="31" column="6" lean-forward="true" selection-start-line="31" selection-start-column="6" selection-end-line="31" selection-end-column="6" />
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/.gitignore">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>
