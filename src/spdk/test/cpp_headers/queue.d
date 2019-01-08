@@ -1,0 +1,9 @@
+queue.o: queue.cpp /home/wuyue/ceph-13.2.2/src/spdk/config.h \
+ /home/wuyue/ceph-13.2.2/src/spdk/include/spdk/queue.h \
+ /home/wuyue/ceph-13.2.2/src/spdk/include/spdk/queue_extras.h
+
+/home/wuyue/ceph-13.2.2/src/spdk/config.h:
+
+/home/wuyue/ceph-13.2.2/src/spdk/include/spdk/queue.h:
+
+/home/wuyue/ceph-13.2.2/src/spdk/include/spdk/queue_extras.h:

@@ -1,0 +1,1 @@
+CONFIG_DPDK_DIR?=/home/wuyue/ceph-13.2.2/build/src/dpdk
