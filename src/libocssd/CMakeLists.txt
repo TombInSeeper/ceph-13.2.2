@@ -97,11 +97,11 @@ include_directories(src/)
 set(LNAME "lightnvm")
 
 add_library(${LNAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})
-target_link_libraries(${LNAME} aio pthread rt)
+target_link_libraries(${LNAME} aio pthread rt tcmalloc)
 set_target_properties(${LNAME} PROPERTIES OUTPUT_NAME ${LNAME})
 
 add_library(lightnvm_so SHARED ${HEADER_FILES} ${SOURCE_FILES})
-target_link_libraries(lightnvm_so aio pthread rt)
+target_link_libraries(lightnvm_so aio pthread rt tcmalloc)
 set_target_properties(lightnvm_so PROPERTIES OUTPUT_NAME ${LNAME})
 
 

@@ -19,7 +19,6 @@ int OCDevice::open(const std::string &path) {
   this->dev_path = path;
   int r = 0;
 
-  segmentManager = new SegmentManager();
   segmentManager->backend = cct->_conf->bdev_ocssd_backend;
   dout(0) << " OCDevice:" << __func__ << "backend: " << cct->_conf->bdev_ocssd_backend  << dendl;
   if(cct->_conf->bdev_ocssd_backend == "mock") {
@@ -32,7 +31,7 @@ int OCDevice::open(const std::string &path) {
   }
   else if(cct->_conf->bdev_ocssd_backend == "ocssd")
   {
-    this->dev = dev_open(path.c_str());
+    this->dev = dev_open("/dev/nvme0n1");
     if(!this->dev)
     {
       return -1;
@@ -42,7 +41,6 @@ int OCDevice::open(const std::string &path) {
   {
     return -1;
   }
-
   BlockDevice::size = segmentManager->nr_lba_segments * segmentManager->segment_size;
   BlockDevice::block_size = segmentManager->flash_page_size;
   ceph_assert(block_size == cct->_conf->bdev_block_size);
@@ -92,8 +90,14 @@ int OCDevice::read(uint64_t off, uint64_t len, bufferlist *pbl,
     for(auto s : sv)
     {
       if(s){
-
-        l = s->read(dev, buf + l, off1 % s->size ,len);
+	if(segmentManager->backend == "mock")
+        	l = s->read(fd, buf + l, off1 % s->size ,len);
+	else if(segmentManager->backend == "ocssd")
+        	l = s->read(dev, buf + l, off1 % s->size ,len);
+	else
+	{
+		ceph_assert(0);
+	}
         off1 += l;
         len -= l;
       }
@@ -103,6 +107,12 @@ int OCDevice::read(uint64_t off, uint64_t len, bufferlist *pbl,
 
   pbl->clear();
   pbl->push_back(std::move(p));
+
+  dout(20) << __func__ << " dump length =  " << pbl->length() << dendl;
+  dout(20) << __func__ << " dump buffer content = ";
+  pbl->hexdump(*_dout);
+  *_dout << dendl;
+  
 
   return 0;
 }
@@ -139,6 +149,11 @@ int OCDevice::write(uint64_t off, bufferlist& bl, bool buffered)
   else
     dout(10) << " OCDevice::write " << "Bad , the data buffer is contiguous, copy triggered" << dendl;
 
+  dout(20) << __func__ << " dump length =  " << bl.length() << dendl;
+  dout(20) << __func__ << " dump buffer content = ";
+  bl.hexdump(*_dout);
+  *_dout << dendl;
+
   const char *data = bl.c_str();
   auto  [s1,s2]  = segmentManager->get_segment(off,len);
 
@@ -159,8 +174,15 @@ int OCDevice::write(uint64_t off, bufferlist& bl, bool buffered)
              << dendl;
 
     ceph_assert(off % s1->size == s1->nvm_obj_off);
-    s1->append(dev, (void *)data , len);
-
+    if(segmentManager->backend == "mock")
+	s1->append(fd,(void *)data,len);
+    else if(segmentManager->backend == "ocssd")	
+    	s1->append(dev, (void *)data , len);
+    else
+    {
+	dout(0) << __func__ << "Unkown ocdevice backend " << dendl;
+	ceph_assert(false);
+    }
     //MOCK , must persist meta data of device
     //segmentManager->_mock_coredump();
     return 0;
@@ -194,9 +216,23 @@ int OCDevice::write(uint64_t off, bufferlist& bl, bool buffered)
              "}"
              << dendl;
 
-    ceph_assert(s2->nvm_obj_off == 0);
-    s1->append(dev , data1, l1);
-    s2->append(dev , data2 ,l2);
+    ceph_assert(s2->nvm_obj_off == 0);  
+    if(segmentManager->backend == "mock")
+    {
+	s1->append(fd, data1, l1);
+        s2->append(fd, data2 ,l2);
+    }
+    else if(segmentManager->backend == "ocssd")
+    {
+	
+    	s1->append(dev , data1, l1);
+   	s2->append(dev , data2, l2);
+    }	
+    else
+    {
+	dout(0) << __func__ << "Unkown ocdevice backend " << dendl;
+	ceph_assert(false);
+    }
 
     //MOCK , must persist meta data of device
     //segmentManager->_mock_coredump();
@@ -222,7 +258,7 @@ int OCDevice::collect_metadata(const string& prefix, map<string,string> *pm) con
   (*pm)[prefix + "size"] = stringify(get_size());
   (*pm)[prefix + "block_size"] = stringify(get_block_size());
   (*pm)[prefix + "driver"] = "libobj";
-  (*pm)[prefix + "type"] = "nvme";
+  (*pm)[prefix + "type"] = "OCSSD";
   (*pm)[prefix + "access_mode"] = "libobj";
   return 0;
 }
@@ -259,7 +295,8 @@ int SegmentManager::new_nvm_obj(uint32_t *obj_id, uint32_t *obj_size) {
   else if (backend == "ocssd"){
     int r = obj_create(dev , obj_id, obj_size);
     ceph_assert( r == 0);
-    ceph_assert( *obj_size == segment_size);
+    ceph_assert( *obj_size == segment_size / 4096);
+    *obj_size *= 4096;
     return 0;
   }
   else {
@@ -292,13 +329,14 @@ std::tuple<Segment *, Segment *> SegmentManager::get_segment(uint64_t offset, ui
     uint64_t seg_id = offset / segment_size;
     if (seg_map.count(seg_id) < 1)
     {
-      auto bdev_lba_aligned = p2align(offset,segment_size);
+      auto bdev_lba_aligned = ( offset / segment_size) * segment_size;
 
       new_nvm_obj(&new_id, &obj_size);
 
       Segment* segment = new Segment(bdev_lba_aligned,new_id,segment_size);
       dout(10) << __func__ << " NewSegment " <<
-               " pid = " << getpid() <<
+               " pid = " << getpid() << std::hex <<
+	       " segment bdev_lba = " << bdev_lba_aligned << std::dec <<
                " segment size = " << segment->size / ( 1024 *1024 ) << " MiB " <<
                " segmentManager ptr = " << this <<
                " seg_id = "          << seg_id <<
@@ -432,13 +470,11 @@ void SegmentManager::_mock_coredump() {
   dout(10) << __func__ << " dump meta " << dendl;
   bufferlist bl;
   dout(10) << __func__ <<
-           " last_id = " << mock_obj_id.load() <<
            " seg_map size = " << seg_map.size() <<
            " seg_map= " << this->dump_seg_map() <<
            " sizeof(seg_map size) = " << sizeof(seg_map.size()) <<
   dendl;
-
-  encode(mock_obj_id.load(), bl);
+  
   encode(seg_map.size(),bl);
   for(auto k : seg_map)
   {
@@ -448,15 +484,15 @@ void SegmentManager::_mock_coredump() {
     encode(s->nvm_obj_off,bl);
     encode(s->size,bl);
   }
+
   ofstream f(corefile,ios::binary);
   bl.write_stream(f);
   f.close();
 
-//      dout(0) << __func__ << " dump length =  " << bl.length() <<
-//        dendl;
-//      dout(0) << __func__ << " dump buffer content = ";
-//      bl.hexdump(*_dout);
-//      *_dout << dendl;
+  dout(20) << __func__ << " dump length =  " << bl.length() << dendl;
+  dout(20) << __func__ << " dump buffer content = ";
+  bl.hexdump(*_dout);
+  *_dout << dendl;
 
 #endif
 }
@@ -469,10 +505,11 @@ void SegmentManager::_mock_coreback() {
   dout(0) << __func__ << " recovery " << dendl;
   SpinLock spinLock(&s);
   ifstream f(corefile,ios::binary);
-  string s;
-  f >> s;
+  ostringstream os;
+  os << f.rdbuf();
+  string s = os.str();
   f.close();
-  //dout(10) << __func__ << " dump file size probed by string s = " << s.size() << dendl;
+  dout(10) << __func__ << " dump file size probed by string s = " << s.size() << dendl;
   if(s.size() == 0){
     ceph_assert(false);
   }
@@ -480,14 +517,12 @@ void SegmentManager::_mock_coreback() {
   b.append(s);
   bufferlist::iterator bl = b.begin();
 
-  //dout(10) << __func__ << " dump file size probed by bl = " << b.length() << dendl;
+  dout(10) << __func__ << " dump file size probed by bl = " << b.length() << dendl;
   uint32_t last_id ;
   decltype(seg_map.size()) n;
 
-  decode(last_id,  bl);
-  dout(10) << __func__ << " last id " << last_id << dendl;
   decode(n,bl);
-  dout(10) << __func__ << " map size" << n << dendl;
+  dout(10) << __func__ << " map size: " << n << dendl;
 
 
   Segment zom(0,0,0);
@@ -501,11 +536,12 @@ void SegmentManager::_mock_coreback() {
 
   while(n--)
   {
+    decode(bloff,bl);
     decode(obj_id,bl);
     decode(obj_off,bl);
-    decode(bloff,bl);
     decode(size,bl);
     auto idx = bloff / segment_size;
+    dout(10) << __func__<< " prepare to recovery: " << obj_id << dendl; 
     seg_map[idx] = new Segment(bloff,obj_id,size);
     seg_map[idx] ->nvm_obj_off = obj_off;
   }

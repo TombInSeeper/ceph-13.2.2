@@ -57,8 +57,23 @@ int main()
 {
 
   //Imagine we have a
-  dev_open("1234.blk");
+  struct nvm_dev *dev = dev_open("/dev/nvme0n1");
+  if(!dev){
+	printf("Open err!");
+	return 1;
+  }
+	
+	
+  unsigned int oid,osize;
+  for(int i=0 ; i < 1 ; ++i) {
+  	obj_create(dev,&oid,&osize);  
+  	printf("oid=%u,osize=%u\n",oid,osize);
+  }
+  
+	
 
+
+  dev_close(dev);
 
 
   return 0;

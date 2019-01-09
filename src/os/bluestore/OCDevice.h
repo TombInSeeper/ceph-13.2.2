@@ -39,7 +39,7 @@ public:
     uint32_t  nvm_obj_off = 0;    //
     uint32_t  size;
 
-    std::bitset< 512 * 128 > invalid_bitmap;
+    std::bitset< 96 * 1024 > invalid_bitmap;
 
     Segment(uint64_t bdev_lba_offset, uint32_t nvm_obj_id , uint32_t _size) : bdev_lba_offset(bdev_lba_offset),
                                                                       nvm_obj_id(nvm_obj_id),size(_size)
@@ -85,21 +85,24 @@ public:
     {
        io_u io;
        io.data = buf;
-       io.data_size = len;
+       io.data_size = len / 4096 ;
        io.obj_id = this->nvm_obj_id;
-       io.obj_off= this->nvm_obj_off;
+       io.obj_off= this->nvm_obj_off / 4096;
        int r = obj_write(dev,&io);
        ceph_assert( r == 0);
+       nvm_obj_off += len;
+       return len;
     }
     uint64_t read(struct nvm_dev *dev , void *buf , uint32_t off ,uint32_t len )
     {
       io_u io;
       io.data = buf;
-      io.data_size = len;
+      io.data_size = len / 4096;
       io.obj_id = this->nvm_obj_id;
-      io.obj_off= off;
+      io.obj_off= off / 4096 ;
       int r = obj_read(dev,&io);
       ceph_assert( r == 0);
+      return len;
     }
 
 
@@ -149,8 +152,8 @@ public:
 
 public:
     string   backend                =  "mock";
-    uint64_t flash_page_size        =  4096;               //4KiB
-    uint32_t segment_size           =  384 *(1024 * 1024); //384MiB
+    uint64_t flash_page_size        =  4096;               // 4KiB
+    uint32_t segment_size           =  384 *(1024 * 1024); // 384MiB
     uint64_t nr_reserved_segments   =  1;
     uint64_t nr_lba_segments        =  (10 -1);
     struct nvm_dev*  dev = nullptr;   //nvm_dev
@@ -219,6 +222,7 @@ public:
     dcb_priv(d_cbpriv)
     {
       BlockDevice::rotational = false;
+      segmentManager = new SegmentManager();
     }
 private:
     std::string     dev_path = "";    //sys link to

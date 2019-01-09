@@ -4936,7 +4936,8 @@ int BlueStore::_open_db(bool create, bool to_repair_db)
     // shared devic
     // OCSSD::We need to add /block to bluefs block devices ; But not add extents to it;
     // We also keep bluefs can see 3 devices , but promise shared_dev's total size is zero forever;
-    bfn = path + "/block";
+    bfn =  path + "/block";
+    
     // never trim here
     r = bluefs->add_block_device(bluefs_shared_bdev, bfn, false);
     if (r < 0) {

@@ -153,8 +153,10 @@ int BlueFS::add_block_device(unsigned id, const string& path, bool trim)
   dout(10) << __func__ << " bdev " << id << " path " << path << dendl;
   ceph_assert(id < bdev.size());
   ceph_assert(bdev[id] == NULL);
-  BlockDevice *b = BlockDevice::create(cct, path, NULL, NULL, discard_cb[id], static_cast<void*>(this));
-  int r = b->open(path);
+  string p = path;
+  BlockDevice *b = BlockDevice::create(cct, p, NULL, NULL, discard_cb[id], static_cast<void*>(this));
+  int r = 0 ; 
+  r = b->open(p);
   if (r < 0) {
     delete b;
     return r;
@@ -392,7 +394,7 @@ void BlueFS::_init_alloc()
   alloc.resize(MAX_BDEV);
   pending_release.resize(MAX_BDEV);
   for (unsigned id = 0; id < bdev.size(); ++id) {
-    if (!bdev[id]) {
+    if (!bdev[id] ) {
       continue;
     }
     ceph_assert(bdev[id]->get_size());
