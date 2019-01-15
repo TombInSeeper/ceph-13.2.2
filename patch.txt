@@ -1,0 +1,4058 @@
+diff --git a/cmake/modules/AddCephTest.cmake b/cmake/modules/AddCephTest.cmake
+deleted file mode 100644
+index 3cc5faa..0000000
+--- a/cmake/modules/AddCephTest.cmake
++++ /dev/null
+@@ -1,32 +0,0 @@
+-#AddCephTest is a module for adding tests to the "make check" target which runs CTest
+-
+-#adds makes target/script into a test, test to check target, sets necessary environment variables
+-function(add_ceph_test test_name test_path)
+-  add_test(NAME ${test_name} COMMAND ${test_path} ${ARGN})
+-  if(TARGET ${test_name})
+-    add_dependencies(tests ${test_name})
+-  endif()
+-  set_property(TEST
+-    ${test_name}
+-    PROPERTY ENVIRONMENT 
+-    CEPH_ROOT=${CMAKE_SOURCE_DIR}
+-    CEPH_BIN=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+-    CEPH_LIB=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+-    CEPH_BUILD_DIR=${CMAKE_BINARY_DIR}
+-    LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/lib
+-    PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}:${CMAKE_SOURCE_DIR}/src:$ENV{PATH}
+-    PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cython_modules/lib.${PYTHON${PYTHON_VERSION}_VERSION_MAJOR}:${CMAKE_SOURCE_DIR}/src/pybind
+-    CEPH_BUILD_VIRTUALENV=${CEPH_BUILD_VIRTUALENV})
+-  # none of the tests should take more than 1 hour to complete
+-  set_property(TEST
+-    ${test_name}
+-    PROPERTY TIMEOUT 3600)
+-endfunction()
+-
+-#sets uniform compiler flags and link libraries
+-function(add_ceph_unittest unittest_name)
+-  add_ceph_test(${unittest_name} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${unittest_name})
+-  target_link_libraries(${unittest_name} ${UNITTEST_LIBS})
+-  set_target_properties(${unittest_name} PROPERTIES COMPILE_FLAGS ${UNITTEST_CXX_FLAGS})
+-endfunction()
+-
+diff --git a/cmake/modules/BuildBoost.cmake b/cmake/modules/BuildBoost.cmake
+deleted file mode 100644
+index d657211..0000000
+--- a/cmake/modules/BuildBoost.cmake
++++ /dev/null
+@@ -1,286 +0,0 @@
+-# This module builds Boost
+-# executables are. It sets the following variables:
+-#
+-#  Boost_FOUND : boolean            - system has Boost
+-#  Boost_LIBRARIES : list(filepath) - the libraries needed to use Boost
+-#  Boost_INCLUDE_DIRS : list(path)  - the Boost include directories
+-#
+-# Following hints are respected
+-#
+-#  Boost_USE_STATIC_LIBS : boolean (default: OFF)
+-#  Boost_USE_MULTITHREADED : boolean (default: OFF)
+-#  BOOST_J: integer (defanult 1)
+-
+-function(check_boost_version source_dir expected_version)
+-  set(version_hpp "${source_dir}/boost/version.hpp")
+-  if(NOT EXISTS ${version_hpp})
+-    message(FATAL_ERROR "${version_hpp} not found. Please either \"rm -rf ${source_dir}\" "
+-      "so I can download Boost v${expected_version} for you, or make sure ${source_dir} "
+-      "contains a full copy of Boost v${expected_version}.")
+-  endif()
+-  file(STRINGS "${version_hpp}" BOOST_VERSION_LINE
+-    REGEX "^#define[ \t]+BOOST_VERSION[ \t]+[0-9]+$")
+-  string(REGEX REPLACE "^#define[ \t]+BOOST_VERSION[ \t]+([0-9]+)$"
+-    "\\1" BOOST_VERSION "${BOOST_VERSION_LINE}")
+-  math(EXPR BOOST_VERSION_PATCH "${BOOST_VERSION} % 100")
+-  math(EXPR BOOST_VERSION_MINOR "${BOOST_VERSION} / 100 % 1000")
+-  math(EXPR BOOST_VERSION_MAJOR "${BOOST_VERSION} / 100000")
+-  set(version "${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}.${BOOST_VERSION_PATCH}")
+-  if(version VERSION_LESS expected_version)
+-    message(FATAL_ERROR "Boost v${version} in ${source_dir} is not new enough. "
+-      "Please either \"rm -rf ${source_dir}\" so I can download Boost v${expected_version} "
+-      "for you, or make sure ${source_dir} contains a copy of Boost v${expected_version}.")
+-  else()
+-    message(STATUS "boost (${version} >= ${expected_version}) already in ${source_dir}")
+-  endif()
+-endfunction()
+-
+-macro(list_replace list old new)
+-  list(FIND ${list} ${old} where)
+-  if(where GREATER -1)
+-    list(REMOVE_AT ${list} ${where})
+-    list(INSERT ${list} ${where} ${new})
+-  endif()
+-  unset(where)
+-endmacro()
+-
+-function(do_build_boost version)
+-  cmake_parse_arguments(Boost_BUILD "" "" COMPONENTS ${ARGN})
+-  set(boost_features "variant=release")
+-  if(Boost_USE_MULTITHREADED)
+-    list(APPEND boost_features "threading=multi")
+-  else()
+-    list(APPEND boost_features "threading=single")
+-  endif()
+-  if(Boost_USE_STATIC_LIBS)
+-    list(APPEND boost_features "link=static")
+-  else()
+-    list(APPEND boost_features "link=shared")
+-  endif()
+-  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+-    list(APPEND boost_features "address-model=64")
+-  else()
+-    list(APPEND boost_features "address-model=32")
+-  endif()
+-  set(BOOST_CXXFLAGS "-fPIC -w") # check on arm, etc <---XXX
+-  list(APPEND boost_features "cxxflags=${BOOST_CXXFLAGS}")
+-
+-  list(FIND Boost_BUILD_COMPONENTS "python" with_python)
+-  list_replace(Boost_BUILD_COMPONENTS "unit_test_framework" "test")
+-  string(REPLACE ";" "," boost_with_libs "${Boost_BUILD_COMPONENTS}")
+-  # build b2 and prepare the project-config.jam for boost
+-  set(configure_command
+-    ./bootstrap.sh --prefix=<INSTALL_DIR>
+-    --with-libraries=${boost_with_libs})
+-
+-  set(b2 ./b2)
+-  if(BOOST_J)
+-    message(STATUS "BUILDING Boost Libraries at j ${BOOST_J}")
+-    list(APPEND b2 -j${BOOST_J})
+-  endif()
+-  if(CMAKE_VERBOSE_MAKEFILE)
+-    list(APPEND b2 -d1)
+-  else()
+-    list(APPEND b2 -d0)
+-  endif()
+-
+-  if(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+-    set(toolset gcc)
+-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+-    set(toolset clang)
+-  else()
+-    message(SEND_ERROR "unknown compiler: ${CMAKE_CXX_COMPILER_ID}")
+-  endif()
+-
+-  set(user_config ${CMAKE_BINARY_DIR}/user-config.jam)
+-  # edit the user-config.jam so b2 will be able to use the specified
+-  # toolset and python
+-  file(WRITE ${user_config}
+-    "using ${toolset}"
+-    " : "
+-    " : ${CMAKE_CXX_COMPILER}"
+-    " ;\n")
+-  if(with_python GREATER -1)
+-    set(python_ver ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+-    string(REPLACE ";" " " python_includes "${PYTHON_INCLUDE_DIRS}")
+-    file(APPEND ${user_config}
+-      "using python"
+-      " : ${python_ver}"
+-      " : ${PYTHON_EXECUTABLE}"
+-      " : ${python_includes}"
+-      " : ${PYTHON_LIBRARIES}"
+-      " ;\n")
+-  endif()
+-  list(APPEND b2 --user-config=${user_config})
+-
+-  list(APPEND b2 toolset=${toolset})
+-  if(with_python GREATER -1)
+-    if(NOT PYTHONLIBS_FOUND)
+-      message(FATAL_ERROR "Please call find_package(PythonLibs) first for building "
+-        "Boost.Python")
+-    endif()
+-    list(APPEND b2 python=${python_ver})
+-  endif()
+-
+-  set(build_command
+-    ${b2} headers stage
+-    #"--buildid=ceph" # changes lib names--can omit for static
+-    ${boost_features})
+-  set(install_command
+-    ${b2} install)
+-  set(boost_root_dir "${CMAKE_BINARY_DIR}/boost")
+-  if(EXISTS "${PROJECT_SOURCE_DIR}/src/boost/bootstrap.sh")
+-    check_boost_version("${PROJECT_SOURCE_DIR}/src/boost" ${version})
+-    set(source_dir
+-      SOURCE_DIR "${PROJECT_SOURCE_DIR}/src/boost")
+-  elseif(version VERSION_GREATER 1.67)
+-    message(FATAL_ERROR "Unknown BOOST_REQUESTED_VERSION: ${version}")
+-  else()
+-    message(STATUS "boost will be downloaded...")
+-    # NOTE: If you change this version number make sure the package is available
+-    # at the three URLs below (may involve uploading to download.ceph.com)
+-    set(boost_version 1.67.0)
+-    set(boost_sha256 2684c972994ee57fc5632e03bf044746f6eb45d4920c343937a465fd67a5adba)
+-    string(REPLACE "." "_" boost_version_underscore ${boost_version} )
+-    set(boost_url 
+-      https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_underscore}.tar.bz2)
+-    if(CMAKE_VERSION VERSION_GREATER 3.7)
+-      set(boost_url
+-        "${boost_url} http://downloads.sourceforge.net/project/boost/boost/${boost_version}/boost_${boost_version_underscore}.tar.bz2")
+-      set(boost_url
+-        "${boost_url} https://download.ceph.com/qa/boost_${boost_version_underscore}.tar.bz2")
+-    endif()
+-    set(source_dir
+-      URL ${boost_url}
+-      URL_HASH SHA256=${boost_sha256})
+-    if(CMAKE_VERSION VERSION_GREATER 3.1)
+-      list(APPEND source_dir DOWNLOAD_NO_PROGRESS 1)
+-    endif()
+-  endif()
+-  # build all components in a single shot
+-  include(ExternalProject)
+-  ExternalProject_Add(Boost
+-    ${source_dir}
+-    CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${configure_command}
+-    BUILD_COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ${build_command}
+-    BUILD_IN_SOURCE 1
+-    INSTALL_COMMAND ${install_command}
+-    PREFIX "${boost_root_dir}")
+-endfunction()
+-
+-set(Boost_context_DEPENDENCIES thread chrono system date_time)
+-set(Boost_coroutine_DEPENDENCIES context system)
+-set(Boost_filesystem_DEPENDENCIES system)
+-set(Boost_iostreams_DEPENDENCIES regex)
+-set(Boost_thread_DEPENDENCIES chrono system date_time atomic)
+-
+-macro(build_boost version)
+-  do_build_boost(${version} ${ARGN})
+-  ExternalProject_Get_Property(Boost install_dir)
+-  set(Boost_INCLUDE_DIRS ${install_dir}/include)
+-  set(Boost_INCLUDE_DIR ${install_dir}/include)
+-  set(Boost_VERSION ${version})
+-  # create the directory so cmake won't complain when looking at the imported
+-  # target
+-  file(MAKE_DIRECTORY ${Boost_INCLUDE_DIRS})
+-  cmake_parse_arguments(Boost_BUILD "" "" COMPONENTS ${ARGN})
+-  foreach(c ${Boost_BUILD_COMPONENTS})
+-    list(APPEND components ${c})
+-    if(Boost_${c}_DEPENDENCIES)
+-      list(APPEND components ${Boost_${c}_DEPENDENCIES})
+-      list(REMOVE_DUPLICATES components)
+-    endif()
+-  endforeach()
+-  set(Boost_BUILD_COMPONENTS ${components})
+-  unset(components)
+-
+-  foreach(c ${Boost_BUILD_COMPONENTS})
+-    string(TOUPPER ${c} upper_c)
+-    if(Boost_USE_STATIC_LIBS)
+-      add_library(Boost::${c} STATIC IMPORTED)
+-    else()
+-      add_library(Boost::${c} SHARED IMPORTED)
+-    endif()
+-    add_dependencies(Boost::${c} Boost)
+-    if(c STREQUAL python)
+-      set(buildid "${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+-    else()
+-      set(buildid "")
+-    endif()
+-    if(Boost_USE_STATIC_LIBS)
+-      set(Boost_${upper_c}_LIBRARY
+-        ${install_dir}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}boost_${c}${buildid}${CMAKE_STATIC_LIBRARY_SUFFIX})
+-    else()
+-      set(Boost_${upper_c}_LIBRARY
+-        ${install_dir}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}boost_${c}${buildid}${CMAKE_SHARED_LIBRARY_SUFFIX})
+-    endif()
+-    unset(buildid)
+-    set_target_properties(Boost::${c} PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIRS}"
+-      IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+-      IMPORTED_LOCATION "${Boost_${upper_c}_LIBRARY}")
+-    list(APPEND Boost_LIBRARIES ${Boost_${upper_c}_LIBRARY})
+-  endforeach()
+-  foreach(c ${Boost_BUILD_COMPONENTS})
+-    if(Boost_${c}_DEPENDENCIES)
+-      foreach(dep ${Boost_${c}_DEPENDENCIES})
+-        list(APPEND dependencies Boost::${dep})
+-      endforeach()
+-      set_target_properties(Boost::${c} PROPERTIES
+-        INTERFACE_LINK_LIBRARIES "${dependencies}")
+-      unset(dependencies)
+-    endif()
+-  endforeach()
+-
+-  # for header-only libraries
+-  if(CMAKE_VERSION VERSION_LESS 3.3)
+-    # only ALIAS and INTERFACE target names allow ":" in it, but
+-    # INTERFACE library is not allowed until cmake 3.1
+-    add_custom_target(Boost.boost DEPENDS Boost)
+-  else()
+-    add_library(Boost::boost INTERFACE IMPORTED)
+-    set_target_properties(Boost::boost PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIRS}")
+-    add_dependencies(Boost::boost Boost)
+-  endif()
+-  find_package_handle_standard_args(Boost DEFAULT_MSG
+-    Boost_INCLUDE_DIRS Boost_LIBRARIES)
+-  mark_as_advanced(Boost_LIBRARIES BOOST_INCLUDE_DIRS)
+-endmacro()
+-
+-function(maybe_add_boost_dep target)
+-  get_target_property(type ${target} TYPE)
+-  if(NOT type MATCHES "OBJECT_LIBRARY|STATIC_LIBRARY|SHARED_LIBRARY|EXECUTABLE")
+-    return()
+-  endif()
+-  get_target_property(sources ${target} SOURCES)
+-  if(NOT CMAKE_VERSION VERSION_LESS 3.1)
+-    string(GENEX_STRIP "${sources}" sources)
+-  endif()
+-  foreach(src ${sources})
+-    get_filename_component(ext ${src} EXT)
+-    # assuming all cxx source files include boost header(s)
+-    if(ext MATCHES ".cc|.cpp|.cxx")
+-      if(CMAKE_VERSION VERSION_LESS 3.3)
+-        add_dependencies(${target} Boost.boost)
+-      else()
+-        add_dependencies(${target} Boost::boost)
+-      endif()
+-      return()
+-    endif()
+-  endforeach()
+-endfunction()
+-
+-# override add_library() to add Boost headers dependency
+-function(add_library target)
+-  _add_library(${target} ${ARGN})
+-  # can't add dependencies to aliases or imported libraries
+-  if (NOT ";${ARGN};" MATCHES ";(ALIAS|IMPORTED);")
+-    maybe_add_boost_dep(${target})
+-  endif()
+-endfunction()
+-
+-function(add_executable target)
+-  _add_executable(${target} ${ARGN})
+-  maybe_add_boost_dep(${target})
+-endfunction()
+diff --git a/cmake/modules/BuildDPDK.cmake b/cmake/modules/BuildDPDK.cmake
+deleted file mode 100644
+index ea60857..0000000
+--- a/cmake/modules/BuildDPDK.cmake
++++ /dev/null
+@@ -1,101 +0,0 @@
+-function(do_build_dpdk dpdk_dir)
+-  if(CMAKE_SYSTEM_PROCESSOR MATCHES "i386")
+-    set(arch "x86_64")
+-    set(machine "default")
+-    set(machine_tmpl "native")
+-  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686")
+-    set(arch "i686")
+-    set(machine "default")
+-    set(machine_tmpl "native")
+-  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "amd64|x86_64|AMD64")
+-    set(arch "x86_64")
+-    set(machine "default")
+-    set(machine_tmpl "native")
+-  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm|ARM")
+-    set(arch "arm")
+-    set(machine "armv7a")
+-    set(machine_tmpl "armv7a")
+-  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|AARCH64")
+-    set(arch "arm64")
+-    set(machine "armv8a")
+-    set(machine_tmpl "armv8a")
+-  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "(powerpc|ppc)64")
+-    set(arch "ppc_64")
+-    set(machine "power8")
+-    set(machine_tmpl "power8")
+-  else()
+-    message(FATAL_ERROR "not able to build DPDK support: "
+-      "unknown arch \"${CMAKE_SYSTEM_PROCESSOR}\"")
+-  endif()
+-
+-  if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+-    set(execenv "linuxapp")
+-  elseif(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+-    set(execenv "bsdapp")
+-  else()
+-    message(FATAL_ERROR "not able to build DPDK support: "
+-      "unsupported OS \"${CMAKE_SYSTEM_NAME}\"")
+-  endif()
+-
+-  if(CMAKE_C_COMPILER_ID STREQUAL GNU)
+-    set(toolchain "gcc")
+-  elseif(CMAKE_C_COMPILER_ID STREQUAL Clang)
+-    set(toolchain "clang")
+-  elseif(CMAKE_C_COMPILER_ID STREQUAL Intel)
+-    set(toolchain "icc")
+-  else()
+-    message(FATAL_ERROR "not able to build DPDK support: "
+-      "unknown compiler \"${CMAKE_C_COMPILER_ID}\"")
+-  endif()
+-
+-  set(target "${arch}-${machine_tmpl}-${execenv}-${toolchain}")
+-
+-  execute_process(
+-    COMMAND ${CMAKE_MAKE_PROGRAM} showconfigs
+-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src/spdk/dpdk
+-    OUTPUT_VARIABLE supported_targets
+-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+-  string(REPLACE "\n" ";" supported_targets "${supported_targets}")
+-  list(FIND supported_targets ${target} found)
+-  if(found EQUAL -1)
+-    message(FATAL_ERROR "not able to build DPDK support: "
+-      "unsupported target. "
+-      "\"${target}\" not listed in ${supported_targets}")
+-  endif()
+-
+-  include(ExternalProject)
+-  ExternalProject_Add(dpdk-ext
+-    SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/spdk/dpdk
+-    CONFIGURE_COMMAND $(MAKE) config O=${dpdk_dir} T=${target}
+-    BUILD_COMMAND env CC=${CMAKE_C_COMPILER} $(MAKE) O=${dpdk_dir} EXTRA_CFLAGS=-fPIC
+-    BUILD_IN_SOURCE 1
+-    INSTALL_COMMAND "true")
+-  ExternalProject_Add_Step(dpdk-ext patch-config
+-    COMMAND ${CMAKE_MODULE_PATH}/patch-dpdk-conf.sh ${dpdk_dir} ${machine} ${arch}
+-    DEPENDEES configure
+-    DEPENDERS build)
+-  # easier to adjust the config
+-  ExternalProject_Add_StepTargets(dpdk-ext configure patch-config build)
+-endfunction()
+-
+-macro(build_dpdk)
+-  set(DPDK_DIR ${CMAKE_BINARY_DIR}/src/dpdk)
+-  do_build_dpdk(${DPDK_DIR})
+-  set(DPDK_INCLUDE_DIR ${DPDK_DIR}/include)
+-  # create the directory so cmake won't complain when looking at the imported
+-  # target
+-  file(MAKE_DIRECTORY ${DPDK_INCLUDE_DIR})
+-  foreach(c
+-      bus_pci pci
+-      eal
+-      mempool mempool_ring mempool_stack ring)
+-    add_library(dpdk::${c} STATIC IMPORTED)
+-    add_dependencies(dpdk::${c} dpdk-ext)
+-    set(dpdk_${c}_LIBRARY
+-      "${DPDK_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}rte_${c}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+-    set_target_properties(dpdk::${c} PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES ${DPDK_INCLUDE_DIR}
+-      IMPORTED_LOCATION "${dpdk_${c}_LIBRARY}")
+-    list(APPEND DPDK_LIBRARIES dpdk::${c})
+-  endforeach()
+-endmacro()
+diff --git a/cmake/modules/BuildFIO.cmake b/cmake/modules/BuildFIO.cmake
+deleted file mode 100644
+index 973063e..0000000
+--- a/cmake/modules/BuildFIO.cmake
++++ /dev/null
+@@ -1,15 +0,0 @@
+-function(build_fio)
+-  # we use an external project and copy the sources to bin directory to ensure
+-  # that object files are built outside of the source tree.
+-  include(ExternalProject)
+-  ExternalProject_Add(fio_ext
+-    DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/src/
+-    UPDATE_COMMAND "" # this disables rebuild on each run
+-    GIT_REPOSITORY "https://github.com/axboe/fio.git"
+-    GIT_TAG "fio-3.5"
+-    SOURCE_DIR ${CMAKE_BINARY_DIR}/src/fio
+-    BUILD_IN_SOURCE 1
+-    CONFIGURE_COMMAND <SOURCE_DIR>/configure
+-    BUILD_COMMAND $(MAKE) fio EXTFLAGS=-Wno-format-truncation
+-    INSTALL_COMMAND cp <BINARY_DIR>/fio ${CMAKE_BINARY_DIR}/bin)
+-endfunction()
+diff --git a/cmake/modules/BuildRocksDB.cmake b/cmake/modules/BuildRocksDB.cmake
+deleted file mode 100644
+index 1c1a257..0000000
+--- a/cmake/modules/BuildRocksDB.cmake
++++ /dev/null
+@@ -1,59 +0,0 @@
+-function(do_build_rocksdb)
+-  set(ROCKSDB_CMAKE_ARGS -DCMAKE_POSITION_INDEPENDENT_CODE=ON)
+-  list(APPEND ROCKSDB_CMAKE_ARGS -DWITH_GFLAGS=OFF)
+-
+-  if(ALLOCATOR STREQUAL "jemalloc")
+-    list(APPEND ROCKSDB_CMAKE_ARGS -DWITH_JEMALLOC=ON)
+-  endif()
+-
+-  if (WITH_CCACHE AND CCACHE_FOUND)
+-    list(APPEND ROCKSDB_CMAKE_ARGS -DCMAKE_CXX_COMPILER=ccache)
+-    list(APPEND ROCKSDB_CMAKE_ARGS -DCMAKE_CXX_COMPILER_ARG1=${CMAKE_CXX_COMPILER})
+-  else()
+-    list(APPEND ROCKSDB_CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER})
+-  endif()
+-
+-  list(APPEND ROCKSDB_CMAKE_ARGS -DWITH_SNAPPY=${SNAPPY_FOUND})
+-  list(APPEND ROCKSDB_CMAKE_ARGS -DWITH_LZ4=${LZ4_FOUND})
+-  list(APPEND ROCKSDB_CMAKE_ARGS -DWITH_ZLIB=${ZLIB_FOUND})
+-  list(APPEND ROCKSDB_CMAKE_ARGS -DPORTABLE=ON)
+-  list(APPEND ROCKSDB_CMAKE_ARGS -DCMAKE_AR=${CMAKE_AR})
+-  list(APPEND ROCKSDB_CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+-  list(APPEND ROCKSDB_CMAKE_ARGS -DFAIL_ON_WARNINGS=OFF)
+-  list(APPEND ROCKSDB_CMAKE_ARGS -DUSE_RTTI=1)
+-
+-  # we use an external project and copy the sources to bin directory to ensure
+-  # that object files are built outside of the source tree.
+-  include(ExternalProject)
+-  ExternalProject_Add(rocksdb_ext
+-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/rocksdb
+-    CMAKE_ARGS ${ROCKSDB_CMAKE_ARGS}
+-    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/rocksdb
+-    BUILD_COMMAND $(MAKE) rocksdb
+-    INSTALL_COMMAND "true")
+-
+-  # force rocksdb make to be called on each time
+-  ExternalProject_Add_Step(rocksdb_ext forcebuild
+-    DEPENDEES configure
+-    DEPENDERS build
+-    COMMAND "true"
+-    ALWAYS 1)
+-endfunction()
+-
+-macro(build_rocksdb)
+-  do_build_rocksdb()
+-  add_library(rocksdb STATIC IMPORTED)
+-  add_dependencies(rocksdb rocksdb_ext)
+-  set_property(TARGET rocksdb PROPERTY IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/rocksdb/librocksdb.a")
+-  set(ROCKSDB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/rocksdb/include)
+-  set(ROCKSDB_LIBRARIES rocksdb)
+-  foreach(ver "MAJOR" "MINOR" "PATCH")
+-    file(STRINGS "${ROCKSDB_INCLUDE_DIR}/rocksdb/version.h" ROCKSDB_VER_${ver}_LINE
+-      REGEX "^#define[ \t]+ROCKSDB_${ver}[ \t]+[0-9]+$")
+-    string(REGEX REPLACE "^#define[ \t]+ROCKSDB_${ver}[ \t]+([0-9]+)$"
+-      "\\1" ROCKSDB_VERSION_${ver} "${ROCKSDB_VER_${ver}_LINE}")
+-    unset(ROCKDB_VER_${ver}_LINE)
+-  endforeach()
+-  set(ROCKSDB_VERSION_STRING
+-    "${ROCKSDB_VERSION_MAJOR}.${ROCKSDB_VERSION_MINOR}.${ROCKSDB_VERSION_PATCH}")
+-endmacro()
+diff --git a/cmake/modules/BuildSPDK.cmake b/cmake/modules/BuildSPDK.cmake
+deleted file mode 100644
+index 3480712..0000000
+--- a/cmake/modules/BuildSPDK.cmake
++++ /dev/null
+@@ -1,39 +0,0 @@
+-macro(build_spdk)
+-  if(NOT TARGET dpdk-ext)
+-    include(BuildDPDK)
+-    build_dpdk()
+-  endif()
+-  find_package(CUnit REQUIRED)
+-  if(LINUX)
+-    find_package(aio REQUIRED)
+-    find_package(uuid REQUIRED)
+-  endif()
+-  include(ExternalProject)
+-  ExternalProject_Add(spdk-ext
+-    DEPENDS dpdk-ext
+-    SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/spdk
+-    CONFIGURE_COMMAND ./configure --with-dpdk=${DPDK_DIR}
+-    # unset $CFLAGS, otherwise it will interfere with how SPDK sets
+-    # its include directory.
+-    # unset $LDFLAGS, otherwise SPDK will fail to mock some functions.
+-    BUILD_COMMAND env -i PATH=$ENV{PATH} CC=${CMAKE_C_COMPILER} $(MAKE) EXTRA_CFLAGS="-fPIC"
+-    BUILD_IN_SOURCE 1
+-    INSTALL_COMMAND "true")
+-  ExternalProject_Get_Property(spdk-ext source_dir)
+-  foreach(c nvme log lvol env_dpdk util)
+-    add_library(spdk::${c} STATIC IMPORTED)
+-    add_dependencies(spdk::${c} spdk-ext)
+-    set_target_properties(spdk::${c} PROPERTIES
+-      IMPORTED_LOCATION "${source_dir}/build/lib/${CMAKE_STATIC_LIBRARY_PREFIX}spdk_${c}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+-      INTERFACE_INCLUDE_DIRECTORIES "${source_dir}/include")
+-    list(APPEND SPDK_LIBRARIES spdk::${c})
+-  endforeach()
+-  set_target_properties(spdk::env_dpdk PROPERTIES
+-    INTERFACE_LINK_LIBRARIES "${DPDK_LIBRARIES};rt")
+-  if(LINUX)
+-    set_target_properties(spdk::lvol PROPERTIES
+-      INTERFACE_LINK_LIBRARIES ${UUID_LIBRARIES})
+-  endif()
+-  set(SPDK_INCLUDE_DIR "${source_dir}/include")
+-  unset(source_dir)
+-endmacro()
+diff --git a/cmake/modules/CTags.cmake b/cmake/modules/CTags.cmake
+deleted file mode 100644
+index 55b2288..0000000
+--- a/cmake/modules/CTags.cmake
++++ /dev/null
+@@ -1,40 +0,0 @@
+-find_program(CTAGS_EXECUTABLE ctags)
+-
+-function(add_tags name)
+-  cmake_parse_arguments(TAGS "" "SRC_DIR;TAG_FILE" "EXCLUDE_OPTS;EXCLUDES" ${ARGN})
+-  set(excludes ${TAGS_EXCLUDES})
+-  if(TAGS_EXCLUDE_OPTS)
+-    # always respect EXCLUDES_OPTS
+-    list(APPEND excludes ${TAGS_EXCLUDE_OPTS})
+-  else()
+-    # exclude the submodules under SRC_DIR by default
+-    execute_process(
+-      COMMAND git config --file .gitmodules --get-regexp path
+-      COMMAND awk "/${TAGS_SRC_DIR}/ { print $2 }"
+-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+-      RESULT_VARIABLE result_code
+-      OUTPUT_VARIABLE submodules
+-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+-    if(${result_code} EQUAL 0)
+-      string(REPLACE "${TAGS_SRC_DIR}/" "" submodules ${submodules})
+-      # cmake list uses ";" as the delimiter, so split the string manually
+-      # before iterating in it.
+-      string(REPLACE "\n" ";" submodules ${submodules})
+-      list(APPEND excludes ${submodules})
+-    endif()
+-  endif()
+-  message(STATUS "exclude following files under ${TAGS_SRC_DIR}: ${excludes}")
+-  # add_custom_target() accepts a list after "COMMAND" keyword, so we should
+-  # make exclude_arg a list, otherwise cmake will quote it. and ctags will
+-  # take it as as a single argument.
+-  foreach(exclude ${excludes})
+-    list(APPEND exclude_args --exclude=${exclude})
+-  endforeach()
+-  add_custom_target(${name}
+-    COMMAND ${CTAGS_EXECUTABLE} -R --c++-kinds=+p --fields=+iaS --extra=+q ${exclude_args}
+-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/${TAGS_SRC_DIR}
+-    COMMENT "Building ctags file ${TAGS_TAG_FILE}"
+-    VERBATIM)
+-  set_source_files_properties(${CMAKE_SOURCE_DIR}/${TAGS_TAG_FILE} PROPERTIES
+-    GENERATED true)
+-endfunction()
+diff --git a/cmake/modules/Distutils.cmake b/cmake/modules/Distutils.cmake
+deleted file mode 100644
+index d6e9f38..0000000
+--- a/cmake/modules/Distutils.cmake
++++ /dev/null
+@@ -1,95 +0,0 @@
+-include(CMakeParseArguments)
+-
+-function(distutils_install_module name)
+-  set(py_srcs setup.py README.rst requirements.txt test-requirements.txt bin ${name})
+-  foreach(src ${py_srcs})
+-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${src})
+-      list(APPEND py_clone ${CMAKE_CURRENT_BINARY_DIR}/${src})
+-      add_custom_command(
+-        OUTPUT ${src}
+-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${src}
+-        COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/${src} ${src})
+-    endif()
+-  endforeach()
+-  add_custom_target(${name}-clone ALL
+-    DEPENDS ${py_clone})
+-  cmake_parse_arguments(DU "" INSTALL_SCRIPT "" ${ARGN})
+-  install(CODE "
+-    set(options --prefix=${CMAKE_INSTALL_PREFIX})
+-    if(DEFINED ENV{DESTDIR})
+-      if(EXISTS /etc/debian_version)
+-        list(APPEND options --install-layout=deb)
+-      endif()
+-      list(APPEND options --root=\$ENV{DESTDIR})
+-      if(NOT \"${DU_INSTALL_SCRIPT}\" STREQUAL \"\")
+-        list(APPEND options --install-script=${DU_INSTALL_SCRIPT})
+-      endif()
+-    endif()
+-    execute_process(
+-    COMMAND ${PYTHON${PYTHON_VERSION}_EXECUTABLE}
+-        setup.py install \${options}
+-    WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")
+-endfunction(distutils_install_module)
+-
+-function(distutils_add_cython_module name src)
+-  get_property(compiler_launcher GLOBAL PROPERTY RULE_LAUNCH_COMPILE)
+-  get_property(link_launcher GLOBAL PROPERTY RULE_LAUNCH_LINK)
+-  set(PY_CC \"${compiler_launcher} ${CMAKE_C_COMPILER}\")
+-  set(PY_CXX \"${compiler_launcher} ${CMAKE_CXX_COMPILER}\")
+-  set(PY_LDSHARED \"${link_launcher} ${CMAKE_C_COMPILER} -shared\")
+-  add_custom_target(${name} ALL
+-    COMMAND
+-    env
+-    CC=${PY_CC}
+-    CXX=${PY_CXX}
+-    LDSHARED=${PY_LDSHARED}
+-    OPT=\"-DNDEBUG -g -fwrapv -O2 -w\"
+-    LDFLAGS=-L${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+-    CYTHON_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+-    CEPH_LIBDIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+-    CFLAGS=\"-iquote${CMAKE_SOURCE_DIR}/src/include -w\"
+-    ${PYTHON${PYTHON_VERSION}_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py
+-    build --verbose --build-base ${CYTHON_MODULE_DIR}
+-    --build-platlib ${CYTHON_MODULE_DIR}/lib.${PYTHON${PYTHON_VERSION}_VERSION_MAJOR}
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-    DEPENDS ${src})
+-endfunction(distutils_add_cython_module)
+-
+-function(distutils_install_cython_module name)
+-  get_property(compiler_launcher GLOBAL PROPERTY RULE_LAUNCH_COMPILE)
+-  get_property(link_launcher GLOBAL PROPERTY RULE_LAUNCH_LINK)
+-  set(PY_CC "${compiler_launcher} ${CMAKE_C_COMPILER}")
+-  set(PY_LDSHARED "${link_launcher} ${CMAKE_C_COMPILER} -shared")
+-  install(CODE "
+-    set(ENV{CC} \"${PY_CC}\")
+-    set(ENV{LDSHARED} \"${PY_LDSHARED}\")
+-    set(ENV{CPPFLAGS} \"-iquote${CMAKE_SOURCE_DIR}/src/include\")
+-    set(ENV{LDFLAGS} \"-L${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\")
+-    set(ENV{CYTHON_BUILD_DIR} \"${CMAKE_CURRENT_BINARY_DIR}\")
+-    set(ENV{CEPH_LIBDIR} \"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\")
+-
+-    set(options --prefix=${CMAKE_INSTALL_PREFIX})
+-    if(DEFINED ENV{DESTDIR})
+-      if(EXISTS /etc/debian_version)
+-        list(APPEND options --install-layout=deb)
+-      endif()
+-      list(APPEND options --root=\$ENV{DESTDIR})
+-    else()
+-      list(APPEND options --root=/)
+-    endif()
+-    execute_process(
+-       COMMAND
+-           ${PYTHON${PYTHON_VERSION}_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/setup.py
+-           build --verbose --build-base ${CYTHON_MODULE_DIR}
+-           --build-platlib ${CYTHON_MODULE_DIR}/lib.${PYTHON${PYTHON_VERSION}_VERSION_MAJOR}
+-           build_ext --cython-c-in-temp --build-temp ${CMAKE_CURRENT_BINARY_DIR} --cython-include-dirs ${PROJECT_SOURCE_DIR}/src/pybind/rados
+-           install \${options} --single-version-externally-managed --record /dev/null
+-           egg_info --egg-base ${CMAKE_CURRENT_BINARY_DIR}
+-           --verbose
+-       WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}\"
+-       RESULT_VARIABLE install_res)
+-    if(NOT \"\${install_res}\" STREQUAL 0)
+-      message(FATAL_ERROR \"Failed to build and install ${name} python module\")
+-    endif()
+-  ")
+-endfunction(distutils_install_cython_module)
+diff --git a/cmake/modules/FindBacktrace.cmake b/cmake/modules/FindBacktrace.cmake
+deleted file mode 100644
+index 936875c..0000000
+--- a/cmake/modules/FindBacktrace.cmake
++++ /dev/null
+@@ -1,101 +0,0 @@
+-#.rst:
+-# FindBacktrace
+-# -------------
+-#
+-# Find provider for backtrace(3).
+-#
+-# Checks if OS supports backtrace(3) via either libc or custom library.
+-# This module defines the following variables:
+-#
+-# ``Backtrace_HEADER``
+-#   The header file needed for backtrace(3). Cached.
+-#   Could be forcibly set by user.
+-# ``Backtrace_INCLUDE_DIRS``
+-#   The include directories needed to use backtrace(3) header.
+-# ``Backtrace_LIBRARIES``
+-#   The libraries (linker flags) needed to use backtrace(3), if any.
+-# ``Backtrace_FOUND``
+-#   Is set if and only if backtrace(3) support detected.
+-#
+-# The following cache variables are also available to set or use:
+-#
+-# ``Backtrace_LIBRARY``
+-#   The external library providing backtrace, if any.
+-# ``Backtrace_INCLUDE_DIR``
+-#   The directory holding the backtrace(3) header.
+-#
+-# Typical usage is to generate of header file using configure_file() with the
+-# contents like the following::
+-#
+-#  #cmakedefine01 Backtrace_FOUND
+-#  #if Backtrace_FOUND
+-#  # include <${Backtrace_HEADER}>
+-#  #endif
+-#
+-# And then reference that generated header file in actual source.
+-
+-#=============================================================================
+-# Copyright 2013 Vadim Zhukov
+-#
+-# Distributed under the OSI-approved BSD License (the "License");
+-# see accompanying file Copyright.txt for details.
+-#
+-# This software is distributed WITHOUT ANY WARRANTY; without even the
+-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-# See the License for more information.
+-#=============================================================================
+-# (To distribute this file outside of CMake, substitute the full
+-#  License text for the above reference.)
+-
+-
+-include(CMakePushCheckState)
+-include(CheckSymbolExists)
+-include(FindPackageHandleStandardArgs)
+-
+-# List of variables to be provided to find_package_handle_standard_args()
+-set(_Backtrace_STD_ARGS Backtrace_INCLUDE_DIR)
+-
+-if(Backtrace_HEADER)
+-  set(_Backtrace_HEADER_TRY "${Backtrace_HEADER}")
+-else(Backtrace_HEADER)
+-  set(_Backtrace_HEADER_TRY "execinfo.h")
+-endif(Backtrace_HEADER)
+-
+-find_path(Backtrace_INCLUDE_DIR "${_Backtrace_HEADER_TRY}")
+-set(Backtrace_INCLUDE_DIRS ${Backtrace_INCLUDE_DIR})
+-
+-if (NOT DEFINED Backtrace_LIBRARY)
+-  # First, check if we already have backtrace(), e.g., in libc
+-  cmake_push_check_state(RESET)
+-  set(CMAKE_REQUIRED_INCLUDES ${Backtrace_INCLUDE_DIRS})
+-  set(CMAKE_REQUIRED_QUIET ${Backtrace_FIND_QUIETLY})
+-  check_symbol_exists("backtrace" "${_Backtrace_HEADER_TRY}" _Backtrace_SYM_FOUND)
+-  cmake_pop_check_state()
+-endif()
+-
+-if(_Backtrace_SYM_FOUND)
+-  # Avoid repeating the message() call below each time CMake is run.
+-  if(NOT Backtrace_FIND_QUIETLY AND NOT DEFINED Backtrace_LIBRARY)
+-    message(STATUS "backtrace facility detected in default set of libraries")
+-  endif()
+-  set(Backtrace_LIBRARY "" CACHE FILEPATH "Library providing backtrace(3), empty for default set of libraries")
+-else()
+-  # Check for external library, for non-glibc systems
+-  if(Backtrace_INCLUDE_DIR)
+-    # OpenBSD has libbacktrace renamed to libexecinfo
+-    find_library(Backtrace_LIBRARY "execinfo")
+-  elseif()     # respect user wishes
+-    set(_Backtrace_HEADER_TRY "backtrace.h")
+-    find_path(Backtrace_INCLUDE_DIR ${_Backtrace_HEADER_TRY})
+-    find_library(Backtrace_LIBRARY "backtrace")
+-  endif()
+-
+-  # Prepend list with library path as it's more common practice
+-  set(_Backtrace_STD_ARGS Backtrace_LIBRARY ${_Backtrace_STD_ARGS})
+-endif()
+-
+-set(Backtrace_LIBRARIES ${Backtrace_LIBRARY})
+-set(Backtrace_HEADER "${_Backtrace_HEADER_TRY}" CACHE STRING "Header providing backtrace(3) facility")
+-
+-find_package_handle_standard_args(Backtrace FOUND_VAR Backtrace_FOUND REQUIRED_VARS ${_Backtrace_STD_ARGS})
+-mark_as_advanced(Backtrace_HEADER Backtrace_INCLUDE_DIR Backtrace_LIBRARY)
+diff --git a/cmake/modules/FindCUnit.cmake b/cmake/modules/FindCUnit.cmake
+deleted file mode 100644
+index 26fea55..0000000
+--- a/cmake/modules/FindCUnit.cmake
++++ /dev/null
+@@ -1,23 +0,0 @@
+-# Try to find CUnit
+-#
+-# Once done, this will define
+-#
+-# CUNIT_FOUND
+-
+-find_path(CUNIT_INCLUDE_DIR NAMES CUnit/CUnit.h)
+-
+-find_library(CUNIT_LIBRARY NAMES
+-    cunit
+-    libcunit
+-    cunitlib)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(CUnit
+-  DEFAULT_MSG CUNIT_LIBRARY CUNIT_INCLUDE_DIR)
+-
+-if(CUNIT_FOUND)
+-  set(CUNIT_LIBRARIES ${CUNIT_LIBRARY})
+-  set(CUNIT_INCLUDE_DIRS ${CUNIT_INCLUDE_DIR})
+-endif()
+-
+-mark_as_advanced(CUNIT_INCLUDE_DIR CUNIT_LIBRARY)
+diff --git a/cmake/modules/FindCython.cmake b/cmake/modules/FindCython.cmake
+deleted file mode 100644
+index 0048bf7..0000000
+--- a/cmake/modules/FindCython.cmake
++++ /dev/null
+@@ -1,26 +0,0 @@
+-#
+-# Cython
+-#
+-
+-SET(Cython${PYTHON_VERSION}_FOUND FALSE)
+-# Try to run Cython, to make sure it works:
+-execute_process(
+-    COMMAND ${PYTHON${PYTHON_VERSION}_EXECUTABLE} -m cython --version
+-    RESULT_VARIABLE CYTHON_RESULT
+-    OUTPUT_QUIET
+-    ERROR_QUIET
+-    )
+-if (CYTHON_RESULT EQUAL 0)
+-    SET(Cython${PYTHON_VERSION}_FOUND TRUE)
+-endif (CYTHON_RESULT EQUAL 0)
+-
+-
+-IF (Cython${PYTHON_VERSION}_FOUND)
+-    IF (NOT Cython_FIND_QUIETLY)
+-        MESSAGE(STATUS "Found cython${PYTHON_VERSION}")
+-    ENDIF (NOT Cython_FIND_QUIETLY)
+-ELSE (Cython${PYTHON_VERSION}_FOUND)
+-    IF (Cython_FIND_REQUIRED)
+-        MESSAGE(FATAL_ERROR "Could not find cython${PYTHON_VERSION}. Please install Cython.")
+-    ENDIF (Cython_FIND_REQUIRED)
+-ENDIF (Cython${PYTHON_VERSION}_FOUND)
+diff --git a/cmake/modules/FindJeMalloc.cmake b/cmake/modules/FindJeMalloc.cmake
+deleted file mode 100644
+index 784560d..0000000
+--- a/cmake/modules/FindJeMalloc.cmake
++++ /dev/null
+@@ -1,20 +0,0 @@
+-# Find the native JeMalloc includes and library
+-# This module defines
+-#  JEMALLOC_INCLUDE_DIRS, where to find jemalloc.h, Set when
+-#                        JEMALLOC_INCLUDE_DIR is found.
+-#  JEMALLOC_LIBRARIES, libraries to link against to use JeMalloc.
+-#  JEMALLOC_FOUND, If false, do not try to use JeMalloc.
+-#
+-
+-find_path(JEMALLOC_INCLUDE_DIR jemalloc/jemalloc.h)
+-
+-find_library(JEMALLOC_LIBRARIES jemalloc)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(JeMalloc DEFAULT_MSG
+-    JEMALLOC_LIBRARIES JEMALLOC_INCLUDE_DIR)
+-
+-mark_as_advanced(
+-  JEMALLOC_INCLUDE_DIR
+-  JEMALLOC_LIBRARIES)
+-
+diff --git a/cmake/modules/FindLTTngUST.cmake b/cmake/modules/FindLTTngUST.cmake
+deleted file mode 100644
+index ac8f14c..0000000
+--- a/cmake/modules/FindLTTngUST.cmake
++++ /dev/null
+@@ -1,111 +0,0 @@
+-#.rst:
+-# FindLTTngUST
+-# ------------
+-#
+-# This module finds the `LTTng-UST <http://lttng.org/>`__ library.
+-#
+-# Imported target
+-# ^^^^^^^^^^^^^^^
+-#
+-# This module defines the following :prop_tgt:`IMPORTED` target:
+-#
+-# ``LTTng::UST``
+-#   The LTTng-UST library, if found
+-#
+-# Result variables
+-# ^^^^^^^^^^^^^^^^
+-#
+-# This module sets the following
+-#
+-# ``LTTNGUST_FOUND``
+-#   ``TRUE`` if system has LTTng-UST
+-# ``LTTNGUST_INCLUDE_DIRS``
+-#   The LTTng-UST include directories
+-# ``LTTNGUST_LIBRARIES``
+-#   The libraries needed to use LTTng-UST
+-# ``LTTNGUST_VERSION_STRING``
+-#   The LTTng-UST version
+-# ``LTTNGUST_HAS_TRACEF``
+-#   ``TRUE`` if the ``tracef()`` API is available in the system's LTTng-UST
+-# ``LTTNGUST_HAS_TRACELOG``
+-#   ``TRUE`` if the ``tracelog()`` API is available in the system's LTTng-UST
+-
+-#=============================================================================
+-# Copyright 2016 Kitware, Inc.
+-# Copyright 2016 Philippe Proulx <pproulx@efficios.com>
+-#
+-# Distributed under the OSI-approved BSD License (the "License");
+-# see accompanying file Copyright.txt for details.
+-#
+-# This software is distributed WITHOUT ANY WARRANTY; without even the
+-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-# See the License for more information.
+-#=============================================================================
+-# (To distribute this file outside of CMake, substitute the full
+-#  License text for the above reference.)
+-
+-find_path(LTTNGUST_INCLUDE_DIRS NAMES lttng/tracepoint.h)
+-find_library(LTTNGUST_LIBRARIES NAMES lttng-ust)
+-
+-if(LTTNGUST_INCLUDE_DIRS AND LTTNGUST_LIBRARIES)
+-  # find tracef() and tracelog() support
+-  set(LTTNGUST_HAS_TRACEF 0)
+-  set(LTTNGUST_HAS_TRACELOG 0)
+-
+-  if(EXISTS "${LTTNGUST_INCLUDE_DIRS}/lttng/tracef.h")
+-    set(LTTNGUST_HAS_TRACEF TRUE)
+-  endif()
+-
+-  if(EXISTS "${LTTNGUST_INCLUDE_DIRS}/lttng/tracelog.h")
+-    set(LTTNGUST_HAS_TRACELOG TRUE)
+-  endif()
+-
+-  # get version
+-  set(lttngust_version_file "${LTTNGUST_INCLUDE_DIRS}/lttng/ust-version.h")
+-
+-  if(EXISTS "${lttngust_version_file}")
+-    file(STRINGS "${lttngust_version_file}" lttngust_version_major_string
+-         REGEX "^[\t ]*#define[\t ]+LTTNG_UST_MAJOR_VERSION[\t ]+[0-9]+[\t ]*$")
+-    file(STRINGS "${lttngust_version_file}" lttngust_version_minor_string
+-         REGEX "^[\t ]*#define[\t ]+LTTNG_UST_MINOR_VERSION[\t ]+[0-9]+[\t ]*$")
+-    file(STRINGS "${lttngust_version_file}" lttngust_version_patch_string
+-         REGEX "^[\t ]*#define[\t ]+LTTNG_UST_PATCHLEVEL_VERSION[\t ]+[0-9]+[\t ]*$")
+-    string(REGEX REPLACE ".*([0-9]+).*" "\\1"
+-           lttngust_v_major "${lttngust_version_major_string}")
+-    string(REGEX REPLACE ".*([0-9]+).*" "\\1"
+-           lttngust_v_minor "${lttngust_version_minor_string}")
+-    string(REGEX REPLACE ".*([0-9]+).*" "\\1"
+-           lttngust_v_patch "${lttngust_version_patch_string}")
+-    set(LTTNGUST_VERSION_STRING
+-        "${lttngust_v_major}.${lttngust_v_minor}.${lttngust_v_patch}")
+-    unset(lttngust_version_major_string)
+-    unset(lttngust_version_minor_string)
+-    unset(lttngust_version_patch_string)
+-    unset(lttngust_v_major)
+-    unset(lttngust_v_minor)
+-    unset(lttngust_v_patch)
+-  endif()
+-
+-  unset(lttngust_version_file)
+-
+-  if(NOT TARGET LTTng::UST)
+-    add_library(LTTng::UST UNKNOWN IMPORTED)
+-    set_target_properties(LTTng::UST PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${LTTNGUST_INCLUDE_DIRS}"
+-      INTERFACE_LINK_LIBRARIES ${CMAKE_DL_LIBS}
+-      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+-      IMPORTED_LOCATION "${LTTNGUST_LIBRARIES}")
+-  endif()
+-
+-  # add libdl to required libraries
+-  set(LTTNGUST_LIBRARIES ${LTTNGUST_LIBRARIES} ${CMAKE_DL_LIBS})
+-endif()
+-
+-# handle the QUIETLY and REQUIRED arguments and set LTTNGUST_FOUND to
+-# TRUE if all listed variables are TRUE
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(LTTngUST FOUND_VAR LTTNGUST_FOUND
+-                                  REQUIRED_VARS LTTNGUST_LIBRARIES
+-                                                LTTNGUST_INCLUDE_DIRS
+-                                  VERSION_VAR LTTNGUST_VERSION_STRING)
+-mark_as_advanced(LTTNGUST_LIBRARIES LTTNGUST_INCLUDE_DIRS)
+diff --git a/cmake/modules/FindLZ4.cmake b/cmake/modules/FindLZ4.cmake
+deleted file mode 100644
+index 27d4bc5..0000000
+--- a/cmake/modules/FindLZ4.cmake
++++ /dev/null
+@@ -1,34 +0,0 @@
+-# Try to find liblz4
+-#
+-# Once done, this will define
+-#
+-# LZ4_FOUND
+-# LZ4_INCLUDE_DIR
+-# LZ4_LIBRARY
+-# LZ4_VERSION_STRING
+-# LZ4_VERSION_MAJOR
+-# LZ4_VERSION_MINOR
+-# LZ4_VERSION_RELEASE
+-
+-find_path(LZ4_INCLUDE_DIR NAMES lz4.h)
+-
+-if(LZ4_INCLUDE_DIR AND EXISTS "${LZ4_INCLUDE_DIR}/lz4.h")
+-  foreach(ver "MAJOR" "MINOR" "RELEASE")
+-    file(STRINGS "${LZ4_INCLUDE_DIR}/lz4.h" LZ4_VER_${ver}_LINE
+-      REGEX "^#define[ \t]+LZ4_VERSION_${ver}[ \t]+[0-9]+[ \t]+.*$")
+-    string(REGEX REPLACE "^#define[ \t]+LZ4_VERSION_${ver}[ \t]+([0-9]+)[ \t]+.*$"
+-      "\\1" LZ4_VERSION_${ver} "${LZ4_VER_${ver}_LINE}")
+-    unset(${LZ4_VER_${ver}_LINE})
+-  endforeach()
+-  set(LZ4_VERSION_STRING
+-    "${LZ4_VERSION_MAJOR}.${LZ4_VERSION_MINOR}.${LZ4_VERSION_RELEASE}")
+-endif()
+-
+-find_library(LZ4_LIBRARY NAMES lz4)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(LZ4
+-  REQUIRED_VARS LZ4_LIBRARY LZ4_INCLUDE_DIR
+-  VERSION_VAR LZ4_VERSION_STRING)
+-
+-mark_as_advanced(LZ4_INCLUDE_DIR LZ4_LIBRARY)
+diff --git a/cmake/modules/FindNSPR.cmake b/cmake/modules/FindNSPR.cmake
+deleted file mode 100644
+index 94d6a06..0000000
+--- a/cmake/modules/FindNSPR.cmake
++++ /dev/null
+@@ -1,104 +0,0 @@
+-# - Try to find NSPR
+-# Once done this will define
+-#
+-#  NSPR_FOUND - system has NSPR
+-#  NSPR_INCLUDE_DIRS - the NSPR include directory
+-#  NSPR_LIBRARIES - Link these to use NSPR
+-#  NSPR_DEFINITIONS - Compiler switches required for using NSPR
+-#
+-#  Copyright (c) 2010 Andreas Schneider <asn@redhat.com>
+-#
+-#  Redistribution and use is allowed according to the terms of the New
+-#  BSD license.
+-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+-#
+-
+-
+-if (NSPR_LIBRARIES AND NSPR_INCLUDE_DIRS)
+-  # in cache already
+-  set(NSPR_FOUND TRUE)
+-else (NSPR_LIBRARIES AND NSPR_INCLUDE_DIRS)
+-  find_package(PkgConfig)
+-  if (PKG_CONFIG_FOUND)
+-    pkg_check_modules(_NSPR nspr)
+-  endif (PKG_CONFIG_FOUND)
+-
+-  find_path(NSPR_INCLUDE_DIR
+-    NAMES
+-      nspr.h
+-    PATHS
+-      ${_NSPR_INCLUDEDIR}
+-      /usr/include
+-      /usr/local/include
+-      /opt/local/include
+-      /sw/include
+-    PATH_SUFFIXES
+-      nspr4
+-      nspr
+-  )
+-
+-  find_library(PLDS4_LIBRARY
+-    NAMES
+-      plds4
+-    PATHS
+-      ${_NSPR_LIBDIR}
+-      /usr/lib
+-      /usr/local/lib
+-      /opt/local/lib
+-      /sw/lib
+-  )
+-
+-  find_library(PLC4_LIBRARY
+-    NAMES
+-      plc4
+-    PATHS
+-      ${_NSPR_LIBDIR}
+-      /usr/lib
+-      /usr/local/lib
+-      /opt/local/lib
+-      /sw/lib
+-  )
+-
+-  find_library(NSPR4_LIBRARY
+-    NAMES
+-      nspr4
+-    PATHS
+-      ${_NSPR_LIBDIR}
+-      /usr/lib
+-      /usr/local/lib
+-      /opt/local/lib
+-      /sw/lib
+-  )
+-
+-  set(NSPR_INCLUDE_DIRS
+-    ${NSPR_INCLUDE_DIR}
+-  )
+-
+-  if (PLDS4_LIBRARY)
+-    set(NSPR_LIBRARIES
+-        ${NSPR_LIBRARIES}
+-        ${PLDS4_LIBRARY}
+-    )
+-  endif (PLDS4_LIBRARY)
+-
+-  if (PLC4_LIBRARY)
+-    set(NSPR_LIBRARIES
+-        ${NSPR_LIBRARIES}
+-        ${PLC4_LIBRARY}
+-    )
+-  endif (PLC4_LIBRARY)
+-
+-  if (NSPR4_LIBRARY)
+-    set(NSPR_LIBRARIES
+-        ${NSPR_LIBRARIES}
+-        ${NSPR4_LIBRARY}
+-    )
+-  endif (NSPR4_LIBRARY)
+-
+-  include(FindPackageHandleStandardArgs)
+-  find_package_handle_standard_args(NSPR DEFAULT_MSG NSPR_LIBRARIES NSPR_INCLUDE_DIRS)
+-
+-  # show the NSPR_INCLUDE_DIRS and NSPR_LIBRARIES variables only in the advanced view
+-  mark_as_advanced(NSPR_INCLUDE_DIRS NSPR_LIBRARIES)
+-
+-endif (NSPR_LIBRARIES AND NSPR_INCLUDE_DIRS)
+diff --git a/cmake/modules/FindNSS.cmake b/cmake/modules/FindNSS.cmake
+deleted file mode 100644
+index a22e0f7..0000000
+--- a/cmake/modules/FindNSS.cmake
++++ /dev/null
+@@ -1,126 +0,0 @@
+-# - Try to find NSS
+-# Once done this will define
+-#
+-#  NSS_FOUND - system has NSS
+-#  NSS_INCLUDE_DIRS - the NSS include directory
+-#  NSS_LIBRARIES - Link these to use NSS
+-#  NSS_DEFINITIONS - Compiler switches required for using NSS
+-#
+-#  Copyright (c) 2010 Andreas Schneider <asn@redhat.com>
+-#
+-#  Redistribution and use is allowed according to the terms of the New
+-#  BSD license.
+-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+-#
+-
+-
+-if (NSS_LIBRARIES AND NSS_INCLUDE_DIRS)
+-  # in cache already
+-  set(NSS_FOUND TRUE)
+-else (NSS_LIBRARIES AND NSS_INCLUDE_DIRS)
+-  find_package(PkgConfig)
+-  if (PKG_CONFIG_FOUND)
+-    pkg_check_modules(_NSS nss)
+-  endif (PKG_CONFIG_FOUND)
+-
+-  find_path(NSS_INCLUDE_DIR
+-    NAMES
+-      pk11pub.h
+-    PATHS
+-      ${_NSS_INCLUDEDIR}
+-      /usr/include
+-      /usr/local/include
+-      /opt/local/include
+-      /sw/include
+-      /usr/local/include/nss
+-    PATH_SUFFIXES
+-      nss3
+-      nss
+-  )
+-
+-  find_library(SSL3_LIBRARY
+-    NAMES
+-      ssl3
+-    PATHS
+-      ${_NSS_LIBDIR}
+-      /usr/lib
+-      /usr/local/lib
+-      /opt/local/lib
+-      /sw/lib
+-  )
+-
+-  find_library(SMIME3_LIBRARY
+-    NAMES
+-      smime3
+-    PATHS
+-      ${_NSS_LIBDIR}
+-      /usr/lib
+-      /usr/local/lib
+-      /opt/local/lib
+-      /sw/lib
+-  )
+-
+-  find_library(NSS3_LIBRARY
+-    NAMES
+-      nss3
+-    PATHS
+-      ${_NSS_LIBDIR}
+-      /usr/lib
+-      /usr/local/lib
+-      /opt/local/lib
+-      /sw/lib
+-      /usr/lib/x86_64-linux-gnu
+-  )
+-
+-  find_library(NSSUTIL3_LIBRARY
+-    NAMES
+-      nssutil3
+-    PATHS
+-      ${_NSS_LIBDIR}
+-      /usr/lib
+-      /usr/local/lib
+-      /opt/local/lib
+-      /sw/lib
+-  )
+-
+-  set(NSS_INCLUDE_DIRS
+-    ${NSS_INCLUDE_DIR}
+-  )
+-
+-  if (SSL3_LIBRARY)
+-    set(NSS_LIBRARIES
+-        ${NSS_LIBRARIES}
+-        ${SSL3_LIBRARY}
+-    )
+-  endif (SSL3_LIBRARY)
+-
+-  if (SMIME3_LIBRARY)
+-    set(NSS_LIBRARIES
+-        ${NSS_LIBRARIES}
+-        ${SMIME3_LIBRARY}
+-    )
+-  endif (SMIME3_LIBRARY)
+-
+-  if (NSS3_LIBRARY)
+-    set(NSS_LIBRARIES
+-        ${NSS_LIBRARIES}
+-        ${NSS3_LIBRARY}
+-    )
+-  endif (NSS3_LIBRARY)
+-
+-  if (NSSUTIL3_LIBRARY)
+-    set(NSS_LIBRARIES
+-        ${NSS_LIBRARIES}
+-        ${NSSUTIL3_LIBRARY}
+-    )
+-  endif (NSSUTIL3_LIBRARY)
+-
+-  include(FindPackageHandleStandardArgs)
+-  message(STATUS "NSS_LIBRARIES: ${NSS_LIBRARIES}")
+-  message(STATUS "NSS_INCLUDE_DIRS: ${NSS_INCLUDE_DIRS}")
+-  find_package_handle_standard_args(NSS DEFAULT_MSG NSS_LIBRARIES NSS_INCLUDE_DIRS)
+-
+-  # show the NSS_INCLUDE_DIRS and NSS_LIBRARIES variables only in the advanced view
+-  mark_as_advanced(NSS_INCLUDE_DIRS NSS_LIBRARIES)
+-
+-endif (NSS_LIBRARIES AND NSS_INCLUDE_DIRS)
+diff --git a/cmake/modules/FindOpenLdap.cmake b/cmake/modules/FindOpenLdap.cmake
+deleted file mode 100644
+index 35b711d..0000000
+--- a/cmake/modules/FindOpenLdap.cmake
++++ /dev/null
+@@ -1,22 +0,0 @@
+-# - Find OpenLDAP C Libraries
+-#
+-# OPENLDAP_FOUND - True if found.
+-# OPENLDAP_INCLUDE_DIR - Path to the openldap include directory
+-# OPENLDAP_LIBRARIES - Paths to the ldap and lber libraries
+-
+-find_path(OPENLDAP_INCLUDE_DIR ldap.h PATHS
+-  /usr/include
+-  /opt/local/include
+-  /usr/local/include)
+-
+-find_library(LDAP_LIBRARY ldap)
+-find_library(LBER_LIBRARY lber)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(OpenLdap DEFAULT_MSG
+-  OPENLDAP_INCLUDE_DIR LDAP_LIBRARY LBER_LIBRARY)
+-
+-set(OPENLDAP_LIBRARIES ${LDAP_LIBRARY} ${LBER_LIBRARY})
+-
+-mark_as_advanced(
+-  OPENLDAP_INCLUDE_DIR LDAP_LIBRARY LBER_LIBRARY)
+diff --git a/cmake/modules/FindPython3Interp.cmake b/cmake/modules/FindPython3Interp.cmake
+deleted file mode 100644
+index a1d076f..0000000
+--- a/cmake/modules/FindPython3Interp.cmake
++++ /dev/null
+@@ -1,148 +0,0 @@
+-#.rst:
+-# FindPython3Interp
+-# ----------------
+-#
+-# Find python interpreter
+-#
+-# This module finds if Python interpreter is installed and determines
+-# where the executables are.  This code sets the following variables:
+-#
+-# ::
+-#
+-#   PYTHON3INTERP_FOUND         - Was the Python executable found
+-#   PYTHON3_EXECUTABLE          - path to the Python interpreter
+-#
+-#
+-#
+-# ::
+-#
+-#   PYTHON3_VERSION_STRING      - Python version found e.g. 2.5.2
+-#   PYTHON3_VERSION_MAJOR       - Python major version found e.g. 2
+-#   PYTHON3_VERSION_MINOR       - Python minor version found e.g. 5
+-#   PYTHON3_VERSION_PATCH       - Python patch version found e.g. 2
+-#
+-#
+-#
+-# The Python3_ADDITIONAL_VERSIONS variable can be used to specify a list
+-# of version numbers that should be taken into account when searching
+-# for Python.  You need to set this variable before calling
+-# find_package(Python3Interp).
+-#
+-# If calling both ``find_package(Python3Interp)`` and
+-# ``find_package(Python3Libs)``, call ``find_package(Python3Interp)`` first to
+-# get the currently active Python version by default with a consistent version
+-# of PYTHON3_LIBRARIES.
+-
+-#=============================================================================
+-# Copyright 2005-2010 Kitware, Inc.
+-# Copyright 2011 Bjoern Ricks <bjoern.ricks@gmail.com>
+-# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
+-#
+-# Redistribution and use in source and binary forms, with or without
+-# modification, are permitted provided that the following conditions
+-# are met:
+-#
+-# * Redistributions of source code must retain the above copyright
+-#   notice, this list of conditions and the following disclaimer.
+-#
+-# * Redistributions in binary form must reproduce the above copyright
+-#   notice, this list of conditions and the following disclaimer in the
+-#   documentation and/or other materials provided with the distribution.
+-#
+-# * Neither the names of Kitware, Inc., the Insight Software Consortium,
+-#   nor the names of their contributors may be used to endorse or promote
+-#   products derived from this software without specific prior written
+-#   permission.
+-#
+-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+-# HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-#=============================================================================
+-
+-unset(_Python3_NAMES)
+-
+-set(_PYTHON3_VERSIONS 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
+-
+-if(Python3Interp_FIND_VERSION)
+-    if(Python3Interp_FIND_VERSION_COUNT GREATER 1)
+-        set(_PYTHON3_FIND_MAJ_MIN "${Python3Interp_FIND_VERSION_MAJOR}.${Python3Interp_FIND_VERSION_MINOR}")
+-        list(APPEND _Python3_NAMES
+-             python${_PYTHON3_FIND_MAJ_MIN}
+-             python${Python3Interp_FIND_VERSION_MAJOR})
+-        unset(_PYTHON3_FIND_OTHER_VERSIONS)
+-        if(NOT Python3Interp_FIND_VERSION_EXACT)
+-            foreach(_PYTHON3_V ${_PYTHON${Python3Interp_FIND_VERSION_MAJOR}_VERSIONS})
+-                if(NOT _PYTHON3_V VERSION_LESS _PYTHON3_FIND_MAJ_MIN)
+-                    list(APPEND _PYTHON3_FIND_OTHER_VERSIONS ${_PYTHON3_V})
+-                endif()
+-             endforeach()
+-        endif()
+-        unset(_PYTHON3_FIND_MAJ_MIN)
+-    else()
+-        list(APPEND _Python3_NAMES python${Python3Interp_FIND_VERSION_MAJOR})
+-        set(_PYTHON3_FIND_OTHER_VERSIONS ${_PYTHON${Python3Interp_FIND_VERSION_MAJOR}_VERSIONS})
+-    endif()
+-else()
+-    set(_PYTHON3_FIND_OTHER_VERSIONS ${_PYTHON3_VERSIONS})
+-endif()
+-find_program(PYTHON3_EXECUTABLE NAMES ${_Python3_NAMES})
+-
+-# Set up the versions we know about, in the order we will search. Always add
+-# the user supplied additional versions to the front.
+-set(_Python3_VERSIONS ${Python3_ADDITIONAL_VERSIONS})
+-# If FindPython3Interp has already found the major and minor version,
+-# insert that version next to get consistent versions of the interpreter and
+-# library.
+-if(DEFINED PYTHON3LIBS_VERSION_STRING)
+-  string(REPLACE "." ";" _PYTHON3LIBS_VERSION "${PYTHON3LIBS_VERSION_STRING}")
+-  list(GET _PYTHON3LIBS_VERSION 0 _PYTHON3LIBS_VERSION_MAJOR)
+-  list(GET _PYTHON3LIBS_VERSION 1 _PYTHON3LIBS_VERSION_MINOR)
+-  list(APPEND _Python3_VERSIONS ${_PYTHON3LIBS_VERSION_MAJOR}.${_PYTHON3LIBS_VERSION_MINOR})
+-endif()
+-# Search for the current active python version first
+-list(APPEND _Python3_VERSIONS ";")
+-list(APPEND _Python3_VERSIONS ${_PYTHON3_FIND_OTHER_VERSIONS})
+-
+-unset(_PYTHON3_FIND_OTHER_VERSIONS)
+-unset(_PYTHON3_VERSIONS)
+-
+-# Search for newest python version if python executable isn't found
+-if(NOT PYTHON3_EXECUTABLE)
+-    foreach(_CURRENT_VERSION IN LISTS _Python3_VERSIONS)
+-      set(_Python3_NAMES python${_CURRENT_VERSION})
+-      if(WIN32)
+-        list(APPEND _Python3_NAMES python)
+-      endif()
+-      find_program(PYTHON3_EXECUTABLE
+-        NAMES ${_Python3_NAMES}
+-        PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]
+-        )
+-    endforeach()
+-endif()
+-
+-# determine python version string
+-if(PYTHON3_EXECUTABLE)
+-    execute_process(COMMAND "${PYTHON3_EXECUTABLE}" -c
+-                            "import sys; sys.stdout.write(';'.join([str(x) for x in sys.version_info[:3]]))"
+-                    OUTPUT_VARIABLE _VERSION)
+-    string(REPLACE ";" "." PYTHON3_VERSION_STRING "${_VERSION}")
+-    list(GET _VERSION 0 PYTHON3_VERSION_MAJOR)
+-    list(GET _VERSION 1 PYTHON3_VERSION_MINOR)
+-    list(GET _VERSION 2 PYTHON3_VERSION_PATCH)
+-    unset(_VERSION)
+-endif()
+-
+-# handle the QUIETLY and REQUIRED arguments and set PYTHON3INTERP_FOUND to TRUE if
+-# all listed variables are TRUE
+-include(FindPackageHandleStandardArgs)
+-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Python3Interp REQUIRED_VARS PYTHON3_EXECUTABLE VERSION_VAR PYTHON3_VERSION_STRING)
+-
+-mark_as_advanced(PYTHON3_EXECUTABLE)
+diff --git a/cmake/modules/FindPython3Libs.cmake b/cmake/modules/FindPython3Libs.cmake
+deleted file mode 100644
+index 38b44e2..0000000
+--- a/cmake/modules/FindPython3Libs.cmake
++++ /dev/null
+@@ -1,369 +0,0 @@
+-#.rst:
+-# FindPython3Libs
+-# --------------
+-#
+-# Find python libraries
+-#
+-# This module finds if Python is installed and determines where the
+-# include files and libraries are.  It also determines what the name of
+-# the library is.  This code sets the following variables:
+-#
+-# ::
+-#
+-#   PYTHON3LIBS_FOUND           - have the Python libs been found
+-#   PYTHON3_LIBRARIES           - path to the python library
+-#   PYTHON3_INCLUDE_PATH        - path to where Python.h is found (deprecated)
+-#   PYTHON3_INCLUDE_DIRS        - path to where Python.h is found
+-#   PYTHON3_DEBUG_LIBRARIES     - path to the debug library (deprecated)
+-#   PYTHON3LIBS_VERSION_STRING  - version of the Python libs found (since CMake 2.8.8)
+-#
+-#
+-#
+-# The Python3_ADDITIONAL_VERSIONS variable can be used to specify a list
+-# of version numbers that should be taken into account when searching
+-# for Python.  You need to set this variable before calling
+-# find_package(Python3Libs).
+-#
+-# If you'd like to specify the installation of Python to use, you should
+-# modify the following cache variables:
+-#
+-# ::
+-#
+-#   PYTHON3_LIBRARY             - path to the python library
+-#   PYTHON3_INCLUDE_DIR         - path to where Python.h is found
+-#
+-# If calling both ``find_package(PythonInterp)`` and
+-# ``find_package(Python3Libs)``, call ``find_package(PythonInterp)`` first to
+-# get the currently active Python version by default with a consistent version
+-# of PYTHON3_LIBRARIES.
+-
+-#=============================================================================
+-# Copyright 2001-2009 Kitware, Inc.
+-#
+-# Redistribution and use in source and binary forms, with or without
+-# modification, are permitted provided that the following conditions
+-# are met:
+-#
+-# * Redistributions of source code must retain the above copyright
+-#   notice, this list of conditions and the following disclaimer.
+-#
+-# * Redistributions in binary form must reproduce the above copyright
+-#   notice, this list of conditions and the following disclaimer in the
+-#   documentation and/or other materials provided with the distribution.
+-#
+-# * Neither the names of Kitware, Inc., the Insight Software Consortium,
+-#   nor the names of their contributors may be used to endorse or promote
+-#   products derived from this software without specific prior written
+-#   permission.
+-#
+-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+-# HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-#=============================================================================
+-
+-# Use the executable's path as a hint
+-set(_Python3_LIBRARY_PATH_HINT)
+-if(PYTHON3_EXECUTABLE)
+-  if(WIN32)
+-    get_filename_component(_Python3_PREFIX ${PYTHON3_EXECUTABLE} PATH)
+-    if(_Python3_PREFIX)
+-      set(_Python3_LIBRARY_PATH_HINT ${_Python3_PREFIX}/libs)
+-    endif()
+-    unset(_Python3_PREFIX)
+-  else()
+-    get_filename_component(_Python3_PREFIX ${PYTHON3_EXECUTABLE} PATH)
+-    get_filename_component(_Python3_PREFIX ${_Python3_PREFIX} PATH)
+-    if(_Python3_PREFIX)
+-      set(_Python3_LIBRARY_PATH_HINT ${_Python3_PREFIX}/lib)
+-    endif()
+-    unset(_Python3_PREFIX)
+-  endif()
+-endif()
+-
+-include(CMakeFindFrameworks)
+-# Search for the python framework on Apple.
+-CMAKE_FIND_FRAMEWORKS(Python)
+-
+-# Save CMAKE_FIND_FRAMEWORK
+-if(DEFINED CMAKE_FIND_FRAMEWORK)
+-  set(_Python3Libs_CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+-else()
+-  unset(_Python3Libs_CMAKE_FIND_FRAMEWORK)
+-endif()
+-# To avoid picking up the system Python.h pre-maturely.
+-set(CMAKE_FIND_FRAMEWORK LAST)
+-
+-set(_PYTHON3_VERSIONS 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
+-
+-if(Python3Libs_FIND_VERSION)
+-    if(Python3Libs_FIND_VERSION_COUNT GREATER 1)
+-        set(_PYTHON3_FIND_MAJ_MIN "${Python3Libs_FIND_VERSION_MAJOR}.${Python3Libs_FIND_VERSION_MINOR}")
+-        unset(_PYTHON3_FIND_OTHER_VERSIONS)
+-        if(Python3Libs_FIND_VERSION_EXACT)
+-            if(_PYTHON3_FIND_MAJ_MIN STREQUAL Python3Libs_FIND_VERSION)
+-                set(_PYTHON3_FIND_OTHER_VERSIONS "${Python3Libs_FIND_VERSION}")
+-            else()
+-                set(_PYTHON3_FIND_OTHER_VERSIONS "${Python3Libs_FIND_VERSION}" "${_PYTHON3_FIND_MAJ_MIN}")
+-            endif()
+-        else()
+-            foreach(_PYTHON3_V ${_PYTHON${Python3Libs_FIND_VERSION_MAJOR}_VERSIONS})
+-                if(NOT _PYTHON3_V VERSION_LESS _PYTHON3_FIND_MAJ_MIN)
+-                    list(APPEND _PYTHON3_FIND_OTHER_VERSIONS ${_PYTHON3_V})
+-                endif()
+-             endforeach()
+-        endif()
+-        unset(_PYTHON3_FIND_MAJ_MIN)
+-    else()
+-        set(_PYTHON3_FIND_OTHER_VERSIONS ${_PYTHON${Python3Libs_FIND_VERSION_MAJOR}_VERSIONS})
+-    endif()
+-else()
+-    set(_PYTHON3_FIND_OTHER_VERSIONS ${_PYTHON3_VERSIONS})
+-endif()
+-
+-# Set up the versions we know about, in the order we will search. Always add
+-# the user supplied additional versions to the front.
+-# If FindPythonInterp has already found the major and minor version,
+-# insert that version between the user supplied versions and the stock
+-# version list.
+-set(_Python3_VERSIONS ${Python3_ADDITIONAL_VERSIONS})
+-if(DEFINED PYTHON3_VERSION_MAJOR AND DEFINED PYTHON3_VERSION_MINOR)
+-  list(APPEND _Python3_VERSIONS ${PYTHON3_VERSION_MAJOR}.${PYTHON3_VERSION_MINOR})
+-endif()
+-list(APPEND _Python3_VERSIONS ${_PYTHON3_FIND_OTHER_VERSIONS})
+-
+-unset(_PYTHON3_FIND_OTHER_VERSIONS)
+-unset(_PYTHON3_VERSIONS)
+-
+-foreach(_CURRENT_VERSION ${_Python3_VERSIONS})
+-  string(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
+-  if(WIN32)
+-    find_library(PYTHON3_DEBUG_LIBRARY
+-      NAMES python${_CURRENT_VERSION_NO_DOTS}_d python
+-      HINTS ${_Python3_LIBRARY_PATH_HINT}
+-      PATHS
+-      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
+-      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
+-      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+-      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+-      )
+-  endif()
+-
+-  set(PYTHON3_FRAMEWORK_LIBRARIES)
+-  if(Python3_FRAMEWORKS AND NOT PYTHON3_LIBRARY)
+-    foreach(dir ${Python3_FRAMEWORKS})
+-      list(APPEND PYTHON3_FRAMEWORK_LIBRARIES
+-           ${dir}/Versions/${_CURRENT_VERSION}/lib)
+-    endforeach()
+-  endif()
+-  find_library(PYTHON3_LIBRARY
+-    NAMES
+-      python${_CURRENT_VERSION_NO_DOTS}
+-      python${_CURRENT_VERSION}mu
+-      python${_CURRENT_VERSION}m
+-      python${_CURRENT_VERSION}u
+-      python${_CURRENT_VERSION}
+-    HINTS
+-      ${_Python3_LIBRARY_PATH_HINT}
+-    PATHS
+-      ${PYTHON3_FRAMEWORK_LIBRARIES}
+-      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+-      [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
+-    # Avoid finding the .dll in the PATH.  We want the .lib.
+-    NO_SYSTEM_ENVIRONMENT_PATH
+-  )
+-  # Look for the static library in the Python config directory
+-  find_library(PYTHON3_LIBRARY
+-    NAMES python${_CURRENT_VERSION_NO_DOTS} python${_CURRENT_VERSION}
+-    # Avoid finding the .dll in the PATH.  We want the .lib.
+-    NO_SYSTEM_ENVIRONMENT_PATH
+-    # This is where the static library is usually located
+-    PATH_SUFFIXES python${_CURRENT_VERSION}/config
+-  )
+-
+-  # Don't search for include dir until library location is known
+-  if(PYTHON3_LIBRARY)
+-
+-    # Use the library's install prefix as a hint
+-    set(_Python3_INCLUDE_PATH_HINT)
+-    get_filename_component(_Python3_PREFIX ${PYTHON3_LIBRARY} PATH)
+-    get_filename_component(_Python3_PREFIX ${_Python3_PREFIX} PATH)
+-    if(_Python3_PREFIX)
+-      set(_Python3_INCLUDE_PATH_HINT ${_Python3_PREFIX}/include)
+-    endif()
+-    unset(_Python3_PREFIX)
+-
+-    # Add framework directories to the search paths
+-    set(PYTHON3_FRAMEWORK_INCLUDES)
+-    if(Python3_FRAMEWORKS AND NOT PYTHON3_INCLUDE_DIR)
+-      foreach(dir ${Python3_FRAMEWORKS})
+-        list(APPEND PYTHON3_FRAMEWORK_INCLUDES
+-          ${dir}/Versions/${_CURRENT_VERSION}/include)
+-      endforeach()
+-    endif()
+-
+-    find_path(PYTHON3_INCLUDE_DIR
+-      NAMES Python.h
+-      HINTS
+-        ${_Python3_INCLUDE_PATH_HINT}
+-      PATHS
+-        ${PYTHON3_FRAMEWORK_INCLUDES}
+-        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+-        [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
+-      PATH_SUFFIXES
+-        python${_CURRENT_VERSION}mu
+-        python${_CURRENT_VERSION}m
+-        python${_CURRENT_VERSION}u
+-        python${_CURRENT_VERSION}
+-    )
+-  endif()
+-
+-  # For backward compatibility, set PYTHON3_INCLUDE_PATH.
+-  set(PYTHON3_INCLUDE_PATH "${PYTHON3_INCLUDE_DIR}")
+-
+-  if(PYTHON3_INCLUDE_DIR AND EXISTS "${PYTHON3_INCLUDE_DIR}/patchlevel.h")
+-    file(STRINGS "${PYTHON3_INCLUDE_DIR}/patchlevel.h" python3_version_str
+-         REGEX "^#define[ \t]+PY_VERSION[ \t]+\"[^\"]+\"")
+-    string(REGEX REPLACE "^#define[ \t]+PY_VERSION[ \t]+\"([^\"]+)\".*" "\\1"
+-                         PYTHON3LIBS_VERSION_STRING "${python3_version_str}")
+-    unset(python3_version_str)
+-  endif()
+-
+-  if(PYTHON3_LIBRARY AND PYTHON3_INCLUDE_DIR)
+-    break()
+-  endif()
+-endforeach()
+-
+-unset(_Python3_INCLUDE_PATH_HINT)
+-unset(_Python3_LIBRARY_PATH_HINT)
+-
+-mark_as_advanced(
+-  PYTHON3_DEBUG_LIBRARY
+-  PYTHON3_LIBRARY
+-  PYTHON3_INCLUDE_DIR
+-)
+-
+-# We use PYTHON3_INCLUDE_DIR, PYTHON3_LIBRARY and PYTHON3_DEBUG_LIBRARY for the
+-# cache entries because they are meant to specify the location of a single
+-# library. We now set the variables listed by the documentation for this
+-# module.
+-set(PYTHON3_INCLUDE_DIRS "${PYTHON3_INCLUDE_DIR}")
+-set(PYTHON3_DEBUG_LIBRARIES "${PYTHON3_DEBUG_LIBRARY}")
+-
+-# These variables have been historically named in this module different from
+-# what SELECT_LIBRARY_CONFIGURATIONS() expects.
+-set(PYTHON3_LIBRARY_DEBUG "${PYTHON3_DEBUG_LIBRARY}")
+-set(PYTHON3_LIBRARY_RELEASE "${PYTHON3_LIBRARY}")
+-include(SelectLibraryConfigurations)
+-SELECT_LIBRARY_CONFIGURATIONS(PYTHON3)
+-# SELECT_LIBRARY_CONFIGURATIONS() sets ${PREFIX}_FOUND if it has a library.
+-# Unset this, this prefix doesn't match the module prefix, they are different
+-# for historical reasons.
+-unset(PYTHON3_FOUND)
+-
+-# Restore CMAKE_FIND_FRAMEWORK
+-if(DEFINED _Python3Libs_CMAKE_FIND_FRAMEWORK)
+-  set(CMAKE_FIND_FRAMEWORK ${_Python3Libs_CMAKE_FIND_FRAMEWORK})
+-  unset(_Python3Libs_CMAKE_FIND_FRAMEWORK)
+-else()
+-  unset(CMAKE_FIND_FRAMEWORK)
+-endif()
+-
+-include(FindPackageHandleStandardArgs)
+-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Python3Libs
+-                                  REQUIRED_VARS PYTHON3_LIBRARIES PYTHON3_INCLUDE_DIRS
+-                                  VERSION_VAR PYTHON3LIBS_VERSION_STRING)
+-
+-# PYTHON3_ADD_MODULE(<name> src1 src2 ... srcN) is used to build modules for python.
+-# PYTHON3_WRITE_MODULES_HEADER(<filename>) writes a header file you can include
+-# in your sources to initialize the static python modules
+-function(PYTHON3_ADD_MODULE _NAME )
+-  get_property(_TARGET_SUPPORTS_SHARED_LIBS
+-    GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
+-  option(PYTHON3_ENABLE_MODULE_${_NAME} "Add module ${_NAME}" TRUE)
+-  option(PYTHON3_MODULE_${_NAME}_BUILD_SHARED
+-    "Add module ${_NAME} shared" ${_TARGET_SUPPORTS_SHARED_LIBS})
+-
+-  # Mark these options as advanced
+-  mark_as_advanced(PYTHON3_ENABLE_MODULE_${_NAME}
+-    PYTHON3_MODULE_${_NAME}_BUILD_SHARED)
+-
+-  if(PYTHON3_ENABLE_MODULE_${_NAME})
+-    if(PYTHON3_MODULE_${_NAME}_BUILD_SHARED)
+-      set(PY_MODULE_TYPE MODULE)
+-    else()
+-      set(PY_MODULE_TYPE STATIC)
+-      set_property(GLOBAL  APPEND  PROPERTY  PY_STATIC_MODULES_LIST ${_NAME})
+-    endif()
+-
+-    set_property(GLOBAL  APPEND  PROPERTY  PY_MODULES_LIST ${_NAME})
+-    add_library(${_NAME} ${PY_MODULE_TYPE} ${ARGN})
+-#    target_link_libraries(${_NAME} ${PYTHON3_LIBRARIES})
+-
+-    if(PYTHON3_MODULE_${_NAME}_BUILD_SHARED)
+-      set_target_properties(${_NAME} PROPERTIES PREFIX "${PYTHON3_MODULE_PREFIX}")
+-      if(WIN32 AND NOT CYGWIN)
+-        set_target_properties(${_NAME} PROPERTIES SUFFIX ".pyd")
+-      endif()
+-    endif()
+-
+-  endif()
+-endfunction()
+-
+-function(PYTHON3_WRITE_MODULES_HEADER _filename)
+-
+-  get_property(PY_STATIC_MODULES_LIST  GLOBAL  PROPERTY PY_STATIC_MODULES_LIST)
+-
+-  get_filename_component(_name "${_filename}" NAME)
+-  string(REPLACE "." "_" _name "${_name}")
+-  string(TOUPPER ${_name} _nameUpper)
+-  set(_filename ${CMAKE_CURRENT_BINARY_DIR}/${_filename})
+-
+-  set(_filenameTmp "${_filename}.in")
+-  file(WRITE ${_filenameTmp} "/*Created by cmake, do not edit, changes will be lost*/\n")
+-  file(APPEND ${_filenameTmp}
+-"#ifndef ${_nameUpper}
+-#define ${_nameUpper}
+-
+-#include <Python.h>
+-
+-#ifdef __cplusplus
+-extern \"C\" {
+-#endif /* __cplusplus */
+-
+-")
+-
+-  foreach(_currentModule ${PY_STATIC_MODULES_LIST})
+-    file(APPEND ${_filenameTmp} "extern void init${PYTHON3_MODULE_PREFIX}${_currentModule}(void);\n\n")
+-  endforeach()
+-
+-  file(APPEND ${_filenameTmp}
+-"#ifdef __cplusplus
+-}
+-#endif /* __cplusplus */
+-
+-")
+-
+-
+-  foreach(_currentModule ${PY_STATIC_MODULES_LIST})
+-    file(APPEND ${_filenameTmp} "int ${_name}_${_currentModule}(void) \n{\n  static char name[]=\"${PYTHON3_MODULE_PREFIX}${_currentModule}\"; return PyImport_AppendInittab(name, init${PYTHON3_MODULE_PREFIX}${_currentModule});\n}\n\n")
+-  endforeach()
+-
+-  file(APPEND ${_filenameTmp} "void ${_name}_LoadAllPythonModules(void)\n{\n")
+-  foreach(_currentModule ${PY_STATIC_MODULES_LIST})
+-    file(APPEND ${_filenameTmp} "  ${_name}_${_currentModule}();\n")
+-  endforeach()
+-  file(APPEND ${_filenameTmp} "}\n\n")
+-  file(APPEND ${_filenameTmp} "#ifndef EXCLUDE_LOAD_ALL_FUNCTION\nvoid CMakeLoadAllPythonModules(void)\n{\n  ${_name}_LoadAllPythonModules();\n}\n#endif\n\n#endif\n")
+-
+-# with configure_file() cmake complains that you may not use a file created using file(WRITE) as input file for configure_file()
+-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_filenameTmp}" "${_filename}" OUTPUT_QUIET ERROR_QUIET)
+-
+-endfunction()
+diff --git a/cmake/modules/Findaio.cmake b/cmake/modules/Findaio.cmake
+deleted file mode 100644
+index 04b0642..0000000
+--- a/cmake/modules/Findaio.cmake
++++ /dev/null
+@@ -1,18 +0,0 @@
+-# - Find AIO
+-#
+-# AIO_INCLUDE - Where to find libaio.h
+-# AIO_LIBS - List of libraries when using AIO.
+-# AIO_FOUND - True if AIO found.
+-
+-find_path(AIO_INCLUDE_DIR
+-  libaio.h
+-  HINTS $ENV{AIO_ROOT}/include)
+-
+-find_library(AIO_LIBRARIES
+-  aio
+-  HINTS $ENV{AIO_ROOT}/lib)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(aio DEFAULT_MSG AIO_LIBRARIES AIO_INCLUDE_DIR)
+-
+-mark_as_advanced(AIO_INCLUDE_DIR AIO_LIBRARIES)
+diff --git a/cmake/modules/Findbabeltrace.cmake b/cmake/modules/Findbabeltrace.cmake
+deleted file mode 100644
+index 6b29a24..0000000
+--- a/cmake/modules/Findbabeltrace.cmake
++++ /dev/null
+@@ -1,22 +0,0 @@
+-# - Find Babeltrace
+-# This module defines the following variables:
+-#    BABELTRACE_FOUND       = Was Babeltrace found or not?
+-#    BABELTRACE_EXECUTABLE  = The path to lttng command
+-#    BABELTRACE_LIBRARIES   = The list of libraries to link to when using Babeltrace
+-#    BABELTRACE_INCLUDE_DIR = The path to Babeltrace include directory
+-#
+-
+-find_path(BABELTRACE_INCLUDE_DIR
+-  NAMES babeltrace/babeltrace.h babeltrace/ctf/events.h babeltrace/ctf/iterator.h)
+-
+-find_library(BABELTRACE_LIBRARY
+-  NAMES babeltrace babeltrace-ctf)
+-
+-find_program(BABELTRACE_EXECUTABLE
+-  NAMES babeltrace babeltrace-ctf)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(babeltrace DEFAULT_MSG
+-  BABELTRACE_INCLUDE_DIR BABELTRACE_LIBRARY)
+-set(BABELTRACE_LIBRARIES ${BABELTRACE_LIBRARY})
+-mark_as_advanced(BABELTRACE_INCLUDE_DIR BABELTRACE_LIBRARY)
+diff --git a/cmake/modules/Findblkid.cmake b/cmake/modules/Findblkid.cmake
+deleted file mode 100644
+index 66de92f..0000000
+--- a/cmake/modules/Findblkid.cmake
++++ /dev/null
+@@ -1,33 +0,0 @@
+-# Copyright (C) 2007-2012 Hypertable, Inc.
+-#
+-# This file is part of Hypertable.
+-#
+-# Hypertable is free software; you can redistribute it and/or
+-# modify it under the terms of the GNU General Public License
+-# as published by the Free Software Foundation; either version 3
+-# of the License, or any later version.
+-#
+-# Hypertable is distributed in the hope that it will be useful,
+-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-# GNU General Public License for more details.
+-#
+-# You should have received a copy of the GNU General Public License
+-# along with Hypertable. If not, see <http://www.gnu.org/licenses/>
+-#
+-
+-# - Find libblkid
+-# Find the blkid library and includes
+-#
+-# BLKID_INCLUDE_DIR - where to find blkid.h, etc.
+-# BLKID_LIBRARIES - List of libraries when using blkid.
+-# BLKID_FOUND - True if blkid found.
+-
+-find_path(BLKID_INCLUDE_DIR blkid/blkid.h)
+-
+-find_library(BLKID_LIBRARIES blkid)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(blkid DEFAULT_MSG BLKID_LIBRARIES BLKID_INCLUDE_DIR)
+-
+-mark_as_advanced(BLKID_LIBRARIES BLKID_INCLUDE_DIR)
+diff --git a/cmake/modules/Finddpdk.cmake b/cmake/modules/Finddpdk.cmake
+deleted file mode 100644
+index 47abd1f..0000000
+--- a/cmake/modules/Finddpdk.cmake
++++ /dev/null
+@@ -1,47 +0,0 @@
+-# Try to find dpdk
+-#
+-# Once done, this will define
+-#
+-# DPDK_FOUND
+-# DPDK_INCLUDE_DIR
+-# DPDK_LIBRARIES
+-
+-find_path(DPDK_INCLUDE_DIR rte_config.h
+-  PATH_SUFFIXES dpdk
+-  HINTS $ENV{DPDK_DIR}/include)
+-
+-set(components
+-  pci bus_pci cmdline eal ethdev hash kvargs mbuf
+-  mempool mempool_ring mempool_stack
+-  pmd_bond pmd_vmxnet3_uio pmd_ixgbe pmd_i40e pmd_ring pmd_af_packet
+-  ring)
+-
+-foreach(c ${components})
+-  find_library(DPDK_rte_${c}_LIBRARY rte_${c}
+-    HINTS $ENV{DPDK_DIR}/lib)
+-endforeach()
+-
+-foreach(c ${components})
+-  list(APPEND check_LIBRARIES "${DPDK_rte_${c}_LIBRARY}")
+-endforeach()
+-
+-mark_as_advanced(DPDK_INCLUDE_DIR ${check_LIBRARIES})
+-
+-if (EXISTS ${WITH_DPDK_MLX5})
+-  find_library(DPDK_rte_pmd_mlx5_LIBRARY rte_pmd_mlx5)
+-  list(APPEND check_LIBRARIES ${DPDK_rte_pmd_mlx5_LIBRARY})
+-  mark_as_advanced(DPDK_rte_pmd_mlx5_LIBRARY)
+-endif()
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(dpdk DEFAULT_MSG
+-  DPDK_INCLUDE_DIR
+-  check_LIBRARIES)
+-
+-if(DPDK_FOUND)
+-  if(EXISTS ${WITH_DPDK_MLX5})
+-    list(APPEND check_LIBRARIES -libverbs)
+-  endif()
+-  set(DPDK_LIBRARIES
+-    -Wl,--whole-archive ${check_LIBRARIES} -Wl,--no-whole-archive)
+-endif(DPDK_FOUND)
+diff --git a/cmake/modules/Findfcgi.cmake b/cmake/modules/Findfcgi.cmake
+deleted file mode 100644
+index f355b92..0000000
+--- a/cmake/modules/Findfcgi.cmake
++++ /dev/null
+@@ -1,22 +0,0 @@
+-# CMake module to search for FastCGI headers
+-#
+-# If it's found it sets FCGI_FOUND to TRUE
+-# and following variables are set:
+-# FCGI_INCLUDE_DIR
+-# FCGI_LIBRARY
+-find_path(FCGI_INCLUDE_DIR
+-  fcgio.h
+-  PATHS
+-  /usr/include
+-  /usr/local/include
+-  /usr/include/fastcgi)
+-find_library(FCGI_LIBRARY NAMES fcgi libfcgi PATHS
+-  /usr/local/lib
+-  /usr/lib)
+-
+-# handle the QUIETLY and REQUIRED arguments and set UUID_FOUND to TRUE if
+-# all listed variables are TRUE
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(fcgi DEFAULT_MSG FCGI_LIBRARY FCGI_INCLUDE_DIR)
+-
+-mark_as_advanced(FCGI_LIBRARY FCGI_INCLUDE_DIR)
+diff --git a/cmake/modules/Findfio.cmake b/cmake/modules/Findfio.cmake
+deleted file mode 100644
+index ec91ca5..0000000
+--- a/cmake/modules/Findfio.cmake
++++ /dev/null
+@@ -1,12 +0,0 @@
+-# - Find Fio
+-# Find the fio includes
+-#
+-# FIO_INCLUDE_DIR - where to find fio.h
+-# FIO_FOUND - True if fio is found.
+-
+-find_path(FIO_INCLUDE_DIR NAMES fio.h HINTS ENV FIO_ROOT_DIR)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(fio DEFAULT_MSG FIO_INCLUDE_DIR)
+-
+-mark_as_advanced(FIO_INCLUDE_DIR)
+diff --git a/cmake/modules/Findfuse.cmake b/cmake/modules/Findfuse.cmake
+deleted file mode 100644
+index e7a7ff0..0000000
+--- a/cmake/modules/Findfuse.cmake
++++ /dev/null
+@@ -1,28 +0,0 @@
+-# This module can find FUSE Library
+-#
+-# The following variables will be defined for your use:
+-# - FUSE_FOUND : was FUSE found?
+-# - FUSE_INCLUDE_DIRS : FUSE include directory
+-# - FUSE_LIBRARIES : FUSE library
+-
+-find_path(
+-    FUSE_INCLUDE_DIRS
+-    NAMES fuse_common.h fuse_lowlevel.h fuse.h
+-    PATHS /usr/local/include/osxfuse /usr/local/include
+-    PATH_SUFFIXES fuse)
+-
+-set(fuse_names fuse)
+-if(APPLE)
+-  list(APPEND fuse_names libosxfuse.dylib)
+-endif()
+-
+-find_library(FUSE_LIBRARIES
+-  NAMES ${fuse_names}
+-  PATHS /usr/local/lib64 /usr/local/lib)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(fuse DEFAULT_MSG
+-  FUSE_INCLUDE_DIRS FUSE_LIBRARIES)
+-
+-mark_as_advanced(
+-  FUSE_INCLUDE_DIRS FUSE_LIBRARIES)
+diff --git a/cmake/modules/Findgperftools.cmake b/cmake/modules/Findgperftools.cmake
+deleted file mode 100644
+index 38daae7..0000000
+--- a/cmake/modules/Findgperftools.cmake
++++ /dev/null
+@@ -1,44 +0,0 @@
+-# Try to find gperftools
+-# Once done, this will define
+-#
+-# GPERFTOOLS_FOUND - system has Profiler
+-# GPERFTOOLS_INCLUDE_DIR - the Profiler include directories
+-# Tcmalloc_INCLUDE_DIR - where to find Tcmalloc.h
+-# GPERFTOOLS_TCMALLOC_LIBRARY - link it to use tcmalloc
+-# GPERFTOOLS_TCMALLOC_MINIMAL_LIBRARY - link it to use tcmalloc_minimal
+-# GPERFTOOLS_PROFILER_LIBRARY - link it to use Profiler
+-# TCMALLOC_VERSION_STRING
+-# TCMALLOC_VERSION_MAJOR
+-# TCMALLOC_VERSION_MINOR
+-# TCMALLOC_VERSION_PATCH
+-
+-find_path(GPERFTOOLS_INCLUDE_DIR gperftools/profiler.h)
+-find_path(Tcmalloc_INCLUDE_DIR gperftools/tcmalloc.h)
+-  #(HINTS $ENV{GPERF_ROOT}/include)
+-
+-if(Tcmalloc_INCLUDE_DIR AND EXISTS "${Tcmalloc_INCLUDE_DIR}/gperftools/tcmalloc.h")
+-  foreach(ver "MAJOR" "MINOR" "PATCH")
+-    file(STRINGS "${Tcmalloc_INCLUDE_DIR}/gperftools/tcmalloc.h" TC_VER_${ver}_LINE
+-      REGEX "^#define[ \t]+TC_VERSION_${ver}[ \t]+[^ \t]+$")
+-    string(REGEX REPLACE "^#define[ \t]+TC_VERSION_${ver}[ \t]+(\".)?([0-9]*)\"?$"
+-      "\\2" TCMALLOC_VERSION_${ver} "${TC_VER_${ver}_LINE}")
+-    unset(TC_VER_${ver}_LINE)
+-  endforeach()
+-  set(TCMALLOC_VERSION_STRING "${TCMALLOC_VERSION_MAJOR}.${TCMALLOC_VERSION_MINOR}")
+-  if(NOT TCMALLOC_VERSION_PATCH STREQUAL "")
+-    set(TCMALLOC_VERSION_STRING "${TCMALLOC_VERSION_STRING}.${TCMALLOC_VERSION_PATCH}")
+-  endif()
+-endif()
+-
+-foreach(component tcmalloc tcmalloc_minimal profiler)
+-  string(TOUPPER ${component} COMPONENT)
+-  find_library(GPERFTOOLS_${COMPONENT}_LIBRARY ${component})
+-  list(APPEND GPERFTOOLS_LIBRARIES GPERFTOOLS_${COMPONENT}_LIBRARY)
+-endforeach()
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(gperftools
+-  REQUIRED_VARS ${GPERFTOOLS_LIBRARIES} GPERFTOOLS_INCLUDE_DIR
+-  VERSION_VAR TCMALLOC_VERSION_STRING)
+-
+-mark_as_advanced(${GPERFTOOLS_LIBRARIES} GPERFTOOLS_INCLUDE_DIR)
+diff --git a/cmake/modules/Findkeyutils.cmake b/cmake/modules/Findkeyutils.cmake
+deleted file mode 100644
+index e34be8b..0000000
+--- a/cmake/modules/Findkeyutils.cmake
++++ /dev/null
+@@ -1,27 +0,0 @@
+-# Try to find Keyutils
+-# Once done, this will define
+-#
+-# KEYUTILS_FOUND - system has keyutils
+-# KEYUTILS_INCLUDE_DIR - the keyutils include directories
+-# KEYUTILS_LIBRARIES - link these to use keyutils
+-
+-if(KEYUTILS_INCLUDE_DIR AND KEYUTILS_LIBRARIES)
+-	set(KEYUTILS_FIND_QUIETLY TRUE)
+-endif(KEYUTILS_INCLUDE_DIR AND KEYUTILS_LIBRARIES)
+-
+-# include dir
+-find_path(KEYUTILS_INCLUDE_DIR keyutils.h PATHS
+-  /opt/local/include
+-  /usr/local/include
+-)
+-
+-# finally the library itself
+-find_library(LIBKEYUTILS NAMES keyutils)
+-set(KEYUTILS_LIBRARIES ${LIBKEYUTILS})
+-
+-# handle the QUIETLY and REQUIRED arguments and set KEYUTILS_FOUND to TRUE if
+-# all listed variables are TRUE
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(keyutils DEFAULT_MSG KEYUTILS_LIBRARIES KEYUTILS_INCLUDE_DIR)
+-
+-mark_as_advanced(KEYUTILS_LIBRARIES KEYUTILS_INCLUDE_DIR)
+diff --git a/cmake/modules/Findleveldb.cmake b/cmake/modules/Findleveldb.cmake
+deleted file mode 100644
+index 32786e9..0000000
+--- a/cmake/modules/Findleveldb.cmake
++++ /dev/null
+@@ -1,18 +0,0 @@
+-# - Find LevelDB
+-#
+-# LEVELDB_INCLUDE_DIR - Where to find leveldb/db.h
+-# LEVELDB_LIBRARIES - List of libraries when using LevelDB.
+-# LEVELDB_FOUND - True if LevelDB found.
+-
+-find_path(LEVELDB_INCLUDE_DIR leveldb/db.h
+-  HINTS $ENV{LEVELDB_ROOT}/include
+-  DOC "Path in which the file leveldb/db.h is located." )
+-
+-find_library(LEVELDB_LIBRARIES leveldb
+-  HINTS $ENV{LEVELDB_ROOT}/lib
+-  DOC "Path to leveldb library." )
+-
+-mark_as_advanced(LEVELDB_INCLUDE_DIR LEVELDB_LIBRARIES)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(leveldb DEFAULT_MSG LEVELDB_LIBRARIES LEVELDB_INCLUDE_DIR)
+diff --git a/cmake/modules/Findliboath.cmake b/cmake/modules/Findliboath.cmake
+deleted file mode 100644
+index ae5446a..0000000
+--- a/cmake/modules/Findliboath.cmake
++++ /dev/null
+@@ -1,22 +0,0 @@
+-# CMake module to search for liboath headers
+-#
+-# If it's found it sets LIBOATH_FOUND to TRUE
+-# and following variables are set:
+-# LIBOATH_INCLUDE_DIR
+-# LIBOATH_LIBRARY
+-find_path(LIBOATH_INCLUDE_DIR
+-  oath.h
+-  PATHS
+-  /usr/include
+-  /usr/local/include
+-  /usr/include/liboath)
+-find_library(LIBOATH_LIBRARY NAMES oath liboath PATHS
+-  /usr/local/lib
+-  /usr/lib)
+-
+-# handle the QUIETLY and REQUIRED arguments and set UUID_FOUND to TRUE if
+-# all listed variables are TRUE
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(oath DEFAULT_MSG LIBOATH_LIBRARY LIBOATH_INCLUDE_DIR)
+-
+-mark_as_advanced(LIBOATH_LIBRARY LIBOATH_INCLUDE_DIR)
+diff --git a/cmake/modules/Findrdma.cmake b/cmake/modules/Findrdma.cmake
+deleted file mode 100644
+index eb31f79..0000000
+--- a/cmake/modules/Findrdma.cmake
++++ /dev/null
+@@ -1,49 +0,0 @@
+-# - Find rdma
+-# Find the rdma library and includes
+-#
+-# RDMA_INCLUDE_DIR - where to find ibverbs.h, etc.
+-# RDMA_LIBRARIES - List of libraries when using ibverbs.
+-# RDMA_FOUND - True if ibverbs found.
+-
+-find_path(RDMA_INCLUDE_DIR infiniband/verbs.h)
+-
+-set(RDMA_NAMES ${RDMA_NAMES} ibverbs)
+-find_library(RDMA_LIBRARY NAMES ${RDMA_NAMES})
+-
+-if (RDMA_INCLUDE_DIR AND RDMA_LIBRARY)
+-  set(RDMA_FOUND TRUE)
+-  set(RDMA_LIBRARIES ${RDMA_LIBRARY})
+-else ()
+-  set(RDMA_FOUND FALSE)
+-  set( RDMA_LIBRARIES )
+-endif ()
+-
+-if (RDMA_FOUND)
+-  message(STATUS "Found libibverbs: ${RDMA_LIBRARY}")
+-
+-  include(CheckCXXSourceCompiles)
+-  CHECK_CXX_SOURCE_COMPILES("
+-    #include <infiniband/verbs.h>
+-    int main() {
+-      struct ibv_context* ctxt;
+-      struct ibv_exp_gid_attr gid_attr;
+-      ibv_exp_query_gid_attr(ctxt, 1, 0, &gid_attr);
+-      return 0;
+-    } " HAVE_IBV_EXP)
+-
+-else ()
+-  message(STATUS "Not Found libibverbs: ${RDMA_LIBRARY}")
+-  if (RDMA_FIND_REQUIRED)
+-    message(STATUS "Looked for libibverbs named ${RDMA_NAMES}.")
+-    message(FATAL_ERROR "Could NOT find libibverbs")
+-  endif ()
+-endif ()
+-
+-# handle the QUIETLY and REQUIRED arguments and set UUID_FOUND to TRUE if
+-# all listed variables are TRUE
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(ibverbs DEFAULT_MSG RDMA_LIBRARIES RDMA_INCLUDE_DIR)
+-
+-mark_as_advanced(
+-  RDMA_LIBRARY
+-)
+diff --git a/cmake/modules/Findrocksdb.cmake b/cmake/modules/Findrocksdb.cmake
+deleted file mode 100644
+index f8369f7..0000000
+--- a/cmake/modules/Findrocksdb.cmake
++++ /dev/null
+@@ -1,35 +0,0 @@
+-# Find the native Rocksdb includes and library
+-# This module defines
+-#  ROCKSDB_INCLUDE_DIR, where to find rocksdb/db.h, Set when
+-#                       ROCKSDB_INCLUDE_DIR is found.
+-#  ROCKSDB_LIBRARIES, libraries to link against to use Rocksdb.
+-#  ROCKSDB_FOUND, If false, do not try to use Rocksdb.
+-#  ROCKSDB_VERSION_STRING
+-#  ROCKSDB_VERSION_MAJOR
+-#  ROCKSDB_VERSION_MINOR
+-#  ROCKSDB_VERSION_PATCH
+-
+-find_path(ROCKSDB_INCLUDE_DIR rocksdb/db.h)
+-
+-find_library(ROCKSDB_LIBRARIES rocksdb)
+-
+-if(ROCKSDB_INCLUDE_DIR AND EXISTS "${ROCKSDB_INCLUDE_DIR}/rocksdb/version.h")
+-  foreach(ver "MAJOR" "MINOR" "PATCH")
+-    file(STRINGS "${ROCKSDB_INCLUDE_DIR}/version.h" ROCKSDB_VER_${ver}_LINE
+-      REGEX "^#define[ \t]+ROCKSDB_${ver}[ \t]+[0-9]+$")
+-    string(REGEX REPLACE "^#define[ \t]+ROCKSDB_${ver}[ \t]+([0-9]+)$"
+-      "\\1" ROCKSDB_VERSION_${ver} "${ROCKDB_VER_${ver}_LINE}")
+-    unset(${ROCKDB_VER_${ver}_LINE})
+-  endforeach()
+-  set(ROCKSDB_VERSION_STRING
+-    "${ROCKSDB_VERSION_MAJOR}.${ROCKSDB_VERSION_MINOR}.${ROCKSDB_VERSION_PATCH}")
+-endif()
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(rocksdb
+-  REQUIRED_VARS ROCKSDB_LIBRARIES ROCKSDB_INCLUDE_DIR
+-  VERSION_VAR ROCKSDB_VERSION_STRING)
+-
+-mark_as_advanced(
+-  ROCKSDB_INCLUDE_DIR
+-  ROCKSDB_LIBRARIES)
+diff --git a/cmake/modules/Findsnappy.cmake b/cmake/modules/Findsnappy.cmake
+deleted file mode 100644
+index b298cd2..0000000
+--- a/cmake/modules/Findsnappy.cmake
++++ /dev/null
+@@ -1,23 +0,0 @@
+-# - Find Snappy
+-# Find the snappy compression library and includes
+-#
+-# SNAPPY_INCLUDE_DIR - where to find snappy.h, etc.
+-# SNAPPY_LIBRARIES - List of libraries when using snappy.
+-# SNAPPY_FOUND - True if snappy found.
+-
+-find_path(SNAPPY_INCLUDE_DIR
+-  NAMES snappy.h
+-  HINTS ${SNAPPY_ROOT_DIR}/include)
+-
+-find_library(SNAPPY_LIBRARIES
+-  NAMES snappy
+-  HINTS ${SNAPPY_ROOT_DIR}/lib)
+-
+-# handle the QUIETLY and REQUIRED arguments and set UUID_FOUND to TRUE if
+-# all listed variables are TRUE
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(snappy DEFAULT_MSG SNAPPY_LIBRARIES SNAPPY_INCLUDE_DIR)
+-
+-mark_as_advanced(
+-  SNAPPY_LIBRARIES
+-  SNAPPY_INCLUDE_DIR)
+diff --git a/cmake/modules/Findudev.cmake b/cmake/modules/Findudev.cmake
+deleted file mode 100644
+index fd936fc..0000000
+--- a/cmake/modules/Findudev.cmake
++++ /dev/null
+@@ -1,34 +0,0 @@
+-# Copyright (C) 2007-2012 Hypertable, Inc.
+-#
+-# This file is part of Hypertable.
+-#
+-# Hypertable is free software; you can redistribute it and/or
+-# modify it under the terms of the GNU General Public License
+-# as published by the Free Software Foundation; either version 3
+-# of the License, or any later version.
+-#
+-# Hypertable is distributed in the hope that it will be useful,
+-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-# GNU General Public License for more details.
+-#
+-# You should have received a copy of the GNU General Public License
+-# along with Hypertable. If not, see <http://www.gnu.org/licenses/>
+-#
+-
+-# - Find libudev
+-# Find the udev library and includes
+-#
+-# UDEV_INCLUDE_DIR - where to find libudev.h, etc.
+-# UDEV_LIBRARIES - List of libraries when using udev.
+-# UDEV_FOUND - True if udev found.
+-
+-find_path(UDEV_INCLUDE_DIR libudev.h)
+-find_library(UDEV_LIBRARIES udev)
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(udev DEFAULT_MSG UDEV_LIBRARIES UDEV_INCLUDE_DIR)
+-
+-mark_as_advanced(
+-  UDEV_LIBRARIES
+-  UDEV_INCLUDE_DIR)
+diff --git a/cmake/modules/Finduuid.cmake b/cmake/modules/Finduuid.cmake
+deleted file mode 100644
+index 2bce82b..0000000
+--- a/cmake/modules/Finduuid.cmake
++++ /dev/null
+@@ -1,20 +0,0 @@
+-# Try to find libuuid
+-# Once done, this will define
+-#
+-# UUID_FOUND - system has Profiler
+-# UUID_INCLUDE_DIR - the Profiler include directories
+-# UUID_LIBRARIES - link these to use Profiler
+-
+-if(UUID_INCLUDE_DIR AND UUID_LIBRARIES)
+-  set(UUID_FIND_QUIETLY TRUE)
+-endif()
+-
+-find_path(UUID_INCLUDE_DIR NAMES uuid/uuid.h)
+-find_library(UUID_LIBRARIES NAMES uuid)
+-set(UUID_LIBRARIES ${LIBUUID})
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(uuid
+-  DEFAULT_MSG UUID_LIBRARIES UUID_INCLUDE_DIR)
+-
+-mark_as_advanced(UUID_LIBRARIES UUID_INCLUDE_DIR)
+diff --git a/cmake/modules/Findxfs.cmake b/cmake/modules/Findxfs.cmake
+deleted file mode 100644
+index 6171e32..0000000
+--- a/cmake/modules/Findxfs.cmake
++++ /dev/null
+@@ -1,33 +0,0 @@
+-# Try to find xfs
+-# Once done, this will define
+-#
+-# XFS_FOUND - system has libxfs
+-# XFS_INCLUDE_DIR - the libxfs include directories
+-# XFS_LIBRARIES - link these to use libxfs
+-
+-if(XFS_INCLUDE_DIR AND XFS_LIBRARIES)
+-	set(XFS_FIND_QUIETLY TRUE)
+-endif(XFS_INCLUDE_DIR AND XFS_LIBRARIES)
+-
+-INCLUDE(CheckCXXSymbolExists)
+-
+-# include dir
+-
+-find_path(XFS_INCLUDE_DIR xfs.h NO_DEFAULT_PATH PATHS
+-  /usr/include
+-  /usr/include/xfs
+-  /opt/local/include
+-  /usr/local/include
+-)
+-
+-
+-# finally the library itself
+-find_library(LIBXFS NAMES handle)
+-set(XFS_LIBRARIES ${LIBXFS})
+-
+-# handle the QUIETLY and REQUIRED arguments and set XFS_FOUND to TRUE if
+-# all listed variables are TRUE
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(xfs DEFAULT_MSG XFS_LIBRARIES XFS_INCLUDE_DIR)
+-
+-mark_as_advanced(XFS_LIBRARIES XFS_INCLUDE_DIR)
+diff --git a/cmake/modules/Findxio.cmake b/cmake/modules/Findxio.cmake
+deleted file mode 100644
+index 938af03..0000000
+--- a/cmake/modules/Findxio.cmake
++++ /dev/null
+@@ -1,24 +0,0 @@
+-# - Find libxio
+-# Find libxio transport library
+-#
+-# XIO_INCLUDE_DIR -  libxio include dir
+-# XIO_LIBRARIES - List of libraries
+-# XIO_FOUND - True if libxio found.
+-
+-if(WITH_XIO AND EXISTS ${WITH_XIO})
+-  find_path(XIO_INCLUDE_DIR libxio.h HINTS "${WITH_XIO}/include")
+-  find_library(XIO_LIBRARY xio HINTS "${WITH_XIO}/lib")
+-else()
+-  find_path(XIO_INCLUDE_DIR libxio.h)
+-  find_library(XIO_LIBRARY xio)
+-endif()
+-
+-set(XIO_LIBRARIES ${XIO_LIBRARY})
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(xio DEFAULT_MSG XIO_LIBRARY XIO_INCLUDE_DIR)
+-
+-mark_as_advanced(
+-  XIO_LIBRARY
+-  XIO_INCLUDE_DIR
+-  )
+diff --git a/cmake/modules/Findzfs.cmake b/cmake/modules/Findzfs.cmake
+deleted file mode 100644
+index d92dd1f..0000000
+--- a/cmake/modules/Findzfs.cmake
++++ /dev/null
+@@ -1,28 +0,0 @@
+-# find libzfs or libzfslinux
+-# Once done, this will define
+-#
+-# ZFS_FOUND - system has libzfs
+-# ZFS_INCLUDE_DIR - the libzfs include directories
+-# ZFS_LIBRARIES - link these to use libzfs
+-
+-find_package(PkgConfig)
+-if(PKG_CONFIG_FOUND)
+-  pkg_check_modules(ZFS QUIET libzfs)
+-else()
+-  find_path(ZFS_INCLUDE_DIR libzfs.h
+-    HINTS
+-      ENV ZFS_DIR
+-    PATH_SUFFIXES libzfs)
+-
+-  find_library(ZFS_LIBRARIES
+-    NAMES zfs
+-    HINTS
+-      ENV ZFS_DIR)
+-  set(XFS_LIBRARIES ${LIBXFS})
+-endif()
+-
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(zfs DEFAULT_MSG
+-  ZFS_INCLUDE_DIRS ZFS_LIBRARIES)
+-
+-mark_as_advanced(ZFS_INCLUDE_DIRS XFS_LIBRARIES)
+diff --git a/cmake/modules/GetGitRevisionDescription.cmake b/cmake/modules/GetGitRevisionDescription.cmake
+deleted file mode 100644
+index 85eae15..0000000
+--- a/cmake/modules/GetGitRevisionDescription.cmake
++++ /dev/null
+@@ -1,130 +0,0 @@
+-# - Returns a version string from Git
+-#
+-# These functions force a re-configure on each git commit so that you can
+-# trust the values of the variables in your build system.
+-#
+-#  get_git_head_revision(<refspecvar> <hashvar> [<additional arguments to git describe> ...])
+-#
+-# Returns the refspec and sha hash of the current head revision
+-#
+-#  git_describe(<var> [<additional arguments to git describe> ...])
+-#
+-# Returns the results of git describe on the source tree, and adjusting
+-# the output so that it tests false if an error occurs.
+-#
+-#  git_get_exact_tag(<var> [<additional arguments to git describe> ...])
+-#
+-# Returns the results of git describe --exact-match on the source tree,
+-# and adjusting the output so that it tests false if there was no exact
+-# matching tag.
+-#
+-# Requires CMake 2.6 or newer (uses the 'function' command)
+-#
+-# Original Author:
+-# 2009-2010 Ryan Pavlik <rpavlik@iastate.edu> <abiryan@ryand.net>
+-# http://academic.cleardefinition.com
+-# Iowa State University HCI Graduate Program/VRAC
+-#
+-# Copyright Iowa State University 2009-2010.
+-# Distributed under the Boost Software License, Version 1.0.
+-# (See accompanying file LICENSE_1_0.txt or copy at
+-# http://www.boost.org/LICENSE_1_0.txt)
+-
+-if(__get_git_revision_description)
+-	return()
+-endif()
+-set(__get_git_revision_description YES)
+-
+-# We must run the following at "include" time, not at function call time,
+-# to find the path to this module rather than the path to a calling list file
+-get_filename_component(_gitdescmoddir ${CMAKE_CURRENT_LIST_FILE} PATH)
+-
+-function(get_git_head_revision _refspecvar _hashvar)
+-	set(GIT_PARENT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+-	set(GIT_DIR "${GIT_PARENT_DIR}/.git")
+-	while(NOT EXISTS "${GIT_DIR}")	# .git dir not found, search parent directories
+-		set(GIT_PREVIOUS_PARENT "${GIT_PARENT_DIR}")
+-		get_filename_component(GIT_PARENT_DIR ${GIT_PARENT_DIR} PATH)
+-		if(GIT_PARENT_DIR STREQUAL GIT_PREVIOUS_PARENT)
+-			# We have reached the root directory, we are not in git
+-			set(${_refspecvar} "GITDIR-NOTFOUND" PARENT_SCOPE)
+-			set(${_hashvar} "GITDIR-NOTFOUND" PARENT_SCOPE)
+-			return()
+-		endif()
+-		set(GIT_DIR "${GIT_PARENT_DIR}/.git")
+-	endwhile()
+-	# check if this is a submodule
+-	if(NOT IS_DIRECTORY ${GIT_DIR})
+-		file(READ ${GIT_DIR} submodule)
+-		string(REGEX REPLACE "gitdir: (.*)\n$" "\\1" GIT_DIR_RELATIVE ${submodule})
+-		get_filename_component(SUBMODULE_DIR ${GIT_DIR} PATH)
+-		get_filename_component(GIT_DIR ${SUBMODULE_DIR}/${GIT_DIR_RELATIVE} ABSOLUTE)
+-	endif()
+-	set(GIT_DATA "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/git-data")
+-	if(NOT EXISTS "${GIT_DATA}")
+-		file(MAKE_DIRECTORY "${GIT_DATA}")
+-	endif()
+-
+-	if(NOT EXISTS "${GIT_DIR}/HEAD")
+-		return()
+-	endif()
+-	set(HEAD_FILE "${GIT_DATA}/HEAD")
+-	configure_file("${GIT_DIR}/HEAD" "${HEAD_FILE}" COPYONLY)
+-
+-	configure_file("${_gitdescmoddir}/GetGitRevisionDescription.cmake.in"
+-		"${GIT_DATA}/grabRef.cmake"
+-		@ONLY)
+-	include("${GIT_DATA}/grabRef.cmake")
+-
+-	set(${_refspecvar} "${HEAD_REF}" PARENT_SCOPE)
+-	set(${_hashvar} "${HEAD_HASH}" PARENT_SCOPE)
+-endfunction()
+-
+-function(git_describe _var)
+-	if(NOT GIT_FOUND)
+-		find_package(Git QUIET)
+-	endif()
+-	get_git_head_revision(refspec hash)
+-	if(NOT GIT_FOUND)
+-		set(${_var} "GIT-NOTFOUND" PARENT_SCOPE)
+-		return()
+-	endif()
+-	if(NOT hash)
+-		set(${_var} "HEAD-HASH-NOTFOUND" PARENT_SCOPE)
+-		return()
+-	endif()
+-
+-	# TODO sanitize
+-	#if((${ARGN}" MATCHES "&&") OR
+-	#	(ARGN MATCHES "||") OR
+-	#	(ARGN MATCHES "\\;"))
+-	#	message("Please report the following error to the project!")
+-	#	message(FATAL_ERROR "Looks like someone's doing something nefarious with git_describe! Passed arguments ${ARGN}")
+-	#endif()
+-
+-	#message(STATUS "Arguments to execute_process: ${ARGN}")
+-
+-	execute_process(COMMAND
+-		"${GIT_EXECUTABLE}"
+-		describe
+-		${hash}
+-		${ARGN}
+-		WORKING_DIRECTORY
+-		"${CMAKE_CURRENT_SOURCE_DIR}"
+-		RESULT_VARIABLE
+-		res
+-		OUTPUT_VARIABLE
+-		out
+-		ERROR_QUIET
+-		OUTPUT_STRIP_TRAILING_WHITESPACE)
+-	if(NOT res EQUAL 0)
+-		set(out "${out}-${res}-NOTFOUND")
+-	endif()
+-
+-	set(${_var} "${out}" PARENT_SCOPE)
+-endfunction()
+-
+-function(git_get_exact_tag _var)
+-	git_describe(out --exact-match ${ARGN})
+-	set(${_var} "${out}" PARENT_SCOPE)
+-endfunction()
+diff --git a/cmake/modules/GetGitRevisionDescription.cmake.in b/cmake/modules/GetGitRevisionDescription.cmake.in
+deleted file mode 100644
+index 6d8b708..0000000
+--- a/cmake/modules/GetGitRevisionDescription.cmake.in
++++ /dev/null
+@@ -1,41 +0,0 @@
+-#
+-# Internal file for GetGitRevisionDescription.cmake
+-#
+-# Requires CMake 2.6 or newer (uses the 'function' command)
+-#
+-# Original Author:
+-# 2009-2010 Ryan Pavlik <rpavlik@iastate.edu> <abiryan@ryand.net>
+-# http://academic.cleardefinition.com
+-# Iowa State University HCI Graduate Program/VRAC
+-#
+-# Copyright Iowa State University 2009-2010.
+-# Distributed under the Boost Software License, Version 1.0.
+-# (See accompanying file LICENSE_1_0.txt or copy at
+-# http://www.boost.org/LICENSE_1_0.txt)
+-
+-set(HEAD_HASH)
+-
+-file(READ "@HEAD_FILE@" HEAD_CONTENTS LIMIT 1024)
+-
+-string(STRIP "${HEAD_CONTENTS}" HEAD_CONTENTS)
+-if(HEAD_CONTENTS MATCHES "ref")
+-	# named branch
+-	string(REPLACE "ref: " "" HEAD_REF "${HEAD_CONTENTS}")
+-	if(EXISTS "@GIT_DIR@/${HEAD_REF}")
+-		configure_file("@GIT_DIR@/${HEAD_REF}" "@GIT_DATA@/head-ref" COPYONLY)
+-	else()
+-		configure_file("@GIT_DIR@/packed-refs" "@GIT_DATA@/packed-refs" COPYONLY)
+-		file(READ "@GIT_DATA@/packed-refs" PACKED_REFS)
+-		if(${PACKED_REFS} MATCHES "([0-9a-z]*) ${HEAD_REF}")
+-			set(HEAD_HASH "${CMAKE_MATCH_1}")
+-		endif()
+-	endif()
+-else()
+-	# detached HEAD
+-	configure_file("@GIT_DIR@/HEAD" "@GIT_DATA@/head-ref" COPYONLY)
+-endif()
+-
+-if(NOT HEAD_HASH)
+-	file(READ "@GIT_DATA@/head-ref" HEAD_HASH LIMIT 1024)
+-	string(STRIP "${HEAD_HASH}" HEAD_HASH)
+-endif()
+diff --git a/cmake/modules/SIMDExt.cmake b/cmake/modules/SIMDExt.cmake
+deleted file mode 100644
+index 021524e..0000000
+--- a/cmake/modules/SIMDExt.cmake
++++ /dev/null
+@@ -1,128 +0,0 @@
+-# detect SIMD extentions
+-#
+-# HAVE_ARMV8_CRC
+-# HAVE_ARMV8_SIMD
+-# HAVE_ARM_NEON
+-# HAVE_INTEL_SSE
+-# HAVE_INTEL_SSE2
+-# HAVE_INTEL_SSE3
+-# HAVE_INTEL_SSSE3
+-# HAVE_INTEL_PCLMUL
+-# HAVE_INTEL_SSE4_1
+-# HAVE_INTEL_SSE4_2
+-#
+-# SIMD_COMPILE_FLAGS
+-#
+-
+-if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|AARCH64")
+-  set(HAVE_ARM 1) 
+-  set(save_quiet ${CMAKE_REQUIRED_QUIET})
+-  set(CMAKE_REQUIRED_QUIET true)
+-  include(CheckCXXSourceCompiles)
+-
+-  check_cxx_source_compiles("
+-    #define CRC32CX(crc, value) __asm__(\"crc32cx %w[c], %w[c], %x[v]\":[c]\"+r\"(crc):[v]\"r\"(value))
+-    asm(\".arch_extension crc\");
+-    unsigned int foo(unsigned int ret) {
+-      CRC32CX(ret, 0);
+-      return ret;
+-    }
+-    int main() { foo(0); }" HAVE_ARMV8_CRC)
+-    check_cxx_source_compiles("
+-    asm(\".arch_extension crypto\");
+-    unsigned int foo(unsigned int ret) {
+-      __asm__(\"pmull  v2.1q,          v2.1d,  v1.1d\");
+-      return ret;
+-    }
+-    int main() { foo(0); }" HAVE_ARMV8_CRYPTO)
+-
+-  set(CMAKE_REQUIRED_QUIET ${save_quiet})
+-  if(HAVE_ARMV8_CRC)
+-    message(STATUS " aarch64 crc extensions supported")
+-  endif()
+-
+-  if(HAVE_ARMV8_CRYPTO)
+-    message(STATUS " aarch64 crypto extensions supported")
+-  endif()
+-  CHECK_C_COMPILER_FLAG(-march=armv8-a+crc+crypto HAVE_ARMV8_CRC_CRYPTO_MARCH)
+-
+-  # don't believe only the -march support; gcc 4.8.5 on RHEL/CentOS says
+-  # it supports +crc but hasn't got the intrinsics or arm_acle.h.  Test for
+-  # the actual presence of one of the intrinsic functions.
+-  if(HAVE_ARMV8_CRC_CRYPTO_MARCH)
+-    check_cxx_source_compiles("
+-      #include <inttypes.h>
+-      int main() { uint32_t a; uint8_t b; __builtin_aarch64_crc32b(a, b); }
+-    " HAVE_ARMV8_CRC_CRYPTO_INTRINSICS)
+-  endif()
+-
+-  if(HAVE_ARMV8_CRC_CRYPTO_INTRINSICS)
+-    message(STATUS " aarch64 crc+crypto intrinsics supported")
+-    set(ARMV8_CRC_COMPILE_FLAGS "${ARMV8_CRC_COMPILE_FLAGS} -march=armv8-a+crc+crypto")
+-  endif()
+-
+-  CHECK_C_COMPILER_FLAG(-march=armv8-a+simd HAVE_ARMV8_SIMD)
+-  if(HAVE_ARMV8_SIMD)
+-    set(SIMD_COMPILE_FLAGS "${SIMD_COMPILE_FLAGS} -march=armv8-a+simd")
+-  endif()
+-
+-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm|ARM")
+-  set(HAVE_ARM 1)
+-  CHECK_C_COMPILER_FLAG(-mfpu=neon HAVE_ARM_NEON)
+-  if(HAVE_ARM_NEON)
+-    set(SIMD_COMPILE_FLAGS "${SIMD_COMPILE_FLAGS} -mfpu=neon")
+-  endif()
+-
+-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i386|i686|amd64|x86_64|AMD64")
+-  set(HAVE_INTEL 1)
+-  if(CMAKE_SYSTEM_PROCESSOR MATCHES "i686|amd64|x86_64|AMD64")
+-    CHECK_C_COMPILER_FLAG(-msse HAVE_INTEL_SSE)
+-    if(HAVE_INTEL_SSE)
+-      set(SIMD_COMPILE_FLAGS "${SIMD_COMPILE_FLAGS} -msse")
+-    endif()
+-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "amd64|x86_64|AMD64")
+-      CHECK_C_COMPILER_FLAG(-msse2 HAVE_INTEL_SSE2)
+-      if(HAVE_INTEL_SSE2)
+-        set(SIMD_COMPILE_FLAGS "${SIMD_COMPILE_FLAGS} -msse2")
+-      endif()
+-      CHECK_C_COMPILER_FLAG(-msse3 HAVE_INTEL_SSE3)
+-      if(HAVE_INTEL_SSE3)
+-        set(SIMD_COMPILE_FLAGS "${SIMD_COMPILE_FLAGS} -msse3")
+-      endif()
+-      CHECK_C_COMPILER_FLAG(-mssse3 HAVE_INTEL_SSSE3)
+-      if(HAVE_INTEL_SSSE3)
+-        set(SIMD_COMPILE_FLAGS "${SIMD_COMPILE_FLAGS} -mssse3")
+-      endif()
+-      CHECK_C_COMPILER_FLAG(-mpclmul HAVE_INTEL_PCLMUL)
+-      if(HAVE_INTEL_PCLMUL)
+-        set(SIMD_COMPILE_FLAGS "${SIMD_COMPILE_FLAGS} -mpclmul")
+-      endif()
+-      CHECK_C_COMPILER_FLAG(-msse4.1 HAVE_INTEL_SSE4_1)
+-      if(HAVE_INTEL_SSE4_1)
+-        set(SIMD_COMPILE_FLAGS "${SIMD_COMPILE_FLAGS} -msse4.1")
+-      endif()
+-      CHECK_C_COMPILER_FLAG(-msse4.2 HAVE_INTEL_SSE4_2)
+-      if(HAVE_INTEL_SSE4_2)
+-        set(SIMD_COMPILE_FLAGS "${SIMD_COMPILE_FLAGS} -msse4.2")
+-      endif()
+-    endif(CMAKE_SYSTEM_PROCESSOR MATCHES "amd64|x86_64|AMD64")
+-  endif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686|amd64|x86_64|AMD64")
+-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "(powerpc|ppc)64|(powerpc|ppc)64le")
+-  if(CMAKE_SYSTEM_PROCESSOR MATCHES "(powerpc|ppc)64le")
+-    set(HAVE_PPC64LE 1)
+-    message(STATUS " we are ppc64le")
+-  else()
+-    set(HAVE_PPC64 1)
+-    message(STATUS " we are ppc64")
+-  endif(CMAKE_SYSTEM_PROCESSOR MATCHES "(powerpc|ppc)64le")
+-  CHECK_C_COMPILER_FLAG("-maltivec" HAS_ALTIVEC)
+-  if(HAS_ALTIVEC)
+-    message(STATUS " HAS_ALTIVEC yes")
+-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -maltivec")
+-    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -maltivec")
+-  endif()
+-  CHECK_C_COMPILER_FLAG("-mcpu=power8" HAVE_POWER8)
+-  if(HAVE_POWER8)
+-    message(STATUS " HAVE_POWER8 yes")
+-  endif()
+-endif()
+diff --git a/cmake/modules/patch-dpdk-conf.sh b/cmake/modules/patch-dpdk-conf.sh
+deleted file mode 100755
+index 8da0ac2..0000000
+--- a/cmake/modules/patch-dpdk-conf.sh
++++ /dev/null
+@@ -1,55 +0,0 @@
+-#!/bin/sh
+-# -*- mode:sh; tab-width:4; indent-tabs-mode:nil -*
+-
+-setconf() {
+-    local key=$1
+-    local val=$2
+-    if grep -q ^$key= ${conf}; then
+-        sed -i -e "s:^$key=.*$:$key=$val:g" ${conf}
+-    else
+-        echo $key=$val >> ${conf}
+-    fi
+-}
+-
+-conf=$1/.config
+-shift
+-machine=$1
+-shift
+-arch=$1
+-shift
+-
+-setconf CONFIG_RTE_MACHINE "${machine}"
+-setconf CONFIG_RTE_ARCH "${arch}"
+-
+-# Disable experimental features
+-setconf CONFIG_RTE_NEXT_ABI n
+-setconf CONFIG_RTE_LIBRTE_MBUF_OFFLOAD n
+-# Disable unmaintained features
+-setconf CONFIG_RTE_LIBRTE_POWER n
+-
+-setconf CONFIG_RTE_EAL_IGB_UIO n
+-setconf CONFIG_RTE_LIBRTE_KNI n
+-setconf CONFIG_RTE_KNI_KMOD n
+-setconf CONFIG_RTE_KNI_PREEMPT_DEFAULT n
+-
+-# no pdump
+-setconf CONFIG_RTE_LIBRTE_PDUMP n
+-
+-# no vm support
+-setconf CONFIG_RTE_LIBRTE_EAL_VMWARE_TSC_MAP_SUPPORT n
+-setconf CONFIG_RTE_LIBRTE_VHOST n
+-setconf CONFIG_RTE_LIBRTE_VHOST_NUMA n
+-setconf CONFIG_RTE_LIBRTE_VMXNET3_PMD n
+-setconf CONFIG_RTE_LIBRTE_PMD_VHOST n
+-setconf CONFIG_RTE_APP_EVENTDEV n
+-setconf CONFIG_RTE_MAX_VFIO_GROUPS 64
+-
+-# no test
+-setconf CONFIG_RTE_APP_TEST n
+-setconf CONFIG_RTE_TEST_PMD n
+-
+-# async/dpdk does not like it
+-setconf CONFIG_RTE_MBUF_REFCNT_ATOMIC n
+-
+-# balanced allocation of hugepages
+-setconf CONFIG_RTE_EAL_NUMA_AWARE_HUGEPAGES n
+diff --git a/src/boost/b2 b/src/boost/b2
+index dc75a68..77103a4 100755
+Binary files a/src/boost/b2 and b/src/boost/b2 differ
+diff --git a/src/boost/bin.v2/libs/atomic/build/gcc-7.3.1/release/link-static/threading-multi/libboost_atomic.a b/src/boost/bin.v2/libs/atomic/build/gcc-7.3.1/release/link-static/threading-multi/libboost_atomic.a
+index 29f9751..859d436 100644
+Binary files a/src/boost/bin.v2/libs/atomic/build/gcc-7.3.1/release/link-static/threading-multi/libboost_atomic.a and b/src/boost/bin.v2/libs/atomic/build/gcc-7.3.1/release/link-static/threading-multi/libboost_atomic.a differ
+diff --git a/src/boost/bin.v2/libs/chrono/build/gcc-7.3.1/release/link-static/threading-multi/libboost_chrono.a b/src/boost/bin.v2/libs/chrono/build/gcc-7.3.1/release/link-static/threading-multi/libboost_chrono.a
+index 1ffa44b..309a8eb 100644
+Binary files a/src/boost/bin.v2/libs/chrono/build/gcc-7.3.1/release/link-static/threading-multi/libboost_chrono.a and b/src/boost/bin.v2/libs/chrono/build/gcc-7.3.1/release/link-static/threading-multi/libboost_chrono.a differ
+diff --git a/src/boost/bin.v2/libs/container/build/gcc-7.3.1/release/link-static/threading-multi/libboost_container.a b/src/boost/bin.v2/libs/container/build/gcc-7.3.1/release/link-static/threading-multi/libboost_container.a
+index 8f98d5b..9edc6bf 100644
+Binary files a/src/boost/bin.v2/libs/container/build/gcc-7.3.1/release/link-static/threading-multi/libboost_container.a and b/src/boost/bin.v2/libs/container/build/gcc-7.3.1/release/link-static/threading-multi/libboost_container.a differ
+diff --git a/src/boost/bin.v2/libs/context/build/gcc-7.3.1/release/link-static/threading-multi/libboost_context.a b/src/boost/bin.v2/libs/context/build/gcc-7.3.1/release/link-static/threading-multi/libboost_context.a
+index 1063fb4..e777888 100644
+Binary files a/src/boost/bin.v2/libs/context/build/gcc-7.3.1/release/link-static/threading-multi/libboost_context.a and b/src/boost/bin.v2/libs/context/build/gcc-7.3.1/release/link-static/threading-multi/libboost_context.a differ
+diff --git a/src/boost/bin.v2/libs/coroutine/build/gcc-7.3.1/release/link-static/threadapi-pthread/threading-multi/libboost_coroutine.a b/src/boost/bin.v2/libs/coroutine/build/gcc-7.3.1/release/link-static/threadapi-pthread/threading-multi/libboost_coroutine.a
+index 422d865..ec045cb 100644
+Binary files a/src/boost/bin.v2/libs/coroutine/build/gcc-7.3.1/release/link-static/threadapi-pthread/threading-multi/libboost_coroutine.a and b/src/boost/bin.v2/libs/coroutine/build/gcc-7.3.1/release/link-static/threadapi-pthread/threading-multi/libboost_coroutine.a differ
+diff --git a/src/boost/bin.v2/libs/date_time/build/gcc-7.3.1/release/link-static/threading-multi/libboost_date_time.a b/src/boost/bin.v2/libs/date_time/build/gcc-7.3.1/release/link-static/threading-multi/libboost_date_time.a
+index b5acd76..366de70 100644
+Binary files a/src/boost/bin.v2/libs/date_time/build/gcc-7.3.1/release/link-static/threading-multi/libboost_date_time.a and b/src/boost/bin.v2/libs/date_time/build/gcc-7.3.1/release/link-static/threading-multi/libboost_date_time.a differ
+diff --git a/src/boost/bin.v2/libs/iostreams/build/gcc-7.3.1/release/link-static/threading-multi/libboost_iostreams.a b/src/boost/bin.v2/libs/iostreams/build/gcc-7.3.1/release/link-static/threading-multi/libboost_iostreams.a
+index 87db675..7a510ab 100644
+Binary files a/src/boost/bin.v2/libs/iostreams/build/gcc-7.3.1/release/link-static/threading-multi/libboost_iostreams.a and b/src/boost/bin.v2/libs/iostreams/build/gcc-7.3.1/release/link-static/threading-multi/libboost_iostreams.a differ
+diff --git a/src/boost/bin.v2/libs/program_options/build/gcc-7.3.1/release/link-static/threading-multi/libboost_program_options.a b/src/boost/bin.v2/libs/program_options/build/gcc-7.3.1/release/link-static/threading-multi/libboost_program_options.a
+index 8f7ce23..ca2f684 100644
+Binary files a/src/boost/bin.v2/libs/program_options/build/gcc-7.3.1/release/link-static/threading-multi/libboost_program_options.a and b/src/boost/bin.v2/libs/program_options/build/gcc-7.3.1/release/link-static/threading-multi/libboost_program_options.a differ
+diff --git a/src/boost/bin.v2/libs/python/build/gcc-7.3.1/release/link-static/threading-multi/libboost_python27.a b/src/boost/bin.v2/libs/python/build/gcc-7.3.1/release/link-static/threading-multi/libboost_python27.a
+index 37f98fd..6a0bdf5 100644
+Binary files a/src/boost/bin.v2/libs/python/build/gcc-7.3.1/release/link-static/threading-multi/libboost_python27.a and b/src/boost/bin.v2/libs/python/build/gcc-7.3.1/release/link-static/threading-multi/libboost_python27.a differ
+diff --git a/src/boost/bin.v2/libs/random/build/gcc-7.3.1/release/link-static/threading-multi/libboost_random.a b/src/boost/bin.v2/libs/random/build/gcc-7.3.1/release/link-static/threading-multi/libboost_random.a
+index 91a8086..c5ae662 100644
+Binary files a/src/boost/bin.v2/libs/random/build/gcc-7.3.1/release/link-static/threading-multi/libboost_random.a and b/src/boost/bin.v2/libs/random/build/gcc-7.3.1/release/link-static/threading-multi/libboost_random.a differ
+diff --git a/src/boost/bin.v2/libs/regex/build/gcc-7.3.1/release/link-static/threading-multi/libboost_regex.a b/src/boost/bin.v2/libs/regex/build/gcc-7.3.1/release/link-static/threading-multi/libboost_regex.a
+index 38213a9..538b9d9 100644
+Binary files a/src/boost/bin.v2/libs/regex/build/gcc-7.3.1/release/link-static/threading-multi/libboost_regex.a and b/src/boost/bin.v2/libs/regex/build/gcc-7.3.1/release/link-static/threading-multi/libboost_regex.a differ
+diff --git a/src/boost/bin.v2/libs/system/build/gcc-7.3.1/release/link-static/threading-multi/libboost_system.a b/src/boost/bin.v2/libs/system/build/gcc-7.3.1/release/link-static/threading-multi/libboost_system.a
+index eecafdd..68cb4e6 100644
+Binary files a/src/boost/bin.v2/libs/system/build/gcc-7.3.1/release/link-static/threading-multi/libboost_system.a and b/src/boost/bin.v2/libs/system/build/gcc-7.3.1/release/link-static/threading-multi/libboost_system.a differ
+diff --git a/src/boost/bin.v2/libs/thread/build/gcc-7.3.1/release/link-static/threadapi-pthread/threading-multi/libboost_thread.a b/src/boost/bin.v2/libs/thread/build/gcc-7.3.1/release/link-static/threadapi-pthread/threading-multi/libboost_thread.a
+index 1283b38..66c2bb0 100644
+Binary files a/src/boost/bin.v2/libs/thread/build/gcc-7.3.1/release/link-static/threadapi-pthread/threading-multi/libboost_thread.a and b/src/boost/bin.v2/libs/thread/build/gcc-7.3.1/release/link-static/threadapi-pthread/threading-multi/libboost_thread.a differ
+diff --git a/src/boost/bjam b/src/boost/bjam
+index dc75a68..77103a4 100755
+Binary files a/src/boost/bjam and b/src/boost/bjam differ
+diff --git a/src/boost/stage/lib/libboost_atomic.a b/src/boost/stage/lib/libboost_atomic.a
+index 29f9751..859d436 100644
+Binary files a/src/boost/stage/lib/libboost_atomic.a and b/src/boost/stage/lib/libboost_atomic.a differ
+diff --git a/src/boost/stage/lib/libboost_chrono.a b/src/boost/stage/lib/libboost_chrono.a
+index 1ffa44b..309a8eb 100644
+Binary files a/src/boost/stage/lib/libboost_chrono.a and b/src/boost/stage/lib/libboost_chrono.a differ
+diff --git a/src/boost/stage/lib/libboost_container.a b/src/boost/stage/lib/libboost_container.a
+index 8f98d5b..9edc6bf 100644
+Binary files a/src/boost/stage/lib/libboost_container.a and b/src/boost/stage/lib/libboost_container.a differ
+diff --git a/src/boost/stage/lib/libboost_context.a b/src/boost/stage/lib/libboost_context.a
+index 1063fb4..e777888 100644
+Binary files a/src/boost/stage/lib/libboost_context.a and b/src/boost/stage/lib/libboost_context.a differ
+diff --git a/src/boost/stage/lib/libboost_coroutine.a b/src/boost/stage/lib/libboost_coroutine.a
+index 422d865..ec045cb 100644
+Binary files a/src/boost/stage/lib/libboost_coroutine.a and b/src/boost/stage/lib/libboost_coroutine.a differ
+diff --git a/src/boost/stage/lib/libboost_date_time.a b/src/boost/stage/lib/libboost_date_time.a
+index b5acd76..366de70 100644
+Binary files a/src/boost/stage/lib/libboost_date_time.a and b/src/boost/stage/lib/libboost_date_time.a differ
+diff --git a/src/boost/stage/lib/libboost_iostreams.a b/src/boost/stage/lib/libboost_iostreams.a
+index 87db675..7a510ab 100644
+Binary files a/src/boost/stage/lib/libboost_iostreams.a and b/src/boost/stage/lib/libboost_iostreams.a differ
+diff --git a/src/boost/stage/lib/libboost_program_options.a b/src/boost/stage/lib/libboost_program_options.a
+index 8f7ce23..ca2f684 100644
+Binary files a/src/boost/stage/lib/libboost_program_options.a and b/src/boost/stage/lib/libboost_program_options.a differ
+diff --git a/src/boost/stage/lib/libboost_python27.a b/src/boost/stage/lib/libboost_python27.a
+index 37f98fd..6a0bdf5 100644
+Binary files a/src/boost/stage/lib/libboost_python27.a and b/src/boost/stage/lib/libboost_python27.a differ
+diff --git a/src/boost/stage/lib/libboost_random.a b/src/boost/stage/lib/libboost_random.a
+index 91a8086..c5ae662 100644
+Binary files a/src/boost/stage/lib/libboost_random.a and b/src/boost/stage/lib/libboost_random.a differ
+diff --git a/src/boost/stage/lib/libboost_regex.a b/src/boost/stage/lib/libboost_regex.a
+index 38213a9..538b9d9 100644
+Binary files a/src/boost/stage/lib/libboost_regex.a and b/src/boost/stage/lib/libboost_regex.a differ
+diff --git a/src/boost/stage/lib/libboost_system.a b/src/boost/stage/lib/libboost_system.a
+index eecafdd..68cb4e6 100644
+Binary files a/src/boost/stage/lib/libboost_system.a and b/src/boost/stage/lib/libboost_system.a differ
+diff --git a/src/boost/stage/lib/libboost_thread.a b/src/boost/stage/lib/libboost_thread.a
+index 1283b38..66c2bb0 100644
+Binary files a/src/boost/stage/lib/libboost_thread.a and b/src/boost/stage/lib/libboost_thread.a differ
+diff --git a/src/boost/tools/build/src/engine/bin.linuxx86_64/b2 b/src/boost/tools/build/src/engine/bin.linuxx86_64/b2
+index dc75a68..77103a4 100755
+Binary files a/src/boost/tools/build/src/engine/bin.linuxx86_64/b2 and b/src/boost/tools/build/src/engine/bin.linuxx86_64/b2 differ
+diff --git a/src/boost/tools/build/src/engine/bin.linuxx86_64/bjam b/src/boost/tools/build/src/engine/bin.linuxx86_64/bjam
+index dc75a68..77103a4 100755
+Binary files a/src/boost/tools/build/src/engine/bin.linuxx86_64/bjam and b/src/boost/tools/build/src/engine/bin.linuxx86_64/bjam differ
+diff --git a/src/boost/tools/build/src/engine/bootstrap/jam0 b/src/boost/tools/build/src/engine/bootstrap/jam0
+index fae177d..214fa7f 100755
+Binary files a/src/boost/tools/build/src/engine/bootstrap/jam0 and b/src/boost/tools/build/src/engine/bootstrap/jam0 differ
+diff --git a/src/libocssd/CMakeLists.txt b/src/libocssd/CMakeLists.txt
+index 19a3226..8539627 100644
+--- a/src/libocssd/CMakeLists.txt
++++ b/src/libocssd/CMakeLists.txt
+@@ -97,11 +97,11 @@ include_directories(src/)
+ set(LNAME "lightnvm")
+ 
+ add_library(${LNAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})
+-target_link_libraries(${LNAME} aio pthread rt tcmalloc)
++target_link_libraries(${LNAME} aio pthread rt)
+ set_target_properties(${LNAME} PROPERTIES OUTPUT_NAME ${LNAME})
+ 
+ add_library(lightnvm_so SHARED ${HEADER_FILES} ${SOURCE_FILES})
+-target_link_libraries(lightnvm_so aio pthread rt tcmalloc)
++target_link_libraries(lightnvm_so aio pthread rt)
+ set_target_properties(lightnvm_so PROPERTIES OUTPUT_NAME ${LNAME})
+ 
+ 
+diff --git a/src/objssd-nvme.c b/src/objssd-nvme.c
+new file mode 100644
+index 0000000..d60a0fd
+--- /dev/null
++++ b/src/objssd-nvme.c
+@@ -0,0 +1,402 @@
++#include "objssd-nvme.h"
++
++#define TRANSFER_UNIT_NUM 1
++#define TRANSFER_DATA_LAYOUT_UNIT_NUM 24
++#define TRANSFER_UNIT_SIZE 4096
++
++#define PLANE_SUPERBLOCK 1
++#define LUN_SUPERBLOCK 0
++
++nvme_obj  *OBJ_TABLE;
++unsigned char *obj_bitmap;
++unsigned int obj_bitmap_len;
++int object_count;
++void print_nvm_geo(const struct nvm_geo *geo)
++{
++    printf("channel:%llu\n", geo->nchannels);
++    printf("lun:%llu\n", geo->nluns);
++    printf("plane:%llu\n", geo->nplanes);
++    printf("block:%llu\n", geo->nblocks);
++    printf("page:%llu\n", geo->npages);
++    printf("sector:%llu\n", geo->nsectors);
++}
++void print_oc_addr(struct nvm_addr *addr)
++{
++    printf("channel:%llu\n", addr->g.ch);
++    printf("lun:%llu\n", addr->g.lun);
++    printf("plane:%llu\n", addr->g.pl);
++    printf("block:%llu\n", addr->g.blk);
++    printf("page:%llu\n", addr->g.pg);
++    printf("sector:%llu\n", addr->g.sec);
++}
++//寻找第一个为0的位置，与内核函数冲突吗？？
++int find_next_zero_bit(unsigned char *bitmap)
++{
++    int i;
++    for(i = 0; i < object_count; i++){
++        if(bitmap[i] == 0)
++            return i;
++    }
++}
++
++struct nvm_addr obj_addr_to_oc_addr(struct nvm_dev* dev, int obj_id, uint64_t obj_offset)
++{
++    if(LUN_SUPERBLOCK){
++        const struct nvm_geo *geo = nvm_dev_get_geo(dev);
++        int plane_obj_count = geo->nblocks;
++        int plane_id = obj_id / plane_obj_count;
++        int plane_offset = obj_id - plane_id * plane_obj_count;
++        int block_id = plane_offset;
++    
++    //在每个channel每个lun中每个block取96k作为一层
++        int transfer_floor_unit_count = geo->nchannels * geo->nluns * TRANSFER_DATA_LAYOUT_UNIT_NUM;
++        int transfer_floor = obj_offset / transfer_floor_unit_count;
++        int transfer_floor_offset = obj_offset - transfer_floor * transfer_floor_unit_count;
++    
++        int channel_transfer_unit_count = geo->nluns * TRANSFER_DATA_LAYOUT_UNIT_NUM;
++        int channel_id = transfer_floor_offset / channel_transfer_unit_count;
++        int channel_offset = transfer_floor_offset - channel_id * channel_transfer_unit_count;
++        int lun_id = channel_offset / TRANSFER_DATA_LAYOUT_UNIT_NUM;
++        int lun_offset = channel_offset - lun_id * TRANSFER_DATA_LAYOUT_UNIT_NUM;
++    
++        int page_id = transfer_floor * (TRANSFER_DATA_LAYOUT_UNIT_NUM / geo->nsectors) + lun_offset / geo->nsectors;
++        int sector_id = lun_offset % geo->nsectors;
++        struct nvm_addr oc_addr;
++        memset(&oc_addr, 0, sizeof(struct nvm_addr));
++        oc_addr.g.ch = channel_id;
++        oc_addr.g.lun = lun_id;
++        oc_addr.g.pl = plane_id;
++        oc_addr.g.blk = block_id;
++        oc_addr.g.pg = page_id;
++        oc_addr.g.sec = sector_id;
++        return oc_addr;
++    }
++    if(PLANE_SUPERBLOCK){
++        const struct nvm_geo *geo = nvm_dev_get_geo(dev);
++        int block_id = obj_id;
++    
++        int transfer_floor_unit_count = geo->nchannels * geo->nluns * geo->nplanes * TRANSFER_DATA_LAYOUT_UNIT_NUM;
++        int transfer_floor = obj_offset / transfer_floor_unit_count;
++        int transfer_floor_offset = obj_offset - transfer_floor * transfer_floor_unit_count;
++        int plane_unit_count_one_floor = geo->nchannels * geo->nluns * TRANSFER_DATA_LAYOUT_UNIT_NUM;
++        int plane_id = transfer_floor_offset / plane_unit_count_one_floor;
++        int plane_unit_floor_offset = transfer_floor_offset - plane_id * plane_unit_count_one_floor;
++        int channel_id = plane_unit_floor_offset / (geo->nluns * TRANSFER_DATA_LAYOUT_UNIT_NUM);
++        int channel_offset = plane_unit_floor_offset - channel_id * (geo->nluns * TRANSFER_DATA_LAYOUT_UNIT_NUM);
++        int lun_id = channel_offset / TRANSFER_DATA_LAYOUT_UNIT_NUM;
++        int lun_offset = channel_offset - lun_id * TRANSFER_DATA_LAYOUT_UNIT_NUM;
++        int page_id = transfer_floor * (TRANSFER_DATA_LAYOUT_UNIT_NUM / geo->nsectors) + lun_offset / geo->nsectors;
++        int sector_id = lun_offset % geo->nsectors;
++        struct nvm_addr oc_addr;
++        memset(&oc_addr, 0, sizeof(struct nvm_addr));
++        oc_addr.g.ch = channel_id;
++        oc_addr.g.lun = lun_id;
++        oc_addr.g.pl = plane_id;
++        oc_addr.g.blk = block_id;
++        oc_addr.g.pg = page_id;
++        oc_addr.g.sec = sector_id;
++        //printf("222obj_id:%d\t obj_offset:%llu\n", obj_id, obj_offset);
++        //print_oc_addr(&oc_addr);
++        return oc_addr;
++    }
++    
++
++}
++
++int oc_addr_to_obj_addr(struct nvm_dev* dev, struct nvm_addr oc_addr, int *obj_id, uint64_t *obj_offset)
++{
++    if(LUN_SUPERBLOCK){
++        const struct nvm_geo *geo = nvm_dev_get_geo(dev);
++        int plane_id = oc_addr.g.pl;
++        int block_id = oc_addr.g.blk;
++        *obj_id = plane_id * geo->nblocks + block_id;
++    
++        int page_id = oc_addr.g.pg;
++        int sector_id = oc_addr.g.sec;
++        int block_offset = page_id * geo->nsectors + sector_id;
++        int transfer_floor = block_offset / TRANSFER_DATA_LAYOUT_UNIT_NUM;
++        int transfer_floor_block_offset = block_offset - transfer_floor * TRANSFER_DATA_LAYOUT_UNIT_NUM;
++    
++        int channel_id = oc_addr.g.ch;
++        int lun_id = oc_addr.g.lun;
++        *obj_offset = geo->nchannels * geo->nluns * TRANSFER_DATA_LAYOUT_UNIT_NUM * transfer_floor + channel_id * geo->nluns * TRANSFER_DATA_LAYOUT_UNIT_NUM + +lun_id * TRANSFER_DATA_LAYOUT_UNIT_NUM + transfer_floor_block_offset;
++    }
++    
++    if(PLANE_SUPERBLOCK){
++        const struct nvm_geo *geo = nvm_dev_get_geo(dev);
++        *obj_id = oc_addr.g.blk;
++    
++        int channel_id = oc_addr.g.ch;
++        int lun_id = oc_addr.g.lun;
++        int plane_id = oc_addr.g.pl;
++        int page_id = oc_addr.g.pg;
++        int sector_id = oc_addr.g.sec;
++        int block_offset = page_id * geo->nsectors + sector_id;
++        int transfer_floor = block_offset / TRANSFER_DATA_LAYOUT_UNIT_NUM;
++        int transfer_floor_block_offset = block_offset - transfer_floor * TRANSFER_DATA_LAYOUT_UNIT_NUM;
++    
++        *obj_offset = geo->nchannels * geo->nluns * geo->nplanes * transfer_floor * TRANSFER_DATA_LAYOUT_UNIT_NUM + geo->nchannels * geo->nluns * plane_id * TRANSFER_DATA_LAYOUT_UNIT_NUM + channel_id * geo->nluns * TRANSFER_DATA_LAYOUT_UNIT_NUM + lun_id * TRANSFER_DATA_LAYOUT_UNIT_NUM + transfer_floor_block_offset;
++    }
++    return 0;
++}
++
++
++int __obj_write(struct nvm_dev *dev, char *data, int obj_id, uint64_t obj_offset, int data_size)
++{
++    int naddrs = data_size;
++    printf("write data size:%d\n", data_size);
++    struct nvm_addr *oc_addr = (struct nvm_addr *)malloc(naddrs * sizeof(struct nvm_addr));
++    int i;
++    for(i = 0; i < naddrs; i++){
++        oc_addr[i] = obj_addr_to_oc_addr(dev,obj_id, obj_offset + i);
++        printf("obj_id:%d\tobj_offset:%llu\twrite:%d\n", obj_id, obj_offset + i, i);
++        print_oc_addr(&(oc_addr[i]));
++    }
++    int ret = nvm_addr_write(dev, oc_addr, naddrs, data, NULL, 0x1, NULL);
++    if(ret < 0){
++        printf("write failed!\n");
++        free(oc_addr);
++        return -1;
++    }
++    free(oc_addr);
++    return 0;
++}
++int __obj_read(struct nvm_dev *dev, char *data, int obj_id, uint64_t obj_offset, int data_size)
++{
++    int naddrs = data_size;
++    printf("read data size:%d\n", data_size);
++    struct nvm_addr *oc_addr = (struct nvm_addr *)malloc(naddrs * sizeof(struct nvm_addr));
++    int i;
++    for(i = 0; i < naddrs; i++){
++        oc_addr[i] = obj_addr_to_oc_addr(dev, obj_id, obj_offset + i);
++        printf("obj_id:%d\tobj_offset:%llu\tread:%d\n", obj_id, obj_offset + i, i);
++        print_oc_addr(&(oc_addr[i]));
++    }
++    int ret = nvm_addr_read(dev, oc_addr, naddrs, data, NULL, 0x1, NULL);
++    if(ret < 0){
++        free(oc_addr);
++        printf("read failed\n");
++        return -1;
++    }
++    free(oc_addr);
++    return 0;
++}
++int obj_write(struct nvm_dev* dev, io_u *io)
++{
++    int obj_id = io->obj_id;
++    int obj_offset = io->obj_off;
++    int naddrs;
++    if(obj_offset % TRANSFER_UNIT_NUM == 0){
++        char *data_buf_pointer = io->data;
++        int data_transfer_size = io->data_size;
++        int obj_transfer_offset = io->obj_off;
++        while(data_transfer_size >= TRANSFER_UNIT_NUM){
++             printf("1 transfer_size:%d\n", data_transfer_size);
++            __obj_write(dev, data_buf_pointer, obj_id, obj_transfer_offset, TRANSFER_UNIT_NUM);
++            data_buf_pointer += TRANSFER_UNIT_SIZE * TRANSFER_UNIT_NUM;
++            data_transfer_size -= TRANSFER_UNIT_NUM;
++            obj_transfer_offset += TRANSFER_UNIT_NUM;
++            OBJ_TABLE[obj_id].obj_offset = obj_transfer_offset;
++            printf("2 transfer_size:%d\n", data_transfer_size);
++        }
++        if(data_transfer_size > 0){
++            __obj_write(dev, data_buf_pointer, obj_id, obj_transfer_offset, data_transfer_size);
++            OBJ_TABLE[obj_id].obj_offset += data_transfer_size;
++        }
++    }
++    else{
++        char *data_buf_pointer = io->data;
++        int data_transfer_size = io->data_size;
++        int obj_transfer_offset = io->obj_off;
++        int first_transfer_size = TRANSFER_UNIT_NUM - obj_offset % TRANSFER_UNIT_NUM;
++        __obj_write(dev, data_buf_pointer, obj_id, obj_transfer_offset, first_transfer_size);
++        data_buf_pointer += first_transfer_size * TRANSFER_UNIT_SIZE;
++        data_transfer_size -= first_transfer_size;
++        obj_transfer_offset += first_transfer_size;
++        OBJ_TABLE[obj_id].obj_offset = obj_transfer_offset;
++        while(data_transfer_size >= TRANSFER_UNIT_NUM){
++            __obj_write(dev, data_buf_pointer, obj_id, obj_transfer_offset, TRANSFER_UNIT_NUM);
++            data_buf_pointer += TRANSFER_UNIT_SIZE * TRANSFER_UNIT_NUM;
++            data_transfer_size -= TRANSFER_UNIT_NUM;
++            obj_transfer_offset += TRANSFER_UNIT_NUM;
++            OBJ_TABLE[obj_id].obj_offset = obj_transfer_offset;
++        }
++        if(data_transfer_size > 0){
++            __obj_write(dev, data_buf_pointer, obj_id, obj_transfer_offset, data_transfer_size);
++            OBJ_TABLE[obj_id].obj_offset += data_transfer_size;
++        }
++    }
++    return 0;
++}
++int obj_read(struct nvm_dev *dev, io_u *io)
++{
++    int obj_id = io->obj_id;
++    int obj_offset = io->obj_off;
++    if(obj_offset % TRANSFER_UNIT_NUM == 0){
++        char *data_buf_pointer = io->data;
++        int data_transfer_size = io->data_size;
++        int obj_transfer_offset = io->obj_off;
++        while(data_transfer_size >= TRANSFER_UNIT_NUM){
++            printf("1 transfer_size:%d\n", data_transfer_size);
++            __obj_read(dev, data_buf_pointer, obj_id, obj_transfer_offset, TRANSFER_UNIT_NUM);
++            data_buf_pointer += TRANSFER_UNIT_SIZE * TRANSFER_UNIT_NUM;
++            data_transfer_size -= TRANSFER_UNIT_NUM;
++            obj_transfer_offset += TRANSFER_UNIT_NUM;
++            printf("2 transfer_size:%d\n", data_transfer_size);
++        }
++        if(data_transfer_size > 0){
++            __obj_read(dev, data_buf_pointer, obj_id, obj_transfer_offset, data_transfer_size);
++        }
++    }
++    else{
++        char *data_buf_pointer = io->data;
++        int data_transfer_size = io->data_size;
++        int obj_transfer_offset = io->obj_off;
++        int first_transfer_size = TRANSFER_UNIT_NUM - obj_offset % TRANSFER_UNIT_NUM;
++        __obj_read(dev, data_buf_pointer, obj_id, obj_transfer_offset, first_transfer_size);
++        data_buf_pointer += first_transfer_size * TRANSFER_UNIT_SIZE;
++        data_transfer_size -= first_transfer_size;
++        obj_transfer_offset += first_transfer_size;
++        OBJ_TABLE[obj_id].obj_offset = obj_transfer_offset;
++        while(data_transfer_size >= TRANSFER_UNIT_NUM){
++            __obj_read(dev, data_buf_pointer, obj_id, obj_transfer_offset, TRANSFER_UNIT_NUM);
++            data_buf_pointer += TRANSFER_UNIT_SIZE * TRANSFER_UNIT_NUM;
++            data_transfer_size -= TRANSFER_UNIT_NUM;
++            obj_transfer_offset += TRANSFER_UNIT_NUM;
++        }
++        if(data_transfer_size > 0){
++            __obj_write(dev, data_buf_pointer, obj_id, obj_transfer_offset, data_transfer_size);
++        }
++    }
++    return 0;
++}
++int obj_create(struct nvm_dev *dev, unsigned int *obj_id, unsigned int *obj_4k_size)
++{
++    int find_id = find_next_zero_bit(obj_bitmap);
++    if(find_id == -1){
++        printf("create failed!\n");
++        return -1;
++    }
++    (*obj_id) = find_id;
++    (*obj_4k_size) = OBJ_TABLE[find_id].obj_size;
++    OBJ_TABLE[find_id].created |= 0x1;
++    OBJ_TABLE[find_id].obj_offset = 0;
++    obj_bitmap[find_id] = 1;
++    return 0;
++}
++
++int obj_delete(struct nvm_dev *dev, unsigned int obj_id)
++{
++    if(LUN_SUPERBLOCK){
++        const struct nvm_geo *geo = nvm_dev_get_geo(dev);
++        int plane_obj_count = geo->nblocks;
++        int plane_id = obj_id / plane_obj_count;
++        int plane_offset = obj_id - plane_id * plane_obj_count;
++        int block_id = plane_offset;
++        struct nvm_addr *oc_addr = (struct nvm_addr *)malloc(sizeof(struct nvm_addr));
++        int channel_index, lun_index, ret;
++        for(channel_index = 0; channel_index < geo->nchannels; channel_index++){
++            for(lun_index = 0; lun_index < geo->nluns; lun_index++){
++                memset(oc_addr, 0, sizeof(struct nvm_addr));
++                oc_addr->g.ch = channel_index;
++                oc_addr->g.lun = lun_index;
++                oc_addr->g.pl = plane_id;
++                oc_addr->g.blk = block_id;
++                ret = nvm_addr_erase(dev, oc_addr, 1, 0x1, NULL);
++                if(ret != 0){
++                    printf("delete failed!\n");
++                    return -1;
++                }
++            }
++        }
++        OBJ_TABLE[obj_id].created &= 0x0;
++        OBJ_TABLE[obj_id].obj_offset = 0;
++        obj_bitmap[obj_id] = 0;
++        return 0;
++    }
++
++    if(PLANE_SUPERBLOCK){
++        const struct nvm_geo *geo = nvm_dev_get_geo(dev);
++        int block_id = obj_id;
++        struct nvm_addr *oc_addr = (struct nvm_addr *)malloc(sizeof(struct nvm_addr));
++        int channel_index, lun_index, plane_index, ret;
++        for(channel_index = 0; channel_index < geo->nchannels; channel_index++){
++            for(lun_index = 0; lun_index < geo->nluns; lun_index++){
++                for(plane_index = 0; plane_index < geo->nplanes; plane_index++){
++                    memset(oc_addr, 0, sizeof(struct nvm_addr));
++                    oc_addr->g.ch = channel_index;
++                    oc_addr->g.lun = lun_index;
++                    oc_addr->g.pl = plane_index;
++                    oc_addr->g.blk = block_id;
++                    ret = nvm_addr_erase(dev, oc_addr, 1, 0x1, NULL);
++                    if(ret != 0){
++                        printf("delete failed!\n");
++                        return -1;
++                    }
++                }
++            }
++        }
++        OBJ_TABLE[obj_id].created &= 0x0;
++        OBJ_TABLE[obj_id].obj_offset = 0;
++        obj_bitmap[obj_id] = 0;
++        return 0;
++    }
++}
++
++
++struct nvm_dev* dev_open(const char * dev_path)
++{
++    if(LUN_SUPERBLOCK){
++        struct nvm_dev *dev;
++        dev = nvm_dev_open(dev_path);
++    
++        const struct nvm_geo *geo = nvm_dev_get_geo(dev);
++        int obj_count = geo->nplanes * (geo->nblocks);
++        object_count = obj_count;
++        int obj_size = geo->nchannels * geo->nluns * geo->npages * geo->nsectors;
++        OBJ_TABLE = (nvme_obj *)malloc(sizeof(nvme_obj) * obj_count);
++        int i;
++        //后续设计：读文件进行初始化
++        for(i = 0; i < obj_count; i++){
++            OBJ_TABLE[i].created &= 0x0;
++            OBJ_TABLE[i].obj_id = i;
++            OBJ_TABLE[i].obj_size =obj_size;
++            OBJ_TABLE[i].obj_offset = 0;
++        }
++        obj_bitmap = (unsigned char *)malloc(sizeof(unsigned char) * obj_count);
++        for(i = 0; i < obj_count; i++)
++            obj_bitmap[i] = 0;
++        for(i = 10; i < obj_count; i++)
++            obj_bitmap[i] = 0;
++        return dev;
++    }
++    if(PLANE_SUPERBLOCK){
++        struct nvm_dev *dev;
++        dev = nvm_dev_open(dev_path);
++    
++        const struct nvm_geo *geo = nvm_dev_get_geo(dev);
++        int obj_count = geo->nblocks;
++        object_count = obj_count;
++        int obj_size = geo->nchannels * geo->nluns *geo->nplanes * geo->npages * geo->nsectors;
++        OBJ_TABLE = (nvme_obj *)malloc(sizeof(nvme_obj) * obj_count);
++        int i;
++    //后续设计：读文件进行初始化
++        for(i = 0; i < obj_count; i++){
++            OBJ_TABLE[i].created &= 0x0;
++            OBJ_TABLE[i].obj_id = i;
++            OBJ_TABLE[i].obj_size =obj_size;
++            OBJ_TABLE[i].obj_offset = 0;
++        }
++        obj_bitmap = (unsigned char *)malloc(sizeof(unsigned char) * obj_count);
++        for(i = 0; i < 10; i++)
++            obj_bitmap[i] = 1;
++        for(i = 10; i < obj_count; i++)
++            obj_bitmap[i] = 0;
++        return dev;
++    }
++}
++int dev_close(struct nvm_dev *dev)
++{
++    nvm_dev_close(dev);
++    return 0;
++}
+diff --git a/src/objssd-nvme.h b/src/objssd-nvme.h
+new file mode 100644
+index 0000000..9e6b96d
+--- /dev/null
++++ b/src/objssd-nvme.h
+@@ -0,0 +1,50 @@
++#ifndef __OBJECTSSD_H__
++#define __OBJECTSSD_H__
++#include <fcntl.h>
++#include <errno.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <assert.h>
++#include <linux/types.h>
++#include <sys/ioctl.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include <inttypes.h>
++#include <string.h>
++#include <malloc.h>
++#include "./include/liblightnvm.h"
++
++typedef struct req_tag{
++    __u32 req_orig;
++}req_tag;
++
++/**
++ * parameters of reading or writing
++ */
++typedef struct _io_u{
++    __u32 obj_id;          /**< id of the object to operate */
++    __u64 obj_off;         /**< the start offset to operate */
++    void *data;            /**< the position to store reading data or write data */
++    __u64 data_size;       /**< data size to transfer */
++    req_tag io_req_tag;    /**< the tag which is passed from top */
++}io_u;
++
++/**
++ *the struct to store information of one object
++ */
++typedef struct {
++    unsigned int created : 1;    /**< the object is created or not */
++    unsigned int obj_id;         /**< id of this object */
++    unsigned int obj_size;       /**< size of this object */
++    __u64 obj_offset;            /**< the writable offset of this object */
++} nvme_obj;
++
++int obj_read(struct nvm_dev *dev, io_u *io);
++int obj_write(struct nvm_dev *dev, io_u *io);
++int obj_create(struct nvm_dev *dev, unsigned int *obj_id, unsigned int *obj_4k_size);
++int obj_delete(struct nvm_dev *dev, unsigned int obj_id);
++struct nvm_dev* dev_open(const char * dev_path);
++int dev_close(struct nvm_dev *dev);
++#endif
+diff --git a/src/os/bluestore/BlueFS.cc b/src/os/bluestore/BlueFS.cc
+index 788f48a..e13675c 100644
+--- a/src/os/bluestore/BlueFS.cc
++++ b/src/os/bluestore/BlueFS.cc
+@@ -153,10 +153,8 @@ int BlueFS::add_block_device(unsigned id, const string& path, bool trim)
+   dout(10) << __func__ << " bdev " << id << " path " << path << dendl;
+   ceph_assert(id < bdev.size());
+   ceph_assert(bdev[id] == NULL);
+-  string p = path;
+-  BlockDevice *b = BlockDevice::create(cct, p, NULL, NULL, discard_cb[id], static_cast<void*>(this));
+-  int r = 0 ; 
+-  r = b->open(p);
++  BlockDevice *b = BlockDevice::create(cct, path, NULL, NULL, discard_cb[id], static_cast<void*>(this));
++  int r = b->open(path);
+   if (r < 0) {
+     delete b;
+     return r;
+@@ -394,7 +392,7 @@ void BlueFS::_init_alloc()
+   alloc.resize(MAX_BDEV);
+   pending_release.resize(MAX_BDEV);
+   for (unsigned id = 0; id < bdev.size(); ++id) {
+-    if (!bdev[id] ) {
++    if (!bdev[id]) {
+       continue;
+     }
+     ceph_assert(bdev[id]->get_size());
+diff --git a/src/os/bluestore/BlueStore.cc b/src/os/bluestore/BlueStore.cc
+index 8320172..090ba54 100644
+--- a/src/os/bluestore/BlueStore.cc
++++ b/src/os/bluestore/BlueStore.cc
+@@ -4936,8 +4936,7 @@ int BlueStore::_open_db(bool create, bool to_repair_db)
+     // shared devic
+     // OCSSD::We need to add /block to bluefs block devices ; But not add extents to it;
+     // We also keep bluefs can see 3 devices , but promise shared_dev's total size is zero forever;
+-    bfn =  path + "/block";
+-    
++    bfn = path + "/block";
+     // never trim here
+     r = bluefs->add_block_device(bluefs_shared_bdev, bfn, false);
+     if (r < 0) {
+diff --git a/src/os/bluestore/OCDevice.cc b/src/os/bluestore/OCDevice.cc
+index 574895d..1d779c1 100644
+--- a/src/os/bluestore/OCDevice.cc
++++ b/src/os/bluestore/OCDevice.cc
+@@ -19,6 +19,7 @@ int OCDevice::open(const std::string &path) {
+   this->dev_path = path;
+   int r = 0;
+ 
++  segmentManager = new SegmentManager();
+   segmentManager->backend = cct->_conf->bdev_ocssd_backend;
+   dout(0) << " OCDevice:" << __func__ << "backend: " << cct->_conf->bdev_ocssd_backend  << dendl;
+   if(cct->_conf->bdev_ocssd_backend == "mock") {
+@@ -31,7 +32,7 @@ int OCDevice::open(const std::string &path) {
+   }
+   else if(cct->_conf->bdev_ocssd_backend == "ocssd")
+   {
+-    this->dev = dev_open("/dev/nvme0n1");
++    this->dev = dev_open(path.c_str());
+     if(!this->dev)
+     {
+       return -1;
+@@ -41,6 +42,7 @@ int OCDevice::open(const std::string &path) {
+   {
+     return -1;
+   }
++
+   BlockDevice::size = segmentManager->nr_lba_segments * segmentManager->segment_size;
+   BlockDevice::block_size = segmentManager->flash_page_size;
+   ceph_assert(block_size == cct->_conf->bdev_block_size);
+@@ -90,14 +92,8 @@ int OCDevice::read(uint64_t off, uint64_t len, bufferlist *pbl,
+     for(auto s : sv)
+     {
+       if(s){
+-	if(segmentManager->backend == "mock")
+-        	l = s->read(fd, buf + l, off1 % s->size ,len);
+-	else if(segmentManager->backend == "ocssd")
+-        	l = s->read(dev, buf + l, off1 % s->size ,len);
+-	else
+-	{
+-		ceph_assert(0);
+-	}
++
++        l = s->read(dev, buf + l, off1 % s->size ,len);
+         off1 += l;
+         len -= l;
+       }
+@@ -108,12 +104,6 @@ int OCDevice::read(uint64_t off, uint64_t len, bufferlist *pbl,
+   pbl->clear();
+   pbl->push_back(std::move(p));
+ 
+-  dout(20) << __func__ << " dump length =  " << pbl->length() << dendl;
+-  dout(20) << __func__ << " dump buffer content = ";
+-  pbl->hexdump(*_dout);
+-  *_dout << dendl;
+-  
+-
+   return 0;
+ }
+ 
+@@ -149,11 +139,6 @@ int OCDevice::write(uint64_t off, bufferlist& bl, bool buffered)
+   else
+     dout(10) << " OCDevice::write " << "Bad , the data buffer is contiguous, copy triggered" << dendl;
+ 
+-  dout(20) << __func__ << " dump length =  " << bl.length() << dendl;
+-  dout(20) << __func__ << " dump buffer content = ";
+-  bl.hexdump(*_dout);
+-  *_dout << dendl;
+-
+   const char *data = bl.c_str();
+   auto  [s1,s2]  = segmentManager->get_segment(off,len);
+ 
+@@ -174,15 +159,8 @@ int OCDevice::write(uint64_t off, bufferlist& bl, bool buffered)
+              << dendl;
+ 
+     ceph_assert(off % s1->size == s1->nvm_obj_off);
+-    if(segmentManager->backend == "mock")
+-	s1->append(fd,(void *)data,len);
+-    else if(segmentManager->backend == "ocssd")	
+-    	s1->append(dev, (void *)data , len);
+-    else
+-    {
+-	dout(0) << __func__ << "Unkown ocdevice backend " << dendl;
+-	ceph_assert(false);
+-    }
++    s1->append(dev, (void *)data , len);
++
+     //MOCK , must persist meta data of device
+     //segmentManager->_mock_coredump();
+     return 0;
+@@ -216,23 +194,9 @@ int OCDevice::write(uint64_t off, bufferlist& bl, bool buffered)
+              "}"
+              << dendl;
+ 
+-    ceph_assert(s2->nvm_obj_off == 0);  
+-    if(segmentManager->backend == "mock")
+-    {
+-	s1->append(fd, data1, l1);
+-        s2->append(fd, data2 ,l2);
+-    }
+-    else if(segmentManager->backend == "ocssd")
+-    {
+-	
+-    	s1->append(dev , data1, l1);
+-   	s2->append(dev , data2, l2);
+-    }	
+-    else
+-    {
+-	dout(0) << __func__ << "Unkown ocdevice backend " << dendl;
+-	ceph_assert(false);
+-    }
++    ceph_assert(s2->nvm_obj_off == 0);
++    s1->append(dev , data1, l1);
++    s2->append(dev , data2 ,l2);
+ 
+     //MOCK , must persist meta data of device
+     //segmentManager->_mock_coredump();
+@@ -258,7 +222,7 @@ int OCDevice::collect_metadata(const string& prefix, map<string,string> *pm) con
+   (*pm)[prefix + "size"] = stringify(get_size());
+   (*pm)[prefix + "block_size"] = stringify(get_block_size());
+   (*pm)[prefix + "driver"] = "libobj";
+-  (*pm)[prefix + "type"] = "OCSSD";
++  (*pm)[prefix + "type"] = "nvme";
+   (*pm)[prefix + "access_mode"] = "libobj";
+   return 0;
+ }
+@@ -295,8 +259,7 @@ int SegmentManager::new_nvm_obj(uint32_t *obj_id, uint32_t *obj_size) {
+   else if (backend == "ocssd"){
+     int r = obj_create(dev , obj_id, obj_size);
+     ceph_assert( r == 0);
+-    ceph_assert( *obj_size == segment_size / 4096);
+-    *obj_size *= 4096;
++    ceph_assert( *obj_size == segment_size);
+     return 0;
+   }
+   else {
+@@ -329,14 +292,13 @@ std::tuple<Segment *, Segment *> SegmentManager::get_segment(uint64_t offset, ui
+     uint64_t seg_id = offset / segment_size;
+     if (seg_map.count(seg_id) < 1)
+     {
+-      auto bdev_lba_aligned = ( offset / segment_size) * segment_size;
++      auto bdev_lba_aligned = p2align(offset,segment_size);
+ 
+       new_nvm_obj(&new_id, &obj_size);
+ 
+       Segment* segment = new Segment(bdev_lba_aligned,new_id,segment_size);
+       dout(10) << __func__ << " NewSegment " <<
+-               " pid = " << getpid() << std::hex <<
+-	       " segment bdev_lba = " << bdev_lba_aligned << std::dec <<
++               " pid = " << getpid() <<
+                " segment size = " << segment->size / ( 1024 *1024 ) << " MiB " <<
+                " segmentManager ptr = " << this <<
+                " seg_id = "          << seg_id <<
+@@ -470,11 +432,13 @@ void SegmentManager::_mock_coredump() {
+   dout(10) << __func__ << " dump meta " << dendl;
+   bufferlist bl;
+   dout(10) << __func__ <<
++           " last_id = " << mock_obj_id.load() <<
+            " seg_map size = " << seg_map.size() <<
+            " seg_map= " << this->dump_seg_map() <<
+            " sizeof(seg_map size) = " << sizeof(seg_map.size()) <<
+   dendl;
+-  
++
++  encode(mock_obj_id.load(), bl);
+   encode(seg_map.size(),bl);
+   for(auto k : seg_map)
+   {
+@@ -484,15 +448,15 @@ void SegmentManager::_mock_coredump() {
+     encode(s->nvm_obj_off,bl);
+     encode(s->size,bl);
+   }
+-
+   ofstream f(corefile,ios::binary);
+   bl.write_stream(f);
+   f.close();
+ 
+-  dout(20) << __func__ << " dump length =  " << bl.length() << dendl;
+-  dout(20) << __func__ << " dump buffer content = ";
+-  bl.hexdump(*_dout);
+-  *_dout << dendl;
++//      dout(0) << __func__ << " dump length =  " << bl.length() <<
++//        dendl;
++//      dout(0) << __func__ << " dump buffer content = ";
++//      bl.hexdump(*_dout);
++//      *_dout << dendl;
+ 
+ #endif
+ }
+@@ -505,11 +469,10 @@ void SegmentManager::_mock_coreback() {
+   dout(0) << __func__ << " recovery " << dendl;
+   SpinLock spinLock(&s);
+   ifstream f(corefile,ios::binary);
+-  ostringstream os;
+-  os << f.rdbuf();
+-  string s = os.str();
++  string s;
++  f >> s;
+   f.close();
+-  dout(10) << __func__ << " dump file size probed by string s = " << s.size() << dendl;
++  //dout(10) << __func__ << " dump file size probed by string s = " << s.size() << dendl;
+   if(s.size() == 0){
+     ceph_assert(false);
+   }
+@@ -517,12 +480,14 @@ void SegmentManager::_mock_coreback() {
+   b.append(s);
+   bufferlist::iterator bl = b.begin();
+ 
+-  dout(10) << __func__ << " dump file size probed by bl = " << b.length() << dendl;
++  //dout(10) << __func__ << " dump file size probed by bl = " << b.length() << dendl;
+   uint32_t last_id ;
+   decltype(seg_map.size()) n;
+ 
++  decode(last_id,  bl);
++  dout(10) << __func__ << " last id " << last_id << dendl;
+   decode(n,bl);
+-  dout(10) << __func__ << " map size: " << n << dendl;
++  dout(10) << __func__ << " map size" << n << dendl;
+ 
+ 
+   Segment zom(0,0,0);
+@@ -536,12 +501,11 @@ void SegmentManager::_mock_coreback() {
+ 
+   while(n--)
+   {
+-    decode(bloff,bl);
+     decode(obj_id,bl);
+     decode(obj_off,bl);
++    decode(bloff,bl);
+     decode(size,bl);
+     auto idx = bloff / segment_size;
+-    dout(10) << __func__<< " prepare to recovery: " << obj_id << dendl; 
+     seg_map[idx] = new Segment(bloff,obj_id,size);
+     seg_map[idx] ->nvm_obj_off = obj_off;
+   }
+diff --git a/src/os/bluestore/OCDevice.h b/src/os/bluestore/OCDevice.h
+index 2429f8c..a24743e 100644
+--- a/src/os/bluestore/OCDevice.h
++++ b/src/os/bluestore/OCDevice.h
+@@ -39,7 +39,7 @@ public:
+     uint32_t  nvm_obj_off = 0;    //
+     uint32_t  size;
+ 
+-    std::bitset< 96 * 1024 > invalid_bitmap;
++    std::bitset< 512 * 128 > invalid_bitmap;
+ 
+     Segment(uint64_t bdev_lba_offset, uint32_t nvm_obj_id , uint32_t _size) : bdev_lba_offset(bdev_lba_offset),
+                                                                       nvm_obj_id(nvm_obj_id),size(_size)
+@@ -85,24 +85,21 @@ public:
+     {
+        io_u io;
+        io.data = buf;
+-       io.data_size = len / 4096 ;
++       io.data_size = len;
+        io.obj_id = this->nvm_obj_id;
+-       io.obj_off= this->nvm_obj_off / 4096;
++       io.obj_off= this->nvm_obj_off;
+        int r = obj_write(dev,&io);
+        ceph_assert( r == 0);
+-       nvm_obj_off += len;
+-       return len;
+     }
+     uint64_t read(struct nvm_dev *dev , void *buf , uint32_t off ,uint32_t len )
+     {
+       io_u io;
+       io.data = buf;
+-      io.data_size = len / 4096;
++      io.data_size = len;
+       io.obj_id = this->nvm_obj_id;
+-      io.obj_off= off / 4096 ;
++      io.obj_off= off;
+       int r = obj_read(dev,&io);
+       ceph_assert( r == 0);
+-      return len;
+     }
+ 
+ 
+@@ -152,8 +149,8 @@ public:
+ 
+ public:
+     string   backend                =  "mock";
+-    uint64_t flash_page_size        =  4096;               // 4KiB
+-    uint32_t segment_size           =  384 *(1024 * 1024); // 384MiB
++    uint64_t flash_page_size        =  4096;               //4KiB
++    uint32_t segment_size           =  384 *(1024 * 1024); //384MiB
+     uint64_t nr_reserved_segments   =  1;
+     uint64_t nr_lba_segments        =  (10 -1);
+     struct nvm_dev*  dev = nullptr;   //nvm_dev
+@@ -222,7 +219,6 @@ public:
+     dcb_priv(d_cbpriv)
+     {
+       BlockDevice::rotational = false;
+-      segmentManager = new SegmentManager();
+     }
+ private:
+     std::string     dev_path = "";    //sys link to
+diff --git a/src/pybind/ceph_argparse.pyc b/src/pybind/ceph_argparse.pyc
+index da169cd..96598fb 100644
+Binary files a/src/pybind/ceph_argparse.pyc and b/src/pybind/ceph_argparse.pyc differ
+diff --git a/src/pybind/ceph_daemon.pyc b/src/pybind/ceph_daemon.pyc
+index 15e87c5..fc5b838 100644
+Binary files a/src/pybind/ceph_daemon.pyc and b/src/pybind/ceph_daemon.pyc differ
+diff --git a/src/pybind/cephfs/cephfs.c b/src/pybind/cephfs/cephfs.c
+index 6169b62..e9c1a0e 100644
+--- a/src/pybind/cephfs/cephfs.c
++++ b/src/pybind/cephfs/cephfs.c
+@@ -1,4 +1,4 @@
+-/* Generated by Cython 0.19 on Tue Jan  8 23:58:30 2019 */
++/* Generated by Cython 0.19 on Thu Nov 15 20:39:07 2018 */
+ 
+ #define PY_SSIZE_T_CLEAN
+ #ifndef CYTHON_USE_PYLONG_INTERNALS
+diff --git a/src/pybind/mgr/balancer/__init__.pyc b/src/pybind/mgr/balancer/__init__.pyc
+index 8ce6bde..e6067af 100644
+Binary files a/src/pybind/mgr/balancer/__init__.pyc and b/src/pybind/mgr/balancer/__init__.pyc differ
+diff --git a/src/pybind/mgr/balancer/module.pyc b/src/pybind/mgr/balancer/module.pyc
+index 6ba59b3..3eecec9 100644
+Binary files a/src/pybind/mgr/balancer/module.pyc and b/src/pybind/mgr/balancer/module.pyc differ
+diff --git a/src/pybind/mgr/dashboard/__init__.pyc b/src/pybind/mgr/dashboard/__init__.pyc
+index 7096617..1d6c246 100644
+Binary files a/src/pybind/mgr/dashboard/__init__.pyc and b/src/pybind/mgr/dashboard/__init__.pyc differ
+diff --git a/src/pybind/mgr/dashboard/controllers/__init__.pyc b/src/pybind/mgr/dashboard/controllers/__init__.pyc
+index 09d564c..5b7dec0 100644
+Binary files a/src/pybind/mgr/dashboard/controllers/__init__.pyc and b/src/pybind/mgr/dashboard/controllers/__init__.pyc differ
+diff --git a/src/pybind/mgr/dashboard/controllers/auth.pyc b/src/pybind/mgr/dashboard/controllers/auth.pyc
+index 8055c92..6112179 100644
+Binary files a/src/pybind/mgr/dashboard/controllers/auth.pyc and b/src/pybind/mgr/dashboard/controllers/auth.pyc differ
+diff --git a/src/pybind/mgr/dashboard/module.pyc b/src/pybind/mgr/dashboard/module.pyc
+index 45b3e06..ba818f1 100644
+Binary files a/src/pybind/mgr/dashboard/module.pyc and b/src/pybind/mgr/dashboard/module.pyc differ
+diff --git a/src/pybind/mgr/dashboard/settings.pyc b/src/pybind/mgr/dashboard/settings.pyc
+index 6b3b080..9b918f5 100644
+Binary files a/src/pybind/mgr/dashboard/settings.pyc and b/src/pybind/mgr/dashboard/settings.pyc differ
+diff --git a/src/pybind/mgr/dashboard/tools.pyc b/src/pybind/mgr/dashboard/tools.pyc
+index 697778e..90dd89c 100644
+Binary files a/src/pybind/mgr/dashboard/tools.pyc and b/src/pybind/mgr/dashboard/tools.pyc differ
+diff --git a/src/pybind/mgr/hello/__init__.pyc b/src/pybind/mgr/hello/__init__.pyc
+index 9631644..bf629b7 100644
+Binary files a/src/pybind/mgr/hello/__init__.pyc and b/src/pybind/mgr/hello/__init__.pyc differ
+diff --git a/src/pybind/mgr/hello/module.pyc b/src/pybind/mgr/hello/module.pyc
+index 91ed5fb..c2de33d 100644
+Binary files a/src/pybind/mgr/hello/module.pyc and b/src/pybind/mgr/hello/module.pyc differ
+diff --git a/src/pybind/mgr/influx/__init__.pyc b/src/pybind/mgr/influx/__init__.pyc
+index a186c64..54fd70a 100644
+Binary files a/src/pybind/mgr/influx/__init__.pyc and b/src/pybind/mgr/influx/__init__.pyc differ
+diff --git a/src/pybind/mgr/influx/module.pyc b/src/pybind/mgr/influx/module.pyc
+index 91050b0..b56ee36 100644
+Binary files a/src/pybind/mgr/influx/module.pyc and b/src/pybind/mgr/influx/module.pyc differ
+diff --git a/src/pybind/mgr/iostat/__init__.pyc b/src/pybind/mgr/iostat/__init__.pyc
+index 54dd6d6..8957a8d 100644
+Binary files a/src/pybind/mgr/iostat/__init__.pyc and b/src/pybind/mgr/iostat/__init__.pyc differ
+diff --git a/src/pybind/mgr/iostat/module.pyc b/src/pybind/mgr/iostat/module.pyc
+index 7f0367c..d6db5af 100644
+Binary files a/src/pybind/mgr/iostat/module.pyc and b/src/pybind/mgr/iostat/module.pyc differ
+diff --git a/src/pybind/mgr/localpool/__init__.pyc b/src/pybind/mgr/localpool/__init__.pyc
+index fdcb481..32824fb 100644
+Binary files a/src/pybind/mgr/localpool/__init__.pyc and b/src/pybind/mgr/localpool/__init__.pyc differ
+diff --git a/src/pybind/mgr/localpool/module.pyc b/src/pybind/mgr/localpool/module.pyc
+index 52111b3..c733240 100644
+Binary files a/src/pybind/mgr/localpool/module.pyc and b/src/pybind/mgr/localpool/module.pyc differ
+diff --git a/src/pybind/mgr/mgr_module.pyc b/src/pybind/mgr/mgr_module.pyc
+index 9368cf5..661e72b 100644
+Binary files a/src/pybind/mgr/mgr_module.pyc and b/src/pybind/mgr/mgr_module.pyc differ
+diff --git a/src/pybind/mgr/prometheus/__init__.pyc b/src/pybind/mgr/prometheus/__init__.pyc
+index 1cd10fa..f11af13 100644
+Binary files a/src/pybind/mgr/prometheus/__init__.pyc and b/src/pybind/mgr/prometheus/__init__.pyc differ
+diff --git a/src/pybind/mgr/prometheus/module.pyc b/src/pybind/mgr/prometheus/module.pyc
+index 4cc4b92..bf43867 100644
+Binary files a/src/pybind/mgr/prometheus/module.pyc and b/src/pybind/mgr/prometheus/module.pyc differ
+diff --git a/src/pybind/mgr/restful/__init__.pyc b/src/pybind/mgr/restful/__init__.pyc
+index 721d7c9..0b215da 100644
+Binary files a/src/pybind/mgr/restful/__init__.pyc and b/src/pybind/mgr/restful/__init__.pyc differ
+diff --git a/src/pybind/mgr/restful/api/__init__.pyc b/src/pybind/mgr/restful/api/__init__.pyc
+index 6193802..aae0e23 100644
+Binary files a/src/pybind/mgr/restful/api/__init__.pyc and b/src/pybind/mgr/restful/api/__init__.pyc differ
+diff --git a/src/pybind/mgr/restful/api/config.pyc b/src/pybind/mgr/restful/api/config.pyc
+index e65fb57..1123fb5 100644
+Binary files a/src/pybind/mgr/restful/api/config.pyc and b/src/pybind/mgr/restful/api/config.pyc differ
+diff --git a/src/pybind/mgr/restful/api/crush.pyc b/src/pybind/mgr/restful/api/crush.pyc
+index f43cf93..02eb444 100644
+Binary files a/src/pybind/mgr/restful/api/crush.pyc and b/src/pybind/mgr/restful/api/crush.pyc differ
+diff --git a/src/pybind/mgr/restful/api/doc.pyc b/src/pybind/mgr/restful/api/doc.pyc
+index 282d754..ab08047 100644
+Binary files a/src/pybind/mgr/restful/api/doc.pyc and b/src/pybind/mgr/restful/api/doc.pyc differ
+diff --git a/src/pybind/mgr/restful/api/mon.pyc b/src/pybind/mgr/restful/api/mon.pyc
+index 250eae4..0a057a5 100644
+Binary files a/src/pybind/mgr/restful/api/mon.pyc and b/src/pybind/mgr/restful/api/mon.pyc differ
+diff --git a/src/pybind/mgr/restful/api/osd.pyc b/src/pybind/mgr/restful/api/osd.pyc
+index 5c17ca2..a6d7545 100644
+Binary files a/src/pybind/mgr/restful/api/osd.pyc and b/src/pybind/mgr/restful/api/osd.pyc differ
+diff --git a/src/pybind/mgr/restful/api/pool.pyc b/src/pybind/mgr/restful/api/pool.pyc
+index 5efe345..591ba1b 100644
+Binary files a/src/pybind/mgr/restful/api/pool.pyc and b/src/pybind/mgr/restful/api/pool.pyc differ
+diff --git a/src/pybind/mgr/restful/api/request.pyc b/src/pybind/mgr/restful/api/request.pyc
+index 9b136fb..a9b7887 100644
+Binary files a/src/pybind/mgr/restful/api/request.pyc and b/src/pybind/mgr/restful/api/request.pyc differ
+diff --git a/src/pybind/mgr/restful/api/server.pyc b/src/pybind/mgr/restful/api/server.pyc
+index e6e2862..0b77af5 100644
+Binary files a/src/pybind/mgr/restful/api/server.pyc and b/src/pybind/mgr/restful/api/server.pyc differ
+diff --git a/src/pybind/mgr/restful/common.pyc b/src/pybind/mgr/restful/common.pyc
+index 4d5926c..15cf67c 100644
+Binary files a/src/pybind/mgr/restful/common.pyc and b/src/pybind/mgr/restful/common.pyc differ
+diff --git a/src/pybind/mgr/restful/context.pyc b/src/pybind/mgr/restful/context.pyc
+index 848b0f7..1b1b033 100644
+Binary files a/src/pybind/mgr/restful/context.pyc and b/src/pybind/mgr/restful/context.pyc differ
+diff --git a/src/pybind/mgr/restful/decorators.pyc b/src/pybind/mgr/restful/decorators.pyc
+index de94a4d..34f460a 100644
+Binary files a/src/pybind/mgr/restful/decorators.pyc and b/src/pybind/mgr/restful/decorators.pyc differ
+diff --git a/src/pybind/mgr/restful/hooks.pyc b/src/pybind/mgr/restful/hooks.pyc
+index 2efc12e..49f3bf6 100644
+Binary files a/src/pybind/mgr/restful/hooks.pyc and b/src/pybind/mgr/restful/hooks.pyc differ
+diff --git a/src/pybind/mgr/restful/module.pyc b/src/pybind/mgr/restful/module.pyc
+index 7c52be0..adf0bd2 100644
+Binary files a/src/pybind/mgr/restful/module.pyc and b/src/pybind/mgr/restful/module.pyc differ
+diff --git a/src/pybind/mgr/selftest/__init__.pyc b/src/pybind/mgr/selftest/__init__.pyc
+index 1fc2185..34a2b25 100644
+Binary files a/src/pybind/mgr/selftest/__init__.pyc and b/src/pybind/mgr/selftest/__init__.pyc differ
+diff --git a/src/pybind/mgr/selftest/module.pyc b/src/pybind/mgr/selftest/module.pyc
+index 015406f..6da1d09 100644
+Binary files a/src/pybind/mgr/selftest/module.pyc and b/src/pybind/mgr/selftest/module.pyc differ
+diff --git a/src/pybind/mgr/smart/__init__.pyc b/src/pybind/mgr/smart/__init__.pyc
+index 578b00e..1685075 100644
+Binary files a/src/pybind/mgr/smart/__init__.pyc and b/src/pybind/mgr/smart/__init__.pyc differ
+diff --git a/src/pybind/mgr/smart/module.pyc b/src/pybind/mgr/smart/module.pyc
+index 3c58523..440118f 100644
+Binary files a/src/pybind/mgr/smart/module.pyc and b/src/pybind/mgr/smart/module.pyc differ
+diff --git a/src/pybind/mgr/status/__init__.pyc b/src/pybind/mgr/status/__init__.pyc
+index 76b3c6a..a06beed 100644
+Binary files a/src/pybind/mgr/status/__init__.pyc and b/src/pybind/mgr/status/__init__.pyc differ
+diff --git a/src/pybind/mgr/status/module.pyc b/src/pybind/mgr/status/module.pyc
+index 166882d..46a39fc 100644
+Binary files a/src/pybind/mgr/status/module.pyc and b/src/pybind/mgr/status/module.pyc differ
+diff --git a/src/pybind/mgr/telegraf/__init__.pyc b/src/pybind/mgr/telegraf/__init__.pyc
+index 5818451..afdbf19 100644
+Binary files a/src/pybind/mgr/telegraf/__init__.pyc and b/src/pybind/mgr/telegraf/__init__.pyc differ
+diff --git a/src/pybind/mgr/telegraf/basesocket.pyc b/src/pybind/mgr/telegraf/basesocket.pyc
+index 5d3ca5e..09490f3 100644
+Binary files a/src/pybind/mgr/telegraf/basesocket.pyc and b/src/pybind/mgr/telegraf/basesocket.pyc differ
+diff --git a/src/pybind/mgr/telegraf/module.pyc b/src/pybind/mgr/telegraf/module.pyc
+index a39f9b8..ec16041 100644
+Binary files a/src/pybind/mgr/telegraf/module.pyc and b/src/pybind/mgr/telegraf/module.pyc differ
+diff --git a/src/pybind/mgr/telegraf/protocol.pyc b/src/pybind/mgr/telegraf/protocol.pyc
+index 3b82284..3355b7a 100644
+Binary files a/src/pybind/mgr/telegraf/protocol.pyc and b/src/pybind/mgr/telegraf/protocol.pyc differ
+diff --git a/src/pybind/mgr/telegraf/utils.pyc b/src/pybind/mgr/telegraf/utils.pyc
+index 996cfe4..8ec7062 100644
+Binary files a/src/pybind/mgr/telegraf/utils.pyc and b/src/pybind/mgr/telegraf/utils.pyc differ
+diff --git a/src/pybind/mgr/telemetry/__init__.pyc b/src/pybind/mgr/telemetry/__init__.pyc
+index f94fa7f..321df55 100644
+Binary files a/src/pybind/mgr/telemetry/__init__.pyc and b/src/pybind/mgr/telemetry/__init__.pyc differ
+diff --git a/src/pybind/mgr/telemetry/module.pyc b/src/pybind/mgr/telemetry/module.pyc
+index d83e561..ac866e3 100644
+Binary files a/src/pybind/mgr/telemetry/module.pyc and b/src/pybind/mgr/telemetry/module.pyc differ
+diff --git a/src/pybind/mgr/zabbix/__init__.pyc b/src/pybind/mgr/zabbix/__init__.pyc
+index 3793862..f0847ec 100644
+Binary files a/src/pybind/mgr/zabbix/__init__.pyc and b/src/pybind/mgr/zabbix/__init__.pyc differ
+diff --git a/src/pybind/mgr/zabbix/module.pyc b/src/pybind/mgr/zabbix/module.pyc
+index 27a13ec..5d48f61 100644
+Binary files a/src/pybind/mgr/zabbix/module.pyc and b/src/pybind/mgr/zabbix/module.pyc differ
+diff --git a/src/pybind/rados/rados.c b/src/pybind/rados/rados.c
+index ad677ab..688eec8 100644
+--- a/src/pybind/rados/rados.c
++++ b/src/pybind/rados/rados.c
+@@ -1,4 +1,4 @@
+-/* Generated by Cython 0.19 on Wed Jan  9 00:26:46 2019 */
++/* Generated by Cython 0.19 on Thu Nov 15 20:39:58 2018 */
+ 
+ #define PY_SSIZE_T_CLEAN
+ #ifndef CYTHON_USE_PYLONG_INTERNALS
+diff --git a/src/test/objectstore/demo.cc b/src/test/objectstore/demo.cc
+index d9f6cb1..56344b6 100644
+--- a/src/test/objectstore/demo.cc
++++ b/src/test/objectstore/demo.cc
+@@ -57,24 +57,9 @@ int main()
+ {
+ 
+   //Imagine we have a
+-  struct nvm_dev *dev = dev_open("/dev/nvme0n1");
+-  if(!dev){
+-	printf("Open err!");
+-	return 1;
+-  }
+-	
+-	
+-  unsigned int oid,osize;
+-  for(int i=0 ; i < 1 ; ++i) {
+-  	obj_create(dev,&oid,&osize);  
+-  	printf("oid=%u,osize=%u\n",oid,osize);
+-  }
+-  
+-	
++  dev_open("1234.blk");
+ 
+ 
+-  dev_close(dev);
+-
+ 
+   return 0;
+-}
++}
+\ No newline at end of file
+diff --git a/src/vstart.sh b/src/vstart.sh
+index e89dfd5..b889092 100755
+--- a/src/vstart.sh
++++ b/src/vstart.sh
+@@ -533,31 +533,28 @@ $DAEMONOPTS
+ 
+ 
+         bdev_debug_use_ramdisk  = true;
+-        bdev_ocssd_enable       = true;
+-	bdev_ocssd_backend	= ocssd;
++        bdev_ocssd_enable       = false;
+ 
+         ;;;;; bluestore block size file size = 5GB
+         bluestore block size = 5368709120
+-        bluestore block create = false
+-	bluestore block path   = /dev/nvme0n1
+-		
+-	bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
++        bluestore block create = true
++	    bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
+         bluestore block db size = 5368709120
+         bluestore block db create = true
+-	bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
++	    bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
+         bluestore block wal size = 1048576000
+         bluestore block wal create = true
+ 
+         osd objectstore = $objectstore
+ 
+-	;;deferred write never be used
+-	bluestore_min_alloc_size = 4096             ;must be 4KB
+-	bluestore_prefer_deferred_size_hdd = 0      ;must be 0
+-	bluestore_prefer_deferred_size_ssd = 0      ;must be 0
++	    ;;deferred write never be used
++	    bluestore_min_alloc_size = 4096             ;must be 4KB
++	    bluestore_prefer_deferred_size_hdd = 0      ;must be 0
++	    bluestore_prefer_deferred_size_ssd = 0      ;must be 0
+ 
+-	;;extra options
+-	bluestore_csum_type = none ; default:crc32
+-	;;bluestore_allocator = bitmap; default:stupid
++	    ;;extra options
++	    bluestore_csum_type = none ; default:crc32
++	    ;;bluestore_allocator = bitmap; default:stupid
+ 
+ 
+ $COSDSHORT
