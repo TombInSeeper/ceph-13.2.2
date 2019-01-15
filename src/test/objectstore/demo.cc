@@ -1,80 +1,78 @@
 //
 // Created by wuyue on 12/14/18.
 //
-extern "C" {
-  #include "libocssd/objssd-nvme.h"
+extern "C"
+{
+ #include "libocssd/objssd-nvme.h"
 }
-#include "os/bluestore/Allocator.h"
 
-
-#include "include/interval_set.h"
-#include "include/buffer.h"
-
-//int main()
-//{
-//
-////  constexpr static uint64_t block_size = 4096;
-////
-////
-////  uint64_t offset = 4095;
-////  bufferlist data;
-////  data.append("123456");
-////
-////  ceph_assert(data.length()< block_size);
-////  ceph_assert(data.is_contiguous());
-////
-////  bufferlist read_buffer;
-////  read_buffer.append_zero(block_size);
-////
-////
-////  bufferlist head,tail;
-////
-////  auto head_length = p2nphase(offset,block_size);
-////
-////  std::cout << "head_length:" << head_length << std::endl;
-////
-////  bufferlist substr;
-////  bufferlist h , t ;
-////  h.append("head");
-////  t.append("tail");
-////
-////  substr.substr_of(data, 1 , 3 ); // 234
-////
-////  bufferlist result;
-////  result.append(h);
-////  result.append(substr);
-////  result.append(t);
-////
-////
-////
-////  std::cout << "result buffers: " << result.get_num_buffers() << "\n";
-////  std::cout << "result :" << result.c_str() << std::endl;
-//
-//
-//}
-
+#include <chrono>
+#include <iostream>
 int main()
 {
 
-  //Imagine we have a
-  struct nvm_dev *dev = dev_open("/dev/nvme0n1");
-  if(!dev){
-	printf("Open err!");
-	return 1;
-  }
-	
-	
-  unsigned int oid,osize;
-  for(int i=0 ; i < 1 ; ++i) {
-  	obj_create(dev,&oid,&osize);  
-  	printf("oid=%u,osize=%u\n",oid,osize);
-  }
-  
-	
+  using namespace std;
+  using namespace chrono;
+
+	struct nvm_dev *dev = dev_open("/dev/nvme0n1");
+	if (!dev)
+	{
+      printf("Open err!");
+      return 1;
+	}
+	cout << ("Open OK!!\n") ;
 
 
-  dev_close(dev);
+	unsigned int obj_id = 30 ,obj_size = 12800;
+	//int r = obj_create(dev,&obj_id,&obj_size);
+
+	char *buf = new char [ obj_size * 4096 ];
+	char *rbuf = new char [ obj_size * 4096 ];
+
+	for (unsigned int i = 0 ;i < obj_size *4096 ; ++i ){
+		buf[i] = i % 127;
+	}
 
 
-  return 0;
+    io_u io;
+	io.data = buf;
+	io.data_size = obj_size;
+	io.obj_id = obj_id;
+	io.obj_off = 0;
+
+	cout << "Write data , length = " << ( obj_size * 4096 ) / ( 1024 *1024 ) << " MiB \n " ;
+	auto start = steady_clock::now();
+	obj_write(dev,&io);
+	auto end = steady_clock::now();
+	auto tspan = duration_cast<duration<double>> (end-start);
+  cout << "Write data , time overhead = " << tspan.count() << " seconds \n " ;
+  cout << "BandWidth: " << ( ( obj_size * 4096 ) / ( 1024 *1024 ) ) / (tspan.count()) << "MiB/s" << endl;
+
+
+
+
+	io.data = rbuf;
+	cout << "Read data , length = " << ( obj_size * 4096 ) / ( 1024 *1024 ) << " MiB \n " ;
+	 auto start1 = steady_clock::now();
+	obj_read(dev,&io);
+	 auto end1 = steady_clock::now();
+	 auto tspan1 = duration_cast<duration<double>> (end1-start1);
+  cout << "Read data , time overhead = " << tspan1.count() << " seconds \n " ;
+  cout << "BandWidth: " << ( ( obj_size * 4096 ) / ( 1024 *1024 ) ) / (tspan1.count()) << "MiB/s" << endl;
+
+
+   /*for(int i = 0 ; i< obj_size *4096 ; ++i ) {
+		if ( buf[i] != rbuf[i] ){
+			cout << std::dec <<" write buf[" << i << "]=" << buf[i] << ",But" << " read buf["<< i << "]=" << rbuf[i] << endl;
+		}
+	}*/
+
+
+
+  	delete[]buf;
+	delete[]rbuf;
+  	dev_close(dev);
+
+	return 0;
+
 }
