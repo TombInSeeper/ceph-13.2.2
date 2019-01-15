@@ -302,6 +302,15 @@ struct nvm_dev* dev_open(const char * dev_path)
     printf("debug in open:%d\n", find_id);
     return dev;
 }
+
+int mark_created(unsigned int obj_id){
+	
+	printf("%s:%u by up level\n",__func__,obj_id);
+	obj_bitmap[obj_id] = 1;
+	return 0;
+}
+
+
 int dev_close(struct nvm_dev *dev)
 {
     free(obj_bitmap);

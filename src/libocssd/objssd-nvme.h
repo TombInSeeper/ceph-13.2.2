@@ -50,4 +50,8 @@ int obj_create(struct nvm_dev *dev, unsigned int *obj_id, unsigned int *obj_4k_s
 int obj_delete(struct nvm_dev *dev, unsigned int obj_id);
 struct nvm_dev* dev_open(const char * dev_path);
 int dev_close(struct nvm_dev *dev);
+
+
+//----------------
+int mark_created(unsigned int obj_id);
 #endif

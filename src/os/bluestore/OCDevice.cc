@@ -43,6 +43,8 @@ int OCDevice::open(const std::string &path)
       return -1;
     }
     segmentManager->dev = this->dev;
+	dout(0) << "OCDevice:" << __func__ << "mark created obj_id to LibOCSSD" << dendl;
+    segmentManager->replay();	
   }
   else
   {
@@ -343,13 +345,11 @@ std::tuple<Segment *, Segment *> SegmentManager::get_segment(uint64_t offset, ui
     uint64_t seg_id = offset / segment_size;
     if (seg_map.count(seg_id) < 1)
     {
-      auto bdev_lba_aligned = (offset / segment_size) * segment_size;
-
+      auto bdev_lba_aligned = seg_id * segment_size;
       new_nvm_obj(&new_id, &obj_size);
-
       Segment *segment = new Segment(bdev_lba_aligned, new_id, segment_size);
 
-	dout(0) << "OCDevice:" << __func__ << " New seg " << *segment << dendl;
+	dout(0) << std::dec << "OCDevice:" << __func__ << " New seg " << *segment << dendl;
       seg_map.insert({seg_id, segment});
     }
     return {seg_map[seg_id], nullptr};
@@ -361,7 +361,7 @@ std::tuple<Segment *, Segment *> SegmentManager::get_segment(uint64_t offset, ui
     ceph_assert(seg_map.count(seg_id1) );
     if(seg_map.count(seg_id2) < 1)
     {
-      auto bdev_lba_aligned = ( (offset + length) / segment_size ) * segment_size;
+      auto bdev_lba_aligned = seg_id2 * segment_size;
       uint32_t new_id = -1;
       new_nvm_obj(&new_id, &obj_size);
       Segment *segment = new Segment(bdev_lba_aligned, new_id, segment_size);
@@ -495,8 +495,8 @@ void SegmentManager::_mock_coredump()
   SpinLock spinLock(&s);
   dout(10) << __func__ << " dump meta " << dendl;
   bufferlist bl;
-  dout(10) << __func__ << " seg_map size = " << seg_map.size() << " seg_map= " << this->dump_seg_map() << " sizeof(seg_map size) = " << sizeof(seg_map.size()) << dendl;
-  //encode(mock)
+  dout(0) << __func__ << " seg_map size = " << seg_map.size() << " seg_map= " << this->dump_seg_map() << " sizeof(seg_map size) = " << sizeof(seg_map.size()) << dendl;
+  encode(mock_obj_id.load(),bl);
   encode(seg_map.size(), bl);
   for (auto k : seg_map)
   {
@@ -517,6 +517,22 @@ void SegmentManager::_mock_coredump()
   *_dout << dendl;
 
 #endif
+}
+
+void SegmentManager::replay()
+{
+    SpinLock spinLock(&s);
+	int count = 0 ;
+	for ( auto k : seg_map ) {
+		auto id = (k.second)->nvm_obj_id;
+		dout(0) << "OCDevice:" <<__func__ << "  mark " << id << " to used " << dendl;
+		mark_created(id);
+		count++;
+	}
+
+	if(count == 0 )
+		dout(0) << "OCDevice:" << __func__ << " Nothing to mark " << dendl;
+
 }
 
 void SegmentManager::_mock_coreback()
@@ -544,7 +560,8 @@ void SegmentManager::_mock_coreback()
   dout(10) << __func__ << " dump file size probed by bl = " << b.length() << dendl;
   uint32_t last_id;
   decltype(seg_map.size()) n;
-
+  
+  decode(last_id,bl);
   decode(n, bl);
   dout(10) << __func__ << " map size: " << n << dendl;
 
@@ -565,8 +582,10 @@ void SegmentManager::_mock_coreback()
     auto idx = bloff / segment_size;
     dout(10) << __func__ << " prepare to recovery: " << obj_id << dendl;
     seg_map[idx] = new Segment(bloff, obj_id, size);
-    seg_map[idx]->nvm_obj_off = obj_off;
+    seg_map[idx]->nvm_obj_off = obj_off;	
   }
-  dout(10) << __func__ << " existed obj " << this->dump_seg_map() << dendl;
+  dout(0) << __func__ << " existed obj " << this->dump_seg_map() << dendl;
+  
+
 #endif
 }

@@ -151,7 +151,7 @@ private:
   ceph::spinlock s;
   std::mutex seg_map_lock;
   std::map<uint64_t, Segment *> seg_map; // offset / seg_size = seg_id; mapping seg_id => Seg
-  atomic_uint32_t mock_obj_id = {1};
+  atomic_uint32_t mock_obj_id = {30};
 
   //Because objssd now cannot persist meta data of objs, this is a trick
   std::string corefile = "/tmp/ocssd.core";
@@ -168,7 +168,10 @@ public:
   uint64_t nr_lba_segments = 1000;
   struct nvm_dev *dev = nullptr; //nvm_dev
 
-  int new_nvm_obj(uint32_t *obj_id, uint32_t *obj_size);
+  int  new_nvm_obj(uint32_t *obj_id, uint32_t *obj_size);
+
+  /// When we open ocssd device ,we must mark obj_id used that we have written
+  void replay();
 
   bool is_fall_within_the_same_segment(uint64_t offset, uint32_t length);
 
