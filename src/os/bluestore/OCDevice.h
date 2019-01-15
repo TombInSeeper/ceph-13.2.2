@@ -165,7 +165,7 @@ public:
   uint64_t flash_page_size = 4096;             // 4KiB
   uint32_t segment_size = 312 * (1024 * 1024); // 384MiB
   uint64_t nr_reserved_segments = 1;
-  uint64_t nr_lba_segments = (100 - 1);
+  uint64_t nr_lba_segments = 1000;
   struct nvm_dev *dev = nullptr; //nvm_dev
 
   int new_nvm_obj(uint32_t *obj_id, uint32_t *obj_size);

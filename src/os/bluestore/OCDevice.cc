@@ -96,10 +96,16 @@ int OCDevice::read(uint64_t off, uint64_t len, bufferlist *pbl,
   {
     auto [s1, s2] = segmentManager->get_segment(off, len);
     std::vector<Segment *> sv = {s1, s2};
+    if(s1 && s2 ){
+	dout(-1) << "OCDevice:"<< __func__ << "OverLap Two Segments" << dendl;
+    }
     for (auto s : sv)
     {
       if (s)
       {
+	dout(0) << "OCDevice : " <<   __func__  << ": " << std::hex << "off:0x" << off1 
+		<<  " len:0x " << len 
+		<< std::dec << dendl;  
         if (segmentManager->backend == "mock")
           l = s->read(fd, buf + l, off1 % s->size, len);
         else if (segmentManager->backend == "ocssd")
@@ -152,7 +158,7 @@ int OCDevice::write(uint64_t off, bufferlist &bl, bool buffered)
 
   ceph_assert(len % segmentManager->flash_page_size == 0);
 
-  dout(10) << " OCDevice::write "
+  dout(0) << " OCDevice::write "
            << " buffer is contiguous :" << bl.is_contiguous() << dendl;
 
   if (bl.is_contiguous())
@@ -172,12 +178,12 @@ int OCDevice::write(uint64_t off, bufferlist &bl, bool buffered)
 
   if (s2 == nullptr)
   {
-    dout(10) << " OCDevice::write "
+    dout(0) << " OCDevice::write "
              << "I'm now tring to append data to ONE superblock"
              << " obj_physical_id = " << s1->nvm_obj_id << " obj_logical_id = " << s1->bdev_lba_offset / (s1->size) << std::hex << " obj_bdev_lba_off = " << s1->bdev_lba_offset << " obj_nvm_off = " << s1->nvm_obj_off << " blue_offset = " << (off) << " data length  = " << bl.length() << std::dec
              << dendl;
 
-    dout(10) << std::hex << " off % s1->size = 0x" << off % s1->size << " s1->nvm_obj_off = 0x" << s1->nvm_obj_off
+    dout(0) << std::hex << " off % s1->size = 0x" << off % s1->size << " s1->nvm_obj_off = 0x" << s1->nvm_obj_off
              << std::dec
              << dendl;
 
@@ -200,18 +206,18 @@ int OCDevice::write(uint64_t off, bufferlist &bl, bool buffered)
 
     void *data1 = (void *)data;
     auto l1 = s1->size - s1->nvm_obj_off;
-    dout(10) << " OCDevice::write "
-             << "I'm now tring to append data to TWO superblocks"
-             << " The first one: {"
+    dout(0)  << " OCDevice::write "
+             << "I'm now tring to append data to TWO superblocks." << dendl;
+    dout(0)  << std::hex <<  " The first one: {"
              << " obj_physical_id = " << s1->nvm_obj_id << " obj_logical_id = " << s1->bdev_lba_offset / (s1->size) << " obj_bdev_lba_off = " << s1->bdev_lba_offset << " obj_nvm_off = " << s1->nvm_obj_off << " blue_offset = " << (off) << " data length  = " << l1 << "}"
              << dendl;
 
     void *data2 = (void *)(data + l1);
     auto l2 = len - l1;
 
-    dout(10) << " The second one: {"
+    dout(0) << " The second one: {"
              << " obj_physical_id = " << s2->nvm_obj_id << " obj_logical_id = " << s2->bdev_lba_offset / (s2->size) << " obj_bdev_lba_off = " << s2->bdev_lba_offset << " obj_nvm_off = " << s2->nvm_obj_off << " blue_offset = " << (off + l1) << " data length  = " << l2 << "}"
-             << dendl;
+             << std::dec << dendl;
 
     ceph_assert(s2->nvm_obj_off == 0);
     if (segmentManager->backend == "mock")
@@ -270,7 +276,7 @@ int OCDevice::queue_discard(interval_set<uint64_t> &p)
 {
   dout(10) << __func__ << " interval_set: " << p << dendl;
   interval_set<uint64_t> free;
-  //segmentManager->segment_discard(p, &free);
+  segmentManager->segment_discard(p, &free);
   if (!free.empty())
   {
     dout(1) << __func__ << std::hex << " GET BACK " << free << std::dec << dendl;
@@ -342,10 +348,8 @@ std::tuple<Segment *, Segment *> SegmentManager::get_segment(uint64_t offset, ui
       new_nvm_obj(&new_id, &obj_size);
 
       Segment *segment = new Segment(bdev_lba_aligned, new_id, segment_size);
-      dout(10) << __func__ << " NewSegment "
-               << " pid = " << getpid() << std::hex << " segment bdev_lba = " << bdev_lba_aligned << std::dec << " segment size = " << segment->size / (1024 * 1024) << " MiB "
-               << " segmentManager ptr = " << this << " seg_id = " << seg_id << " obj_physical_id = " << new_id << " segment ptr = " << segment << " current seg_map.size() = " << seg_map.size() << " current seg_map = " << dump_seg_map() << dendl;
 
+	dout(0) << "OCDevice:" << __func__ << " New seg " << *segment << dendl;
       seg_map.insert({seg_id, segment});
     }
     return {seg_map[seg_id], nullptr};
@@ -354,13 +358,17 @@ std::tuple<Segment *, Segment *> SegmentManager::get_segment(uint64_t offset, ui
   {
     uint64_t seg_id1 = offset / segment_size;
     uint64_t seg_id2 = (offset + length) / (segment_size);
-    //ceph_assert(seg_map.count(seg_id1) && !seg_map.count(seg_id2));
+    ceph_assert(seg_map.count(seg_id1) );
+    if(seg_map.count(seg_id2) < 1)
     {
-      auto bdev_lba_aligned = p2align((offset + length), segment_size);
+      auto bdev_lba_aligned = ( (offset + length) / segment_size ) * segment_size;
       uint32_t new_id = -1;
       new_nvm_obj(&new_id, &obj_size);
       Segment *segment = new Segment(bdev_lba_aligned, new_id, segment_size);
       seg_map[seg_id2] = segment;
+
+	dout(0) << "OCDevice:" << __func__ << " New seg " << *segment << dendl;
+	
     }
     return {seg_map[seg_id1], seg_map[seg_id2]};
   }
@@ -431,10 +439,13 @@ void SegmentManager::_segment_discard(uint64_t offset, uint32_t length, interval
     uint64_t tail_offset, tail_length;
 
     head_offset = offset;
-    head_length = p2nphase(offset, segment_size);
+    if(head_offset % segment_size == 0 )
+	head_length = 0;
+    else
+	head_length = segment_size - (head_offset) % segment_size; 	
 
     tail_offset = (end / segment_size) * segment_size;
-    tail_length = p2phase(end, segment_size);
+    tail_length = (end - tail_offset);
 
     middle_offset = head_offset + head_length;
     middle_length = length - head_length - tail_length;
@@ -485,7 +496,7 @@ void SegmentManager::_mock_coredump()
   dout(10) << __func__ << " dump meta " << dendl;
   bufferlist bl;
   dout(10) << __func__ << " seg_map size = " << seg_map.size() << " seg_map= " << this->dump_seg_map() << " sizeof(seg_map size) = " << sizeof(seg_map.size()) << dendl;
-
+  //encode(mock)
   encode(seg_map.size(), bl);
   for (auto k : seg_map)
   {

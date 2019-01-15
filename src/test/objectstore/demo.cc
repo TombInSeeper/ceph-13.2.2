@@ -17,8 +17,8 @@ int main()
 	struct nvm_dev *dev = dev_open("/dev/nvme0n1");
 	if (!dev)
 	{
-      printf("Open err!");
-      return 1;
+      		printf("Open err!");
+      		return 1;
 	}
 	cout << ("Open OK!!\n") ;
 
@@ -34,7 +34,7 @@ int main()
 	}
 
 
-    io_u io;
+   	io_u io;
 	io.data = buf;
 	io.data_size = obj_size;
 	io.obj_id = obj_id;

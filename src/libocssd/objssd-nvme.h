@@ -15,7 +15,6 @@
 #include <inttypes.h>
 #include <string.h>
 #include <malloc.h>
-#include "./include/liblightnvm.h"
 #include "./src/libnvm_full.h"
 
 
