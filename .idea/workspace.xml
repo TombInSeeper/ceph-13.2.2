@@ -31,8 +31,13 @@
       <config projectName="ceph" targetName="ceph_erasure_code_benchmark" />
       <config projectName="ceph" targetName="unittest_erasure_code" />
       <config projectName="ceph" targetName="librados-config" />
+<<<<<<< HEAD
       <config projectName="ceph" targetName="unittest_mime" />
       <config projectName="ceph" targetName="tags" />
+=======
+      <config projectName="ceph" targetName="ceph-common" />
+      <config projectName="ceph" targetName="unittest_bluestore_types" />
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
       <config projectName="ceph" targetName="cls_refcount_client" />
       <config projectName="ceph" targetName="unittest_erasure_code_shec" />
       <config projectName="ceph" targetName="unittest_mempool" />
@@ -201,7 +206,12 @@
       <config projectName="ceph" targetName="ceph_test_cls_lock" />
       <config projectName="ceph" targetName="cls_lock_client" />
       <config projectName="ceph" targetName="unittest_striper" />
+<<<<<<< HEAD
       <config projectName="ceph" targetName="ceph_test_admin_socket_output" />
+=======
+      <config projectName="ceph" targetName="unittest_crypto" />
+      <config projectName="ceph" targetName="ceph_test_msgr" />
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
       <config projectName="ceph" targetName="compressor_objs" />
       <config projectName="ceph" targetName="unittest_ecbackend" />
       <config projectName="ceph" targetName="global-static" />
@@ -274,8 +284,13 @@
       <config projectName="ceph" targetName="cython_rbd" />
       <config projectName="ceph" targetName="gmock" />
       <config projectName="ceph" targetName="rbd-mirror" />
+<<<<<<< HEAD
       <config projectName="ceph" targetName="ceph_lz4" />
       <config projectName="ceph" targetName="ceph_test_rados" />
+=======
+      <config projectName="ceph" targetName="cephfs_testing" />
+      <config projectName="ceph" targetName="ec_fail_to_initialize" />
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
       <config projectName="ceph" targetName="ceph_test_cls_journal" />
       <config projectName="ceph" targetName="unittest_throttle" />
       <config projectName="ceph" targetName="unittest_direct_messenger" />
@@ -431,6 +446,20 @@
   <component name="ChangeListManager">
     <list default="true" id="fb239463-a751-42ca-86b4-d39acf30ba4a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+<<<<<<< HEAD
+=======
+      <change beforePath="$PROJECT_DIR$/src/boost/b2" beforeDir="false" afterPath="$PROJECT_DIR$/src/boost/b2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/boost/bjam" beforeDir="false" afterPath="$PROJECT_DIR$/src/boost/bjam" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/boost/tools/build/src/engine/bin.linuxx86_64/b2" beforeDir="false" afterPath="$PROJECT_DIR$/src/boost/tools/build/src/engine/bin.linuxx86_64/b2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/boost/tools/build/src/engine/bin.linuxx86_64/bjam" beforeDir="false" afterPath="$PROJECT_DIR$/src/boost/tools/build/src/engine/bin.linuxx86_64/bjam" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/boost/tools/build/src/engine/bootstrap/jam0" beforeDir="false" afterPath="$PROJECT_DIR$/src/boost/tools/build/src/engine/bootstrap/jam0" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/libocssd/objssd-nvme.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/libocssd/objssd-nvme.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/libocssd/objssd-nvme.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/libocssd/objssd-nvme.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/objectstore/demo.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/objectstore/demo.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/vstart.sh" beforeDir="false" afterPath="$PROJECT_DIR$/src/vstart.sh" afterDir="false" />
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/clion-build/" />
@@ -445,6 +474,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:CEPH" />
   <component name="FUSProjectUsageTrigger">
     <session id="-1743232959">
       <usages-collector id="statistics.lifecycle.project">
@@ -452,6 +482,7 @@
           <entry key="project.closed" value="21" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.1" value="2" />
+          <entry key="project.open.time.12" value="1" />
           <entry key="project.open.time.14" value="1" />
           <entry key="project.open.time.16" value="1" />
           <entry key="project.open.time.17" value="1" />
@@ -459,19 +490,24 @@
           <entry key="project.open.time.21" value="1" />
           <entry key="project.open.time.22" value="1" />
           <entry key="project.open.time.24" value="1" />
+          <entry key="project.open.time.28" value="1" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.6" value="17" />
           <entry key="project.open.time.7" value="11" />
           <entry key="project.open.time.8" value="3" />
+<<<<<<< HEAD
           <entry key="project.opened" value="42" />
+=======
+          <entry key="project.opened" value="43" />
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="cc" value="21675" />
+          <entry key="cc" value="22322" />
           <entry key="cpp" value="43" />
           <entry key="gitignore" value="3" />
-          <entry key="h" value="15612" />
+          <entry key="h" value="15716" />
           <entry key="sh" value="628" />
           <entry key="txt" value="1578" />
         </counts>
@@ -481,14 +517,14 @@
           <entry key="Bash" value="628" />
           <entry key="CMakeLists.txt" value="1578" />
           <entry key="Doxygen file" value="3" />
-          <entry key="ObjectiveC" value="37327" />
+          <entry key="ObjectiveC" value="38078" />
           <entry key="PLAIN_TEXT" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="c" value="5" />
-          <entry key="cc" value="47" />
+          <entry key="cc" value="48" />
           <entry key="cpp" value="2" />
           <entry key="gitignore" value="2" />
           <entry key="h" value="44" />
@@ -502,7 +538,7 @@
         <counts>
           <entry key="Bash" value="5" />
           <entry key="CMakeLists.txt" value="26" />
-          <entry key="ObjectiveC" value="98" />
+          <entry key="ObjectiveC" value="99" />
           <entry key="PLAIN_TEXT" value="2" />
           <entry key="Python" value="2" />
           <entry key="YAML" value="1" />
@@ -511,7 +547,56 @@
     </session>
   </component>
   <component name="FileEditorManager">
+<<<<<<< HEAD
     <leaf />
+=======
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="382">
+              <caret line="99" column="103" selection-start-line="99" selection-start-column="103" selection-end-line="99" selection-end-column="103" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="375">
+              <caret line="103" column="49" selection-start-line="103" selection-start-column="45" selection-end-line="103" selection-end-column="49" />
+              <folding>
+                <element signature="e#465#1411#0" />
+                <element signature="e#1413#1585#0" />
+                <element signature="e#1700#1863#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/os/bluestore/BlueStore.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="601">
+              <caret line="157" column="6" selection-start-line="157" selection-start-column="6" selection-end-line="157" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/test/objectstore/demo.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="456">
+              <caret line="24" lean-forward="true" selection-start-line="24" selection-end-line="24" />
+              <folding>
+                <element signature="e#90#107#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -550,8 +635,8 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/src/vstart.sh" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/src/os/bluestore/BlueStore.cc" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/vstart.sh" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/src/test/objectstore/demo.cc" root0="SKIP_INSPECTION" />
   </component>
   <component name="IdeDocumentHistory">
@@ -579,10 +664,10 @@
         <option value="$PROJECT_DIR$/src/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/src/libocssd/main.cpp" />
         <option value="$PROJECT_DIR$/src/os/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/src/test/objectstore/demo.cc" />
-        <option value="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" />
         <option value="$PROJECT_DIR$/src/libocssd/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" />
+        <option value="$PROJECT_DIR$/src/test/objectstore/demo.cc" />
       </list>
     </option>
   </component>
@@ -602,10 +687,16 @@
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds">
+<<<<<<< HEAD
     <option name="x" value="5" />
     <option name="y" value="5" />
     <option name="width" value="1354" />
     <option name="height" value="714" />
+=======
+    <option name="y" value="28" />
+    <option name="width" value="1920" />
+    <option name="height" value="1018" />
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -627,6 +718,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -639,11 +731,23 @@
               <item name="ceph-13.2.2" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="ceph" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ceph-13.2.2" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ceph" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ceph-13.2.2" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="objectstore" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -651,7 +755,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="CMakeSettings" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -3240,12 +3344,21 @@
       <workItem from="1546923958851" duration="1715000" />
       <workItem from="1546925998635" duration="6872000" />
       <workItem from="1546951745318" duration="725000" />
+<<<<<<< HEAD
       <workItem from="1546998625154" duration="599000" />
+=======
+      <workItem from="1547462380900" duration="647000" />
+      <workItem from="1547465363855" duration="1972000" />
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
+<<<<<<< HEAD
     <option name="totallyTimeSpent" value="278186000" />
+=======
+    <option name="totallyTimeSpent" value="280206000" />
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -3257,9 +3370,16 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
+<<<<<<< HEAD
     <frame x="5" y="5" width="1354" height="714" extended-state="0" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21439628" />
+=======
+    <frame x="0" y="28" width="1920" height="1018" extended-state="1" />
+    <editor active="true" />
+    <layout>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16488223" />
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -3270,7 +3390,11 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32994923" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
+<<<<<<< HEAD
       <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49730894" visible="true" weight="0.7743682" />
+=======
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49730894" visible="true" weight="0.24827586" />
+>>>>>>> 7193855ac31bd5e1517a501129dfc9a06c33c3f6
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5043057" side_tool="true" weight="0.6689498" />
       <window_info anchor="bottom" id="Version Control" order="10" show_stripe_button="false" />
       <window_info anchor="bottom" id="CMake" order="11" sideWeight="0.4956943" weight="0.4326484" />
@@ -3459,13 +3583,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/os/bluestore/BlueStore.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="157" column="6" selection-start-line="157" selection-start-column="6" selection-end-line="157" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/vstart.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="422">
@@ -3533,13 +3650,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/os/bluestore/libocssd/objssd-nvme.c" />
     <entry file="file://$PROJECT_DIR$/src/os/bluestore/libocssd/CMakeLists.txt" />
-    <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="46">
-          <caret line="2" column="2" selection-start-line="2" selection-start-column="2" selection-end-line="2" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/os/bluestore/objssd-nvme.h" />
     <entry file="file://$PROJECT_DIR$/src/kv/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
@@ -3590,13 +3700,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/objectstore/demo.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-593">
-          <caret line="4" column="20" selection-start-line="4" selection-start-column="12" selection-end-line="4" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/libocssd/objssd-nvme.c">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1518">
@@ -3608,13 +3711,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="138">
           <caret line="20" column="9" lean-forward="true" selection-start-line="20" selection-start-column="9" selection-end-line="20" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="207">
-          <caret line="9" column="17" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="20" />
         </state>
       </provider>
     </entry>
@@ -3641,6 +3737,42 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/.gitignore">
       <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/os/bluestore/BlueStore.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="601">
+          <caret line="157" column="6" selection-start-line="157" selection-start-column="6" selection-end-line="157" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="103" column="49" selection-start-line="103" selection-start-column="45" selection-end-line="103" selection-end-column="49" />
+          <folding>
+            <element signature="e#465#1411#0" />
+            <element signature="e#1413#1585#0" />
+            <element signature="e#1700#1863#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="382">
+          <caret line="99" column="103" selection-start-line="99" selection-start-column="103" selection-end-line="99" selection-end-column="103" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/objectstore/demo.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="456">
+          <caret line="24" lean-forward="true" selection-start-line="24" selection-end-line="24" />
+          <folding>
+            <element signature="e#90#107#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
     </entry>
   </component>
 </project>

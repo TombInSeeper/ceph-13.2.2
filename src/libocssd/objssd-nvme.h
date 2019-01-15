@@ -11,10 +11,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
 #include <inttypes.h>
 #include <string.h>
 #include <malloc.h>
 #include "./include/liblightnvm.h"
+#include "./src/libnvm_full.h"
+
 
 typedef struct req_tag{
     __u32 req_orig;
@@ -39,6 +42,7 @@ typedef struct {
     unsigned int obj_id;         /**< id of this object */
     unsigned int obj_size;       /**< size of this object */
     __u64 obj_offset;            /**< the writable offset of this object */
+    unsigned int *block_bitmap;
 } nvme_obj;
 
 int obj_read(struct nvm_dev *dev, io_u *io);

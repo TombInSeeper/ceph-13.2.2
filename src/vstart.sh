@@ -532,19 +532,19 @@ $DAEMONOPTS
 
 
 
-        bdev_debug_use_ramdisk  = true;
-        bdev_ocssd_enable       = true;
-	bdev_ocssd_backend	= ocssd;
+        bdev_debug_use_ramdisk  = true
+        bdev_ocssd_enable       = true
+		bdev_ocssd_backend		= ocssd
 
         ;;;;; bluestore block size file size = 5GB
-        bluestore block size = 5368709120
-        bluestore block create = false
-	bluestore block path   = /dev/nvme0n1
+        ;bluestore block size = 5368709120
+        ;bluestore block create = false
+		bluestore block path   = /dev/nvme0n1
 		
-	bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
-        bluestore block db size = 5368709120
+		bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
+        bluestore block db size = 1048576000
         bluestore block db create = true
-	bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
+		bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
         bluestore block wal size = 1048576000
         bluestore block wal create = true
 
@@ -867,10 +867,6 @@ if [ "$debug" -eq 0 ]; then
 else
     echo "** going verbose **"
     CMONDEBUG='
-        debug mon = 20
-        debug paxos = 20
-	    debug mgrc = 20
-        debug ms = 1
         debug bluestore = 30/30
         debug bdev= 30/30
         '
