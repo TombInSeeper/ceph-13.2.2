@@ -5,22 +5,31 @@ extern "C"
 {
  #include "libocssd/objssd-nvme.h"
 }
+#include "os/ObjectStore.h"
+
+
+
+
+
+
 
 #include <chrono>
 #include <iostream>
-int main()
-{
 
-  using namespace std;
-  using namespace chrono;
 
+
+
+using namespace std;
+using namespace chrono;
+
+int test_libocssd_read_write(){
 	struct nvm_dev *dev = dev_open("/dev/nvme0n1");
 	if (!dev)
 	{
-      		printf("Open err!");
-      		return 1;
+		printf("Open err!");
+		return 1;
 	}
-	cout << ("Open OK!!\n") ;
+	cout << ("Open OK!!\n");
 
 
 	unsigned int obj_id = 30 ,obj_size = 12800;
@@ -34,7 +43,7 @@ int main()
 	}
 
 
-   	io_u io;
+	io_u io;
 	io.data = buf;
 	io.data_size = obj_size;
 	io.obj_id = obj_id;
@@ -45,33 +54,59 @@ int main()
 	obj_write(dev,&io);
 	auto end = steady_clock::now();
 	auto tspan = duration_cast<duration<double>> (end-start);
-  cout << "Write data , time overhead = " << tspan.count() << " seconds \n " ;
-  cout << "BandWidth: " << ( ( obj_size * 4096 ) / ( 1024 *1024 ) ) / (tspan.count()) << "MiB/s" << endl;
+	cout << "Write data , time overhead = " << tspan.count() << " seconds \n " ;
+	cout << "BandWidth: " << ( ( obj_size * 4096 ) / ( 1024 *1024 ) ) / (tspan.count()) << "MiB/s" << std::endl;
 
 
 
 
 	io.data = rbuf;
 	cout << "Read data , length = " << ( obj_size * 4096 ) / ( 1024 *1024 ) << " MiB \n " ;
-	 auto start1 = steady_clock::now();
+	auto start1 = steady_clock::now();
 	obj_read(dev,&io);
-	 auto end1 = steady_clock::now();
-	 auto tspan1 = duration_cast<duration<double>> (end1-start1);
-  cout << "Read data , time overhead = " << tspan1.count() << " seconds \n " ;
-  cout << "BandWidth: " << ( ( obj_size * 4096 ) / ( 1024 *1024 ) ) / (tspan1.count()) << "MiB/s" << endl;
+	auto end1 = steady_clock::now();
+	auto tspan1 = duration_cast<duration<double>> (end1-start1);
+	cout << "Read data , time overhead = " << tspan1.count() << " seconds \n " ;
+	cout << "BandWidth: " << ( ( obj_size * 4096 ) / ( 1024 *1024 ) ) / (tspan1.count()) << "MiB/s" << std::endl;
 
 
-   /*for(int i = 0 ; i< obj_size *4096 ; ++i ) {
-		if ( buf[i] != rbuf[i] ){
-			cout << std::dec <<" write buf[" << i << "]=" << buf[i] << ",But" << " read buf["<< i << "]=" << rbuf[i] << endl;
-		}
-	}*/
+	/*for(int i = 0 ; i< obj_size *4096 ; ++i ) {
+   if ( buf[i] != rbuf[i] ){
+     cout << std::dec <<" write buf[" << i << "]=" << buf[i] << ",But" << " read buf["<< i << "]=" << rbuf[i] << endl;
+   }
+ }*/
 
 
 
-  	delete[]buf;
+	delete[]buf;
 	delete[]rbuf;
-  	dev_close(dev);
+	dev_close(dev);
+}
+
+int test_cid_oid_denc(){
+
+	ghobject_t oid;
+	coll_t cid;
+
+	bufferlist bl;
+	encode(oid,bl);
+	encode(cid,bl);
+
+	std::cout << "oid encoded size = " << oid.encoded_size() << std::endl;
+	std::cout << "cid encoded size = " << cid.encoded_size() << std::endl;
+	std::cout << "cid + oid = " << bl.length() << std::endl;
+	return 0;
+}
+
+
+int main()
+{
+
+	int r = 0;
+
+
+	r = test_cid_oid_denc();
+
 
 	return 0;
 
