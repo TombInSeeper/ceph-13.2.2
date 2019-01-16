@@ -96,7 +96,9 @@ public:
   }
   uint64_t read(struct nvm_dev *dev, void *buf, uint32_t off, uint32_t len)
   {
-
+	if(off + len > size)
+		len = size-off;
+	
     dout(10) << "OCDevice:read" << std::hex << "__off:" << off << " __len:" << len << std::dec << dendl;
     io_u io;
     io.data = buf;

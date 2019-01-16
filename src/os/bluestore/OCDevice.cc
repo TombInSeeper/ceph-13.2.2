@@ -105,7 +105,7 @@ int OCDevice::read(uint64_t off, uint64_t len, bufferlist *pbl,
     {
       if (s)
       {
-	dout(0) << "OCDevice : " <<   __func__  << ": " << std::hex << "off:0x" << off1 
+		dout(0) << "OCDevice : " <<   __func__  << ": " << std::hex << "off:0x" << off1 
 		<<  " len:0x " << len 
 		<< std::dec << dendl;  
         if (segmentManager->backend == "mock")
@@ -182,7 +182,7 @@ int OCDevice::write(uint64_t off, bufferlist &bl, bool buffered)
   {
     dout(0) << " OCDevice::write "
              << "I'm now tring to append data to ONE superblock"
-             << " obj_physical_id = " << s1->nvm_obj_id << " obj_logical_id = " << s1->bdev_lba_offset / (s1->size) << std::hex << " obj_bdev_lba_off = " << s1->bdev_lba_offset << " obj_nvm_off = " << s1->nvm_obj_off << " blue_offset = " << (off) << " data length  = " << bl.length() << std::dec
+             << " obj_physical_id = " << std::hex << s1->nvm_obj_id << " obj_logical_id = " << s1->bdev_lba_offset / (s1->size)  << " obj_bdev_lba_off = " << s1->bdev_lba_offset << " obj_nvm_off = " << s1->nvm_obj_off << " blue_offset = " << (off) << " data length  = " << bl.length() << std::dec
              << dendl;
 
     dout(0) << std::hex << " off % s1->size = 0x" << off % s1->size << " s1->nvm_obj_off = 0x" << s1->nvm_obj_off
@@ -212,13 +212,13 @@ int OCDevice::write(uint64_t off, bufferlist &bl, bool buffered)
              << "I'm now tring to append data to TWO superblocks." << dendl;
     dout(0)  << std::hex <<  " The first one: {"
              << " obj_physical_id = " << s1->nvm_obj_id << " obj_logical_id = " << s1->bdev_lba_offset / (s1->size) << " obj_bdev_lba_off = " << s1->bdev_lba_offset << " obj_nvm_off = " << s1->nvm_obj_off << " blue_offset = " << (off) << " data length  = " << l1 << "}"
-             << dendl;
+             << std::dec << dendl;
 
     void *data2 = (void *)(data + l1);
     auto l2 = len - l1;
 
     dout(0) << " The second one: {"
-             << " obj_physical_id = " << s2->nvm_obj_id << " obj_logical_id = " << s2->bdev_lba_offset / (s2->size) << " obj_bdev_lba_off = " << s2->bdev_lba_offset << " obj_nvm_off = " << s2->nvm_obj_off << " blue_offset = " << (off + l1) << " data length  = " << l2 << "}"
+             << std::hex << " obj_physical_id = " << s2->nvm_obj_id << " obj_logical_id = " << s2->bdev_lba_offset / (s2->size) << " obj_bdev_lba_off = " << s2->bdev_lba_offset << " obj_nvm_off = " << s2->nvm_obj_off << " blue_offset = " << (off + l1) << " data length  = " << l2 << "}"
              << std::dec << dendl;
 
     ceph_assert(s2->nvm_obj_off == 0);
@@ -276,17 +276,17 @@ int OCDevice::discard(uint64_t offset, uint64_t len)
 
 int OCDevice::queue_discard(interval_set<uint64_t> &p)
 {
-  dout(10) << __func__ << " interval_set: " << p << dendl;
+  dout(0) << __func__ << " interval_set: " << p << dendl;
   interval_set<uint64_t> free;
-  segmentManager->segment_discard(p, &free);
+  //segmentManager->segment_discard(p, &free);
   if (!free.empty())
   {
-    dout(1) << __func__ << std::hex << " GET BACK " << free << std::dec << dendl;
+    dout(0) << __func__ << std::hex << " GET BACK " << free << std::dec << dendl;
     dcb(dcb_priv, &free);
   }
   else
   {
-    dout(10) << __func__ << std::hex << " NO BACK " << std::dec << dendl;
+    dout(0) << __func__ << std::hex << " NO BACK " << std::dec << dendl;
   }
   return 0;
 }
