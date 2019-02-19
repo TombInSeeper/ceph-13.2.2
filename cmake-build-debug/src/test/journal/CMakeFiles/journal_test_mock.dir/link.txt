@@ -1,2 +1,0 @@
-/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../../lib/libjournal_test_mock.a  CMakeFiles/journal_test_mock.dir/mock/MockJournaler.cc.o
-/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../../lib/libjournal_test_mock.a

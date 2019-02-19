@@ -1,2 +1,0 @@
-/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../../lib/libdmclock.a  CMakeFiles/dmclock.dir/dmclock_util.cc.o CMakeFiles/dmclock.dir/__/support/src/run_every.cc.o
-/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../../lib/libdmclock.a

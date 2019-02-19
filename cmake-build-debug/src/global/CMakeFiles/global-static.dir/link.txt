@@ -1,2 +1,0 @@
-/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../lib/libglobal-static.a  CMakeFiles/libglobal_objs.dir/global_init.cc.o CMakeFiles/libglobal_objs.dir/pidfile.cc.o CMakeFiles/libglobal_objs.dir/signal_handler.cc.o CMakeFiles/global_common_objs.dir/global_context.cc.o
-/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../lib/libglobal-static.a

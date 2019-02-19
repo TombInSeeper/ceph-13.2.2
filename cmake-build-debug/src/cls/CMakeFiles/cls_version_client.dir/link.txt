@@ -1,2 +1,0 @@
-/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../lib/libcls_version_client.a  CMakeFiles/cls_version_client.dir/version/cls_version_client.cc.o CMakeFiles/cls_version_client.dir/version/cls_version_types.cc.o
-/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../lib/libcls_version_client.a

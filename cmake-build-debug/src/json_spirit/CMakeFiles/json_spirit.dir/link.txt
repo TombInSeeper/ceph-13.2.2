@@ -1,2 +1,0 @@
-/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../lib/libjson_spirit.a  CMakeFiles/json_spirit.dir/json_spirit_reader.cpp.o CMakeFiles/json_spirit.dir/json_spirit_writer.cpp.o
-/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../lib/libjson_spirit.a

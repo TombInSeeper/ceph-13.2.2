@@ -1,1 +1,0 @@
-cmd='/home/wuyue/clion-2018.2.5/bin/cmake/linux/bin/cmake;-DCMAKE_CXX_COMPILER=/opt/rh/devtoolset-7/root/usr/bin/c++;-DCMAKE_C_COMPILER=/opt/rh/devtoolset-7/root/usr/bin/cc;-DCMAKE_C_FLAGS=-fPIC -Wno-unused-variable -O3;-DCMAKE_AR=/opt/rh/devtoolset-7/root/usr/bin/ar;-GCodeBlocks - Unix Makefiles;<SOURCE_DIR><SOURCE_SUBDIR>'

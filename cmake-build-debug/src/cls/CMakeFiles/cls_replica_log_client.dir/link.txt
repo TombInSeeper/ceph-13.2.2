@@ -1,2 +1,0 @@
-/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../lib/libcls_replica_log_client.a  CMakeFiles/cls_replica_log_client.dir/replica_log/cls_replica_log_types.cc.o CMakeFiles/cls_replica_log_client.dir/replica_log/cls_replica_log_ops.cc.o CMakeFiles/cls_replica_log_client.dir/replica_log/cls_replica_log_client.cc.o
-/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../lib/libcls_replica_log_client.a
