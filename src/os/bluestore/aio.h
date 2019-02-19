@@ -10,6 +10,8 @@
 #include "include/buffer.h"
 #include "include/types.h"
 
+
+
 struct aio_t {
   struct iocb iocb{};  // must be first element; see shenanigans in aio_queue_t
   void *priv;
@@ -88,3 +90,5 @@ struct aio_queue_t {
 		   void *priv, int *retries);
   int get_next_completed(int timeout_ms, aio_t **paio, int max);
 };
+
+

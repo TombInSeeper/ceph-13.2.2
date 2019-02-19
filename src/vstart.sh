@@ -530,36 +530,37 @@ $DAEMONOPTS
         osd_client_message_size_cap = 0           ;MARK this option is mentioned by report
         osd_client_message_cap = 0                ;MARK this option is mentioned by report
 
-	bluestore_cache_size = 0
-	bluestore_cache_size_ssd = 0
-	bluestore_cache_size_hdd = 0
+        bluestore_cache_size = 0
+        bluestore_cache_size_ssd = 0
+        bluestore_cache_size_hdd = 0
+        bluestore_cache_trim_interval = 50000000
 
-    bdev_debug_use_ramdisk  = false
-    bdev_ocssd_enable       = true
-	bdev_ocssd_backend		= ocssd
+        bdev_debug_use_ramdisk  = false
+        bdev_ocssd_enable       = true
+        bdev_ocssd_backend	    = mock
        
-        ;;;;; bluestore block size file size = 50GB
-        ;bluestore block size = 53687091200
-    bluestore block create = true
+        ;;;;; bluestore block size file size = 500GB
+        bluestore block size = 536870912000
+    	bluestore block create = true
 	;bluestore block path   = /dev/nvme0n1
 		
 	bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
-        bluestore block db size = 1048576000
+        bluestore block db size = 10485760000
         bluestore block db create = true
 	bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
-        bluestore block wal size = 1048576000
+        bluestore block wal size = 10485760000
         bluestore block wal create = true
 
         osd objectstore = $objectstore
 
-	;;deferred write never be used
-	bluestore_min_alloc_size = 4096             ;must be 4KB
-	bluestore_prefer_deferred_size_hdd = 0      ;must be 0
-	bluestore_prefer_deferred_size_ssd = 0      ;must be 0
+        ;;deferred write never be used
+        bluestore_min_alloc_size = 4096             ;must be 4KB
+        bluestore_prefer_deferred_size_hdd = 0      ;must be 0
+        bluestore_prefer_deferred_size_ssd = 0      ;must be 0
 
-	;;extra options
-	;;bluestore_csum_type = none ; default:crc32
-	;;bluestore_allocator = bitmap; default:stupid
+        ;;extra options
+        ;;bluestore_csum_type = none ; default:crc32
+        ;;bluestore_allocator = bitmap; default:stupid
 
 
 $COSDSHORT

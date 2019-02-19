@@ -12,21 +12,21 @@ int object_count;
 uint8_t **BBT;
 void print_nvm_geo(const struct nvm_geo *geo)
 {
-    printf("channel:%llu\n", geo->nchannels);
-    printf("lun:%llu\n", geo->nluns);
-    printf("plane:%llu\n", geo->nplanes);
-    printf("block:%llu\n", geo->nblocks);
-    printf("page:%llu\n", geo->npages);
-    printf("sector:%llu\n", geo->nsectors);
+    printf("channel:%lu\n", geo->nchannels);
+    printf("lun:%lu\n", geo->nluns);
+    printf("plane:%lu\n", geo->nplanes);
+    printf("block:%lu\n", geo->nblocks);
+    printf("page:%lu\n", geo->npages);
+    printf("sector:%lu\n", geo->nsectors);
 }
 void print_oc_addr(struct nvm_addr *addr)
 {
-    printf("channel:%llu ", addr->g.ch);
-    printf("lun:%llu ", addr->g.lun);
-    printf("plane:%llu ", addr->g.pl);
-    printf("block:%llu ", addr->g.blk);
-    printf("page:%llu ", addr->g.pg);
-    printf("sector:%llu\n", addr->g.sec);
+    printf("channel:%lu ", addr->g.ch);
+    printf("lun:%lu ", addr->g.lun);
+    printf("plane:%lu ", addr->g.pl);
+    printf("block:%lu ", addr->g.blk);
+    printf("page:%lu ", addr->g.pg);
+    printf("sector:%lu\n", addr->g.sec);
 }
 int find_next_zero_bit(unsigned char *bitmap)
 {
@@ -123,10 +123,10 @@ int __obj_read(struct nvm_dev *dev, char *data, int obj_id, uint64_t obj_offset)
 int obj_write(struct nvm_dev* dev, io_u *io)
 {
     int obj_id = io->obj_id;
-    int obj_offset = io->obj_off;
-    int data_transfer_size = io->data_size;
+    __u64 obj_offset = io->obj_off;
+    __u64 data_transfer_size = io->data_size;
     char *data_buffer_pointer = io->data;
-    int i;
+    __u64 i;
     //clock_t start, finish;
     //double duration;
     //start = clock();
@@ -142,10 +142,10 @@ int obj_write(struct nvm_dev* dev, io_u *io)
 int obj_read(struct nvm_dev *dev, io_u *io)
 {
     int obj_id = io->obj_id;
-    int obj_offset = io->obj_off;
-    int data_transfer_size = io->data_size;
+    __u64 obj_offset = io->obj_off;
+    __u64 data_transfer_size = io->data_size;
     char *data_buffer_pointer = io->data;
-    int i;
+    __u64 i;
     for(i = 0; i < data_transfer_size; i++){
         //printf("read :%d\n", i);
         __obj_read(dev, data_buffer_pointer + i * 4096, obj_id, obj_offset + i);
@@ -201,7 +201,7 @@ int obj_create(struct nvm_dev *dev, unsigned int *obj_id, unsigned int *obj_4k_s
         printf("create failed!\n");
         return -1;
     }
-    (*obj_id) = find_id;
+    (*obj_id) = (__u32)find_id;
     (*obj_4k_size) = OBJ_TABLE[find_id].obj_size;
     OBJ_TABLE[find_id].created |= 0x1;
     OBJ_TABLE[find_id].obj_offset = 0;

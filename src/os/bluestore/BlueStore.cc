@@ -11,6 +11,7 @@
  *
  */
 
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -59,8 +60,8 @@ MEMPOOL_DEFINE_OBJECT_FACTORY(BlueStore::TransContext, bluestore_transcontext,
 
 
 // kv store prefixes
-const string PREFIX_SUPER = "S";   // field -> value
-const string PREFIX_STAT = "T";    // field -> value(int64 array)
+const string PREFIX_SUPER = "S";          // field -> value
+const string PREFIX_STAT = "T";           // field -> value(int64 array)
 const string PREFIX_COLL = "C";    // collection name -> cnode_t
 const string PREFIX_OBJ = "O";     // object name -> onode_t
 const string PREFIX_OMAP = "M";    // u64 + keyname -> value
@@ -3540,6 +3541,100 @@ void *BlueStore::MempoolThread::entry()
   return NULL;
 }
 
+void BlueStore::discard_to_gctrd(interval_set<uint64_t> &p) {
+  gc_thread.lock.Lock();
+  gc_thread.invalid_extents.insert(p);
+  gc_thread.cond.SignalOne();
+  gc_thread.lock.Unlock();
+}
+
+void BlueStore::GCThread::may_trigger_gc( bool timeout )
+{
+  uint64_t victim_seg_id = 0;
+  if(gc_policy == STUPID)
+  {
+    SegmentSummary *begin  = segmentSummarys + OCSSD_NR_SEG_RESERVE;
+    SegmentSummary *end    = segmentSummarys + OCSSD_NR_SEG_RESERVE + OCSSD_NR_SEG_USER;
+    for(SegmentSummary *it = begin ; it != end ; ++it)
+    {
+      if (it->invalid_bitmap.all())
+      {
+        victim_seg_id = (it - begin);
+        interval_set<uint64_t> p;
+        p.insert(victim_seg_id * OCSSD_SEG_SIZE , OCSSD_SEG_SIZE );
+
+        //tell bdev to discard (erase) the entire segment;
+        store->bdev->queue_discard(p);
+
+        it->invalid_bitmap.reset();
+
+        //give back to Allocator
+        store->alloc->release(p);
+
+        if(timeout)
+          goto end;
+      }
+    }
+  }
+  else if(gc_policy == GREEDY)
+  {
+    ceph_assert( 0 == "Unsupported GC_POLICY");
+  }
+
+end:
+  return;
+}
+
+void *BlueStore::GCThread::entry()
+{
+  lock.Lock();
+  // 1s
+  timeval t;
+  t.tv_sec = 1;
+  t.tv_usec = 0;
+  utime_t duration(t);
+  if(true)
+  {
+    segmentSummarys = new SegmentSummary[OCSSD_NR_SEG_RESERVE + OCSSD_NR_SEG_USER];
+  }
+  bool timeout = false;
+  while (!stop) {
+    cond.WaitInterval(lock , duration);
+    if(!invalid_extents.empty())
+    {
+      //MARK INVALID
+      for(auto it = invalid_extents.begin() ; it != invalid_extents.end(); it++)
+      {
+        auto off = it.get_start();
+        auto len = it.get_len();
+        auto l = len;
+        auto o = off;
+        while(l)
+        {
+          auto sid = o / OCSSD_SEG_SIZE;
+          auto idx = ( o % OCSSD_SEG_SIZE ) / 0x1000 ;
+          segmentSummarys[sid].invalid_bitmap.set(idx);
+          o += 0x1000;
+          l -= 0x1000;
+        }
+      }
+      //
+      invalid_extents.clear();
+    }
+    else
+    {
+      timeout = true;
+    }
+    lock.Unlock();
+    may_trigger_gc(timeout);
+    lock.Lock();
+  }
+
+  lock.Unlock();
+  stop = false;
+  return NULL;
+}
+
 // =======================================================
 
 // OmapIteratorImpl
@@ -3679,7 +3774,8 @@ BlueStore::BlueStore(CephContext *cct, const string& path)
     deferred_finisher(cct, "defered_finisher", "dfin"),
     kv_sync_thread(this),
     kv_finalize_thread(this),
-    mempool_thread(this)
+    mempool_thread(this),
+    gc_thread(this)
 {
   _init_logger();
   cct->_conf->add_observer(this);
@@ -3700,7 +3796,8 @@ BlueStore::BlueStore(CephContext *cct,
     kv_finalize_thread(this),
     min_alloc_size(_min_alloc_size),
     min_alloc_size_order(ctz(_min_alloc_size)),
-    mempool_thread(this)
+    mempool_thread(this),
+    gc_thread(this)
 {
   _init_logger();
   cct->_conf->add_observer(this);
@@ -4629,9 +4726,10 @@ int BlueStore::_open_alloc()
             << " in " << freelist_set << " "
             << dendl;
 
-    dout(1) << __func__ << " (sync) queue_discard <START> " << dendl;
-    bdev->queue_discard(invalid_set);
-    dout(1) << __func__ << " (sync) queue_discard <END> " << dendl;
+    dout(1) << __func__ << " (async) queue_discard <START> " << dendl;
+    //bdev->queue_discard(invalid_set);
+    discard_to_gctrd(invalid_set);
+    dout(1) << __func__ << " (async) queue_discard <END> " << dendl;
 
 
     for(auto it = freelist_set.begin() ; it!= freelist_set.end() ; it++){
@@ -5805,6 +5903,11 @@ int BlueStore::_mount(bool kv_only, bool open_db)
   if (r < 0)
     goto out_db;
 
+
+
+
+  gc_thread.init();
+
   r = _open_alloc();
   if (r < 0)
     goto out_fm;
@@ -5844,6 +5947,7 @@ int BlueStore::_mount(bool kv_only, bool open_db)
 
   mempool_thread.init();
 
+
   mounted = true;
   return 0;
 
@@ -5875,6 +5979,7 @@ int BlueStore::umount()
 
   mounted = false;
   if (!_kv_only) {
+    gc_thread.shutdown();
     mempool_thread.shutdown();
     dout(20) << __func__ << " stopping kv thread" << dendl;
     _kv_stop();
@@ -7541,8 +7646,8 @@ int BlueStore::_do_read(
 	      r = bdev->read(offset, length, &reg.bl, &ioc, false);
 	    }
 	    if (r < 0)
-              return r;
-            return 0;
+	      return r;
+      return 0;
 	  });
         if (r < 0) {
           derr << __func__ << " bdev-read failed: " << cpp_strerror(r)
@@ -7567,6 +7672,7 @@ int BlueStore::_do_read(
       return -EIO;
     }
   }
+
   logger->tinc(l_bluestore_read_wait_aio_lat, ceph_clock_now() - start);
 
   // enumerate and decompress desired blobs
@@ -7581,7 +7687,7 @@ int BlueStore::_do_read(
       bufferlist& compressed_bl = *p++;
       if (_verify_csum(o, &bptr->get_blob(), 0, compressed_bl,
 		       b2r_it->second.front().logical_offset) < 0) {
-	return -EIO;
+            return -EIO;
       }
       bufferlist raw_bl;
       r = _decompress(compressed_bl, &raw_bl);
@@ -7643,6 +7749,10 @@ int BlueStore::_do_read(
   ceph_assert(pos == length);
   ceph_assert(pr == pr_end);
   r = bl.length();
+  ceph_assert( r >= 0 );
+
+
+  dout(0) << __func__ << "...End..." << dendl;
   return r;
 }
 
@@ -8604,10 +8714,11 @@ void BlueStore::_txc_state_proc(TransContext *txc)
     case TransContext::STATE_PREPARE:
       txc->log_state_latency(logger, l_bluestore_state_prepare_lat);
       if (txc->ioc.has_pending_aios()) {
-	txc->state = TransContext::STATE_AIO_WAIT;
-	txc->had_ios = true;
-	_txc_aio_submit(txc);
-	return;
+          txc->state = TransContext::STATE_AIO_WAIT;
+          txc->had_ios = true;
+          dout(10) << "...OCDevice..." << __func__ << dendl;
+          _txc_aio_submit(txc);
+          return;
       }
       // ** fall-thru **
 
@@ -8994,9 +9105,9 @@ void BlueStore::_txc_release_alloc(TransContext *txc)
 #ifdef WITH_OCSSD
     if(!txc-> released.empty() && cct->_conf->bdev_ocssd_enable)
     {
-      dout(10) << "ocssd::" << __func__  << txc << " " << std::hex
+      dout(10) << "ocssd::" << __func__  << "(async)" <<  txc << " " << std::hex
                << txc->released << std::dec << " to discard" << dendl;
-      bdev->queue_discard( txc->released );
+      discard_to_gctrd(txc->released);
     }
     else
     {
@@ -9010,12 +9121,12 @@ void BlueStore::_txc_release_alloc(TransContext *txc)
     alloc->release(txc->released);
 #endif
 
-
-
-out:
   txc->allocated.clear();
   txc->released.clear();
 }
+
+
+
 
 void BlueStore::_osr_register_zombie(OpSequencer *osr)
 {
@@ -10838,14 +10949,20 @@ int BlueStore::_do_alloc_write(
   }
   PExtentVector prealloc;
   prealloc.reserve(2 * wctx->writes.size());
-  int prealloc_left = 0;
-  {
-    //
-    std::lock_guard<std::mutex> l(this->ocssd_data_log_lock);
+  int64_t prealloc_left = 0;
+
+    //------------------------------
+    std::unique_lock<std::mutex> l(this->ocssd_data_log_lock);
+    //if submit seq has not been get yet , get it
+    if(txc->ioc.ocssd_io_queue.empty()){
+      txc->ioc.ocssd_submit_seq = bdev->get_submit_seq(&(txc->ioc));
+    }
     prealloc_left = alloc->allocate(need, min_alloc_size, need, 0, &prealloc);
-    ceph_assert(prealloc_left == (int64_t) need);
     dout(20) << __func__ << " prealloc " << prealloc << " wctx->writes->size():" << wctx->writes.size() << dendl;
+    //l.unlock();
+    //------------------------------
     auto prealloc_pos = prealloc.begin();
+    ceph_assert(prealloc_left == (int64_t) need);
 
     for (auto &wi : wctx->writes) {
       BlobRef b = wi.b;
@@ -10955,7 +11072,7 @@ int BlueStore::_do_alloc_write(
         }
       }
     }
-  }
+
 
   return 0;
 }
@@ -11064,7 +11181,6 @@ void BlueStore::_ocssd_do_write_data(
       logger->inc(l_bluestore_write_penalty_read_ops);
   };
 
-
   auto aligned_offset = p2align(offset,min_alloc_size);
   auto aligned_length = 0U ;
 
@@ -11098,50 +11214,38 @@ void BlueStore::_ocssd_do_write_data(
 
     middle_offset = head_offset + head_length;
     middle_length = length - head_length - tail_length;
-
     bufferlist n_bl;
-
     if (head_length) {
       bufferlist page;
       pre_read_page(head_offset, page);
 
       bufferlist ori_head;
       ori_head.substr_of( bl, 0 , head_length );
-
       // copy_into page;
       page.copy_in(offset % min_alloc_size, head_length , ori_head);
-
       n_bl.append(page);
-
     }
-
     //TODO
     if(middle_length){
       bufferlist middle_data ;
       middle_data.substr_of( bl , head_length , middle_length);
       n_bl.append(middle_data);
     }
-
     //TODO
     if(tail_length){
       bufferlist page;
       pre_read_page(tail_offset , page);
-
       bufferlist ori_tail;
       ori_tail.substr_of(bl, head_length + middle_length ,tail_length );
-
       // copy_into page
       page.copy_in(0, tail_length, ori_tail);
       n_bl.append(page);
     }
     bl.swap(n_bl);
-
     aligned_length = bl.length();
 
   }
-
   auto blp = bl.begin();
-
   dout(30) << __func__ << std::hex << "\taligned_offset: " << aligned_offset << "\taligned_length: " <<aligned_length << dendl;
   _do_write_big(txc,c,o, aligned_offset, aligned_length, blp ,wctx);
 
@@ -11166,8 +11270,6 @@ void BlueStore::_do_write_data(
   // min_alloc_size == block_size == csum_chunk_size == 4KB == flash_page_size
   // By now (csum_chunk_size == block_size) is always ture
   // We run the new code
-
-
 
   if (offset / min_alloc_size == (end - 1) / min_alloc_size &&
       (length != min_alloc_size)) {
@@ -12769,5 +12871,6 @@ unsigned BlueStoreRepairer::apply(KeyValueDB* db)
   return repaired;
 }
 
+// =======================================================
 // =======================================================
 

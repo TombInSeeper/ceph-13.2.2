@@ -35,14 +35,14 @@
 #include "include/interval_set.h"
 #define SPDK_PREFIX "spdk:"
 
-
-#ifndef WITH_OCSSD
 #define WITH_OCSSD
+#ifdef WITH_OCSSD
+#define OCSSD_SEG_SIZE              (312*1024*1024)
+#define OCSSD_NR_SEG_RESERVE        (1)
+#define OCSSD_NR_SEG_USER           (100)
 #endif
 
-
 class CephContext;
-
 /// track in-flight io
 struct IOContext {
 private:
@@ -53,6 +53,11 @@ private:
 public:
   CephContext* cct;
   void *priv;
+
+  std::atomic_int num_pending = {0};
+  std::atomic_int num_running = {0};
+  bool allow_eio;
+
 #ifdef HAVE_SPDK
   void *nvme_task_first = nullptr;
   void *nvme_task_last = nullptr;
@@ -63,9 +68,13 @@ public:
   std::list<aio_t> pending_aios;    ///< not yet submitted
   std::list<aio_t> running_aios;    ///< submitting or submitted
 #endif
-  std::atomic_int num_pending = {0};
-  std::atomic_int num_running = {0};
-  bool allow_eio;
+
+//For OCSSD
+#if 1
+  uint32_t                 ocssd_submit_seq = 0;          //  write op submit seq
+  std::list<void*>         ocssd_io_queue;                //  void* -> io_u*
+  uint8_t                  ocssd_io_type = 0;             //
+#endif
 
   explicit IOContext(CephContext* cct, void *p, bool allow_eio = false)
     : cct(cct), priv(p), allow_eio(allow_eio)
@@ -208,8 +217,8 @@ public:
 
   /// OCDdevice reserved
   virtual uint64_t  get_reserve_size() const { return 0 ;}
-
-  virtual void   get_written_extents(interval_set<uint64_t>& p) {  };
+  virtual void      get_written_extents(interval_set<uint64_t>& p) {  };
+  virtual uint32_t  get_submit_seq( IOContext *ioc )  { return 0; };
 
 protected:
   bool is_valid_io(uint64_t off, uint64_t len) const {

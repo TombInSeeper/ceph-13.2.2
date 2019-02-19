@@ -1975,9 +1975,60 @@ private:
     }
   } mempool_thread;
 
+  constexpr static uint32_t  N_SLOTS = OCSSD_SEG_SIZE / (4096);
+  struct SegmentSummary{
+      std::bitset<N_SLOTS> invalid_bitmap;
+      struct parent_t{
+          coll_t     cid;
+          ghobject_t oid;
+          uint32_t   off;
+      };
+      parent_t  parents[N_SLOTS];
+  };
+
+  struct GCThread : public Thread {
+      BlueStore *store;
+      Cond cond;
+      Mutex lock;
+      bool stop = false;
+
+  public:
+    enum GC_POLICY{
+        NONE   = 0x0,
+        STUPID = 0x1,
+        GREEDY = 0x2
+    };
+    uint8_t gc_policy = STUPID;
+    interval_set<uint64_t> invalid_extents;
+    SegmentSummary  *segmentSummarys = nullptr;
+
+    void may_trigger_gc( bool timeout);
+
+    explicit GCThread(BlueStore *s)
+          : store(s),
+            lock("BlueStore::GCThread::lock") {}
+      void *entry() override;
+      void init() {
+        ceph_assert(stop == false);
+        create("bstore_gc");
+      }
+      void shutdown() {
+        lock.Lock();
+        stop = true;
+        cond.Signal();
+        lock.Unlock();
+        join();
+      }
+  } gc_thread;
+
+
+  //
+  void discard_to_gctrd(interval_set<uint64_t> &p);
+
+
+
   // --------------------------------------------------------
   // private methods
-
   void _init_logger();
   void _shutdown_logger();
   int _reload_logger();

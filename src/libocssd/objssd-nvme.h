@@ -1,5 +1,9 @@
 #ifndef __OBJECTSSD_H__
 #define __OBJECTSSD_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -18,20 +22,20 @@
 #include "./src/libnvm_full.h"
 
 
-typedef struct req_tag{
+typedef struct req_tag {
     __u32 req_orig;
-}req_tag;
+} req_tag;
 
 /**
  * parameters of reading or writing
  */
-typedef struct _io_u{
+typedef struct _io_u {
     __u32 obj_id;          /**< id of the object to operate */
     __u64 obj_off;         /**< the start offset to operate */
     void *data;            /**< the position to store reading data or write data */
     __u64 data_size;       /**< data size to transfer */
     req_tag io_req_tag;    /**< the tag which is passed from top */
-}io_u;
+} io_u;
 
 /**
  *the struct to store information of one object
@@ -45,13 +49,22 @@ typedef struct {
 } nvme_obj;
 
 int obj_read(struct nvm_dev *dev, io_u *io);
+
 int obj_write(struct nvm_dev *dev, io_u *io);
+
 int obj_create(struct nvm_dev *dev, unsigned int *obj_id, unsigned int *obj_4k_size);
+
 int obj_delete(struct nvm_dev *dev, unsigned int obj_id);
-struct nvm_dev* dev_open(const char * dev_path);
+
+struct nvm_dev *dev_open(const char *dev_path);
+
 int dev_close(struct nvm_dev *dev);
 
 
 //----------------
 int mark_created(unsigned int obj_id);
+
+#ifdef __cplusplus
+}
+#endif
 #endif

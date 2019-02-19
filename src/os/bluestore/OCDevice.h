@@ -5,225 +5,106 @@
 #ifndef CEPH_OS_BLUESTORE_OCDEVICE_H
 #define CEPH_OS_BLUESTORE_OCDEVICE_H
 
-extern "C"
-{
-//Must ADD extern "C"
+
 #include "libocssd/objssd-nvme.h"
-}
-
-#include "include/interval_set.h"
-#include "include/intarith.h"
-#include "common/debug.h"
-#include "common/errno.h"
-#include "include/assert.h"
 #include "BlockDevice.h"
-#include "include/denc.h"
-#include <map>
-#include <bitset>
-#include <fstream>
 
-#ifdef dout_context
-#undef dout_context
-#endif
-#define dout_context g_ceph_context
-#define dout_subsys ceph_subsys_bdev
+//Using std
+#include <thread>
+#include <mutex>
 
-#define MOCK_TEST
+class SegmentBackEnd{
+protected:
+    CephContext *cct;
+    std::string core        = "/tmp/ocssd.core";
+    uint32_t segmentSize    = OCSSD_SEG_SIZE;
+    uint32_t nr_reserved    = OCSSD_NR_SEG_RESERVE;   //Must be 1
+    uint32_t nr_pre_create  = OCSSD_NR_SEG_USER;      //We erase all segs when mkfs
+    uint32_t nr_user_total  = OCSSD_NR_SEG_USER;      //bdev->size
 
-class SegmentManager;
-class Segment
-{
+    //Dump seg_map to a file,this is a trick;
+    void  core_dump();
+
+    //Recover seg_map from a file,this is a trick;
+    void  core_back();
+
+    virtual int seg_create(uint32_t *seg_id) { return 0; }
 public:
-  uint64_t bdev_lba_offset; //bdev_lba_offset / segmentsize = obj_logical_id
-  uint32_t nvm_obj_id;      //nvm_obj_id , get by obj_create = obj_physical_id
-  uint32_t nvm_obj_off = 0; //
-  uint32_t size;
+    struct Segment{
+        enum Status{
+            Unusable = 0x0,
+            Usable   = 0x1
+        };
+        uint32_t id     =  0;
+        uint8_t  status =  Unusable;
+        uint32_t off    =  0;
+        Segment() = default;
+    };
 
-  std::bitset<96 * 1024> invalid_bitmap;
+    //emm....I think we don't need a lock here
+    //gc_thread and io_thread unlikely access to the same Segment concurrently
+    Segment *seg_map;
+    static SegmentBackEnd* create(std::string backend_type,CephContext*cct, std::string path);
 
-  Segment(uint64_t bdev_lba_offset, uint32_t nvm_obj_id, uint32_t _size) : bdev_lba_offset(bdev_lba_offset),
-                                                                           nvm_obj_id(nvm_obj_id), size(_size)
-  {
-    //clear
-    invalid_bitmap.reset();
-  }
-
-  uint64_t append(int fd, void *buf, uint32_t len)
-  {
-    dout(10) << std::hex << " segment append length: 0x" << len << std::dec << dendl;
-
-    int l = 0;
-    l = pwrite(fd, buf, len, bdev_lba_offset + nvm_obj_off);
-    ceph_assert(l >= 0);
-    ceph_assert(l == len);
-
-    nvm_obj_off += l;
-    return len;
-  }
-
-  uint64_t read(int fd, void *buf, uint32_t off, uint32_t len)
-  {
-    dout(10) << std::hex << " segment read off: 0x" << off
-             << " length: 0x" << len << std::dec << dendl;
-    if (off + len > size)
-      len = size - off;
-    uint64_t l = 0;
-    l = pread(fd, buf, len, bdev_lba_offset + off);
-    ceph_assert(l == len);
-    return len;
-  }
-
-  void discard(uint64_t ioff, uint32_t ilen)
-  {
-    //Don't do any check
-    for (auto pos = ioff / 4096; pos < (ioff + ilen) / 4096; pos++)
-    {
-      invalid_bitmap.set(pos);
+    //These helpers are called by OCDevice
+    uint64_t get_seg_size() const  { return segmentSize; }
+    uint64_t get_size() const { return (uint64_t)(nr_user_total) * segmentSize ; }
+    uint64_t get_reserve_size() const { return nr_reserved * segmentSize;}
+    void     get_written_segments(interval_set<uint64_t> &p ) {
+      for(auto seg = seg_map ; seg < seg_map + nr_reserved + nr_user_total ; seg++){
+        if(seg->status == Segment::Usable && seg->off > 0 ){
+          auto lba_offset = (seg - seg_map) * segmentSize;
+          p.insert(lba_offset,seg->off);
+        }
+      }
     }
-  }
 
-  uint64_t append(struct nvm_dev *dev, void *buf, uint32_t len)
-  {
-    io_u io;
-    io.data = buf;
-    io.data_size = len / 4096;
-    io.obj_id = this->nvm_obj_id;
-    io.obj_off = this->nvm_obj_off / 4096;
-    int r = obj_write(dev, &io);
-    ceph_assert(r == 0);
-    nvm_obj_off += len;
-    return len;
-  }
-  uint64_t read(struct nvm_dev *dev, void *buf, uint32_t off, uint32_t len)
-  {
-	if(off + len > size)
-		len = size-off;
-	
-    dout(10) << "OCDevice:read" << std::hex << "__off:" << off << " __len:" << len << std::dec << dendl;
-    io_u io;
-    io.data = buf;
-    io.data_size = len / 4096;
-    io.obj_id = this->nvm_obj_id;
-    io.obj_off = off / 4096;
-    int r = obj_read(dev, &io);
-    ceph_assert(r == 0);
-    return len;
-  }
-
-  void erase()
-  {
-    //TODO
-  }
-
-  ///////////////TOOL FUNCTIONS//////////////////////////////////
-  friend ostream &operator<<(ostream &o, const Segment &seg)
-  {
-    o << "["
-      << " bdev_lba_offset= " << (seg.bdev_lba_offset / (1024 * 1024)) << "MiB"
-      << " obj_logical_id= " << seg.bdev_lba_offset / seg.size
-      << " nvm_obj_id= " << seg.nvm_obj_id
-      << " nvm_obj_off= " << seg.nvm_obj_off
-      << " size= " << (byte_u_t(seg.size))
-      << " invalid bytes= " << (seg.invalid_bitmap.count()) * 4 << "KiB"
-      << "]";
-
-    return o;
-  }
+    //.................................
+    //These function recive logial obj_id
+    // 4K_obj_off and 4K_data_size
+    virtual int seg_noop(io_u* io) = 0;
+    virtual int seg_read(io_u* io) = 0;
+    virtual int seg_write(io_u *io) = 0;
+    virtual int seg_erase(uint32_t seg_id) = 0;
+    virtual ~SegmentBackEnd() = default;
 };
 
-class SegmentManager
-{
-
-  class SpinLock
-  {
-  public:
-    ceph::spinlock *_s;
-    explicit SpinLock(ceph::spinlock *s)
-    {
-      _s = s;
-      _s->lock();
-    }
-    ~SpinLock()
-    {
-      _s->unlock();
-    }
-  };
-
+class FileSegmentBackEnd : public SegmentBackEnd {
 private:
-  ceph::spinlock s;
-  std::mutex seg_map_lock;
-  std::map<uint64_t, Segment *> seg_map; // offset / seg_size = seg_id; mapping seg_id => Seg
-  atomic_uint32_t mock_obj_id = {30};
-
-  //Because objssd now cannot persist meta data of objs, this is a trick
-  std::string corefile = "/tmp/ocssd.core";
-
+    int direct_fd;
+    uint32_t mock_seg_id;
 public:
-  void _mock_coredump();
-  void _mock_coreback();
-
-public:
-  string backend = "mock";
-  uint64_t flash_page_size = 4096;             // 4KiB
-  uint32_t segment_size = 312 * (1024 * 1024); // 384MiB
-  uint64_t nr_reserved_segments = 1;
-  uint64_t nr_lba_segments = 1000;
-  struct nvm_dev *dev = nullptr; //nvm_dev
-
-  int  new_nvm_obj(uint32_t *obj_id, uint32_t *obj_size);
-
-  /// When we open ocssd device ,we must mark obj_id used that we have written
-  void replay();
-
-  bool is_fall_within_the_same_segment(uint64_t offset, uint32_t length);
-
-  std::string dump_seg_map();
-
-  //We make sure a write operation never overlap more than 2 segments
-  std::tuple<Segment *, Segment *>
-  get_segment(uint64_t offset, uint32_t length);
-
-  //But a discard operation may overlap random numbers segments
-  //We must handle this case
-  void _segment_discard_small(uint64_t offset, uint32_t length, interval_set<uint64_t> *free);
-
-  void _segment_discard_big(uint64_t offset, uint32_t length, interval_set<uint64_t> *free);
-
-  void _segment_discard(uint64_t offset, uint32_t length, interval_set<uint64_t> *free);
-
-  void segment_discard(interval_set<uint64_t> &p, interval_set<uint64_t> *free);
-
-  void get_written_segments(interval_set<uint64_t> &p)
-  {
-
-    int unclosed_seg_count = 0;
-    for (auto kv : seg_map)
-    {
-      auto off = kv.second->bdev_lba_offset;
-      auto len = kv.second->nvm_obj_off;
-      if (len != kv.second->size)
-        unclosed_seg_count++;
-      p.insert(off, len);
-    }
-    dout(10) << __func__
-             << "  unclosed_seg_count= " << unclosed_seg_count
-             << std::hex
-             << " written_seg_set= " << p
-             << std::dec
-             << dendl;
-
-    if (unclosed_seg_count > 1)
-    {
-      dout(0) << __func__ << " WARNNING: "
-              << " MORE THAN ONE unclosed_seg_count "
-              << dendl;
-    }
-  }
-
-  SegmentManager();
-
-  ~SegmentManager();
+    explicit FileSegmentBackEnd(CephContext *cct, std::string path);
+    ~FileSegmentBackEnd() override;
+    int seg_erase(uint32_t seg_id) override;
+    int seg_noop(io_u *io) override;
+    int seg_read(io_u *io) override;
+    int seg_write(io_u *io) override;
 };
+
+class OCSSDBackEnd : public SegmentBackEnd {
+private:
+    struct nvm_dev *dev;
+    uint32_t mock_seg_id;
+public:
+    explicit OCSSDBackEnd(CephContext *cct, std::string path);
+    ~OCSSDBackEnd() override;
+    int seg_erase(uint32_t seg_id) override;
+    int seg_noop(io_u *io) override;
+    int seg_read(io_u *io) override;
+    int seg_write(io_u *io) override;
+};
+
+
+
+
+
+
+
+
+
+
+
 
 class OCDevice : public BlockDevice
 {
@@ -234,52 +115,68 @@ class OCDevice : public BlockDevice
   // @1 : priv  = Bluestore*
   // @2 : priv2 = interval_set<uint64_t>*
 public:
-  OCDevice(CephContext *cct, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv) : BlockDevice(cct, cb, cbpriv),
-                                                                                                     dcb(d_cb),
-                                                                                                     dcb_priv(d_cbpriv)
+  OCDevice(CephContext *cct, aio_callback_t cb, void *cbpriv, aio_callback_t d_cb, void *d_cbpriv) :
+  BlockDevice(cct, cb, cbpriv),
+  dcb(d_cb),
+  dcb_priv(d_cbpriv)
   {
-    BlockDevice::rotational = false;
-    segmentManager = new SegmentManager();
+
   }
 
 private:
-  std::string dev_path = "";     //sys link to
-  int fd = -1;                   //ocssd device fd , for mock backend
-  struct nvm_dev *dev = nullptr; //nvm_dev,for ocssd backend
-  aio_callback_t dcb = nullptr;
-  void *dcb_priv = nullptr; //first parameter of dcb;
+    uint64_t    segmentSize = 0 ;
+    std::string dev_path;           //sys link to
+    aio_callback_t dcb = nullptr;
+    void *dcb_priv = nullptr;       //first parameter of dcb;
+    SegmentBackEnd *sbe = nullptr; //Initialize by open;
 
-  SegmentManager *segmentManager = nullptr;
+
+    //Using C++ std
+    //Aio thread / queue
+    enum {
+        IO_NOOP   = 0x0,
+        IO_READ   = 0x1,
+        IO_WRITE  = 0x2
+    };
+    atomic_uint               pre_alloc_seq = {0};
+    atomic_uint               submitted_seq = {0};
+    std::list<IOContext*>     pending_io; //queue
+    std::thread               aio_thread;  //thread
+    std::mutex                aio_mtx;
+    std::condition_variable   aio_cv;
+    bool                      aio_stop = false;
+    void _aio_thread_entry();
+    int  _aio_rw(uint64_t off , uint32_t len , bufferlist *bl ,IOContext *ioc) ;
+
 
 public:
-  void aio_submit(IOContext *ioc) override;
+    int open(const std::string &path) override;
+    void close() override;
 
-  int collect_metadata(const std::string &prefix, map<std::string, std::string> *pm) const override;
+    //Async IO
+    void aio_thread_work() ;
+    uint32_t get_submit_seq(IOContext *ioc)  override;
+    void aio_submit(IOContext *ioc) override;
+    int read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *ioc, bool buffered) override;
+    int read_random(uint64_t off, uint64_t len, char *buf, bool buffered) override;
+    int aio_read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *ioc) override;
+    int write(uint64_t off, bufferlist &bl, bool buffered) override;
+    int aio_write(uint64_t off, bufferlist &bl, IOContext *ioc, bool buffered) override;
 
-  int read(uint64_t off, uint64_t len, bufferlist *pbl,
-           IOContext *ioc,
-           bool buffered) override;
-  int aio_read(uint64_t off, uint64_t len, bufferlist *pbl,
-               IOContext *ioc) override;
+    //Garbage Collection
+    int queue_discard(interval_set<uint64_t> &p) override;
 
-  int read_random(uint64_t off, uint64_t len, char *buf, bool buffered) override;
-  int write(uint64_t off, bufferlist &bl, bool buffered) override;
-  int aio_write(uint64_t off, bufferlist &bl,
-                IOContext *ioc,
-                bool buffered) override;
-  int flush() override;
+    //Helpers
+    uint64_t get_reserve_size() const  override { return sbe->get_reserve_size(); }
+    void get_written_extents(interval_set<uint64_t> &p) override { sbe->get_written_segments(p); };
+    int  collect_metadata(const std::string &prefix, map<std::string, std::string> *pm) const override;
 
-  // for managing buffered readers/writers
-  int invalidate_cache(uint64_t off, uint64_t len) override;
-  int open(const std::string &path) override;
-  void close() override;
+    //Do nothing
+    int flush() override { return 0 ; }
+    bool supported_bdev_label() override { return false; }
+    int invalidate_cache(uint64_t off, uint64_t len) override { return 0 ; }
 
-  int discard(uint64_t offset, uint64_t len) override;
-  int queue_discard(interval_set<uint64_t> &p) override;
 
-  uint64_t get_reserve_size() const override;
-  void get_written_extents(interval_set<uint64_t> &p) override;
-  bool supported_bdev_label() override { return false; }
+
 };
-
 #endif //CEPH_OS_BLUESTORE_OCDEVICE_H
