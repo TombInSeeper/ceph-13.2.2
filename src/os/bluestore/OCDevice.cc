@@ -311,36 +311,39 @@ int OCDevice::collect_metadata(const std::string &prefix, map<std::string, std::
 
 int OCDevice::read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *ioc, bool buffered) {
   (void)buffered;
-  //(void)ioc;
-  /*bufferptr p = buffer::create(len);
-  char* buf   = p.c_str();
+  (void)ioc;
+  //dout(0) << __func__ << std::hex << "...lba_off:" << "0x" << off << "...len:0x"<<  len << ""  << std::dec<< dendl;
+  bufferptr p = buffer::create(len);
+  char* buf   = new char[len];
+  auto  buf1  = buf;
   auto  len1  = len;
   auto  off1  = off;
   while(len1){
     io_u io;
-    io.data = buf;
+    io.data      = buf1;
     io.obj_off   = (off1 % segmentSize) / 0x1000;
-    io.obj_id = static_cast<uint32_t>(off1 / segmentSize);
+    io.obj_id    = (uint32_t)(off1 / segmentSize);
     io.data_size = 1;
     // 4K read
     sbe->seg_read(&io);
-
-    buf  += 0x1000;
+    buf1 += 0x1000;
     len1 -= 0x1000;
     off1 += 0x1000;
   }
-  pbl->append(p);*/
+  //memmove(p.c_str(),buf,len);
+  pbl->append(p);
+  pbl->copy_in(0,len,buf);
+  delete []buf;
 
-  dout(0) << __func__ << std::hex << "...off:" << "0x" << off << "...len:0x"<<  len << ", then call aio_read "  << std::dec<< dendl;
-  aio_read(off,len,pbl,ioc);
+ /* aio_read(off,len,pbl,ioc);
   aio_submit(ioc);
-  ioc->aio_wait();
+  ioc->aio_wait();*/
 
   ceph_assert(ioc->num_pending == 0);
   ceph_assert(ioc->num_running == 0);
 
-  ofstream of("/tmp/read.last",ios::binary);
-  pbl->hexdump(of);
+  //ofstream of("/tmp/read.last",ios::binary);
+  //pbl->hexdump(of);
 
   return 0;
 }
@@ -381,11 +384,23 @@ int OCDevice::aio_read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *i
   //dout(0) << __func__ << std::hex << "...off:" << "0x" << off << "...len:" << "0x" <<  len << std::dec<< dendl;
   //return read(off,len,pbl,ioc,false);
   ioc->ocssd_io_type = IO_READ;
-  bufferptr p = buffer::create((uint32_t)len);
+  bufferptr p = buffer::create(len);
   pbl->append(p);
-  //ceph_assert(pbl->is_contiguous());
-  //dout(10) << __func__ << std::hex << "...off:" << "0x" << off << "...len:" << "0x" <<  len << std::dec<< dendl;
+  dout(10) << __func__ << std::hex << "...off:" << "0x" << off << "...len:" << "0x" <<  len << std::dec<< dendl;
   int r = _aio_rw(off,(uint32_t)len, pbl,ioc);
+  //int r = read(off,len,pbl,ioc,false);
+  while(!ioc->ocssd_io_queue.empty())
+  {
+    io_u *io = (io_u*)(ioc->ocssd_io_queue.front());
+    r = sbe->seg_read(io);
+    ceph_assert( r == 0 );
+    delete io;
+    ioc->ocssd_io_queue.pop_front();
+  }
+  //p.copy_in(0,len,ioc->ocssd_buf);
+  //delete ioc->ocssd_buf;
+  ioc->num_pending = 0;
+  ioc->num_running = 0;
   return r;
 }
 
@@ -439,6 +454,9 @@ int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *io
   bool one = (off / segmentSize) == ((off + len) / segmentSize ) && (len !=segmentSize);
   char *buf = nullptr , *buf2 = nullptr;
   auto  count = 0U;
+
+  ioc->ocssd_bufferptr = pbl;
+  ioc->ocssd_io_len = len;
   if(one){
     if(ioc->ocssd_io_type == IO_WRITE){
       buf = new char[len];
@@ -446,6 +464,8 @@ int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *io
     }
     else
     {
+      /*ioc->ocssd_buf = new char[len];
+      buf = ioc->ocssd_buf;*/
       buf = pbl->c_str();
     }
     io_u *_1 = new io_u;
@@ -475,6 +495,8 @@ int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *io
     }
     else
     {
+      /*ioc->ocssd_buf = new char[len];
+      buf = ioc->ocssd_buf;*/
       buf = pbl->c_str();
       buf2 = buf + len1;
     }
@@ -513,18 +535,17 @@ void OCDevice::_aio_thread_entry() {
   };
 
   //cond_variable pred
-  auto wait_pred = [&](){
-      return aio_stop || !pending_io.empty() ;
-  };
+  /*auto wait_pred = [&](){
+      return !pending_io.empty() ;
+  };*/
 
   std::unique_lock<std::mutex> l(aio_mtx);
-  while (true){
-    aio_cv.wait(l, wait_pred);
-    if(aio_stop)
-      break;
+  while (!aio_stop){
+    aio_cv.wait(l);
     //Swap and Unlock
+    if(!pending_io.empty())
     {
-      dout(0) << __func__ << " queue depth: "  << pending_io.size() << dendl;
+      //dout(0) << __func__ << " queue depth: "  << pending_io.size() << dendl;
       running_io.swap(pending_io);
       l.unlock();
     }
@@ -533,7 +554,7 @@ void OCDevice::_aio_thread_entry() {
       IOContext *ioctx = running_io.front();
       running_io.pop_front();
       for_each_io_u(ioctx,sbe,ioFunction[ioctx->ocssd_io_type]);
-      if(ioctx->priv)
+      if(likely(ioctx->priv != NULL))
       {
         //for aio_write
         ioctx->num_running = 0;
@@ -543,6 +564,12 @@ void OCDevice::_aio_thread_entry() {
       {
         //for aio_read
         ioctx->num_running = 1;
+        /*{
+          bufferptr p = buffer::create(ioctx->ocssd_io_len);
+          p.copy_in(0,ioctx->ocssd_io_len,ioctx->ocssd_buf);
+          ((bufferlist*)(ioctx->ocssd_bufferptr))->append(p);
+          delete ioctx->ocssd_buf;
+        }*/
         ioctx->try_aio_wake();
       }
       //dout(0) << __func__ << " io_type:" << fname[(int)(ioctx->ocssd_io_type)] << " complete" << dendl;
@@ -551,6 +578,7 @@ void OCDevice::_aio_thread_entry() {
     l.lock();
   }
   //Stop
+  l.unlock();
 }
 
 void OCDevice::aio_thread_work() {

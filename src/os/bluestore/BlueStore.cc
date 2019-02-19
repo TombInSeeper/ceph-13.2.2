@@ -3548,62 +3548,54 @@ void BlueStore::discard_to_gctrd(interval_set<uint64_t> &p) {
   gc_thread.lock.Unlock();
 }
 
-void BlueStore::GCThread::may_trigger_gc( bool timeout )
+void BlueStore::GCThread::may_trigger_gc( bool timeout , uint64_t sid)
 {
-  uint64_t victim_seg_id = 0;
   if(gc_policy == STUPID)
   {
-    SegmentSummary *begin  = segmentSummarys + OCSSD_NR_SEG_RESERVE;
-    SegmentSummary *end    = segmentSummarys + OCSSD_NR_SEG_RESERVE + OCSSD_NR_SEG_USER;
-    for(SegmentSummary *it = begin ; it != end ; ++it)
-    {
+      uint64_t victim_seg_id = 0;
+      auto it = segmentSummarys + sid;
       if (it->invalid_bitmap.all())
       {
-        victim_seg_id = (it - begin);
+        victim_seg_id = sid;
         interval_set<uint64_t> p;
         p.insert(victim_seg_id * OCSSD_SEG_SIZE , OCSSD_SEG_SIZE );
-
         //tell bdev to discard (erase) the entire segment;
         store->bdev->queue_discard(p);
-
         it->invalid_bitmap.reset();
-
         //give back to Allocator
         store->alloc->release(p);
-
-        if(timeout)
-          goto end;
       }
-    }
   }
-  else if(gc_policy == GREEDY)
-  {
-    ceph_assert( 0 == "Unsupported GC_POLICY");
-  }
-
-end:
-  return;
 }
 
 void *BlueStore::GCThread::entry()
 {
   lock.Lock();
-  // 1s
   timeval t;
-  t.tv_sec = 1;
+  t.tv_sec = 1000;
   t.tv_usec = 0;
   utime_t duration(t);
-  if(true)
-  {
-    segmentSummarys = new SegmentSummary[OCSSD_NR_SEG_RESERVE + OCSSD_NR_SEG_USER];
-  }
+
+  interval_set<uint64_t> invalid_set_local;
+  segmentSummarys = new SegmentSummary[OCSSD_NR_SEG_RESERVE + OCSSD_NR_SEG_USER];
+
   bool timeout = false;
   while (!stop) {
-    cond.WaitInterval(lock , duration);
+    cond.Wait(lock);
     if(!invalid_extents.empty())
     {
+      invalid_set_local.swap(invalid_extents);
+      lock.Unlock();
+    }
+    else
+    {
+      continue;
+    }
+    //---------------------------------------------------
+    uint64_t sid = 0;
+    {
       //MARK INVALID
-      for(auto it = invalid_extents.begin() ; it != invalid_extents.end(); it++)
+      for(auto it = invalid_set_local.begin() ; it != invalid_set_local.end(); it++)
       {
         auto off = it.get_start();
         auto len = it.get_len();
@@ -3618,19 +3610,18 @@ void *BlueStore::GCThread::entry()
           l -= 0x1000;
         }
       }
+      sid = invalid_set_local.begin().get_start() / OCSSD_SEG_SIZE;
       //
-      invalid_extents.clear();
+      invalid_set_local.clear();
     }
-    else
-    {
-      timeout = true;
-    }
-    lock.Unlock();
-    may_trigger_gc(timeout);
+    may_trigger_gc(timeout,sid);
+
+    //RELOCK
     lock.Lock();
   }
 
   lock.Unlock();
+  delete segmentSummarys;
   stop = false;
   return NULL;
 }
@@ -7658,7 +7649,7 @@ int BlueStore::_do_read(
           }
           ceph_assert(r == 0);
         }
-	ceph_assert(reg.bl.length() == r_len);
+	//ceph_assert(reg.bl.length() == r_len);
       }
     }
   }
@@ -9108,12 +9099,6 @@ void BlueStore::_txc_release_alloc(TransContext *txc)
       dout(10) << "ocssd::" << __func__  << "(async)" <<  txc << " " << std::hex
                << txc->released << std::dec << " to discard" << dendl;
       discard_to_gctrd(txc->released);
-    }
-    else
-    {
-      dout(10) << __func__ << "(sync) " << txc << " " << std::hex
-               << txc->released << std::dec << dendl;
-      alloc->release(txc->released);
     }
 #else
     dout(10) << __func__ << "(sync) " << txc << " " << std::hex
@@ -11168,9 +11153,7 @@ void BlueStore::_ocssd_do_write_data(
   // and
   auto pre_read_page = [ & ](uint64_t o_off , bufferlist &page)->void {
       auto pg_aligned_offset = p2align(o_off , min_alloc_size);
-
       auto r = _do_read(c.get(),o,pg_aligned_offset,min_alloc_size,page);
-
       ceph_assert( r >=0 );
       auto zlen = min_alloc_size - r;
       if(zlen){

@@ -537,9 +537,10 @@ $DAEMONOPTS
 
         bdev_debug_use_ramdisk  = false
         bdev_ocssd_enable       = true
-        bdev_ocssd_backend	    = mock
+        ;bdev_ocssd_gc_enable	= true
+	bdev_ocssd_backend	= mock
        
-        ;;;;; bluestore block size file size = 500GB
+        ;;;;;bluestore block size file size = 500GB
         bluestore block size = 536870912000
     	bluestore block create = true
 	;bluestore block path   = /dev/nvme0n1

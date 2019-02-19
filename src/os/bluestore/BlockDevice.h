@@ -74,6 +74,10 @@ public:
   uint32_t                 ocssd_submit_seq = 0;          //  write op submit seq
   std::list<void*>         ocssd_io_queue;                //  void* -> io_u*
   uint8_t                  ocssd_io_type = 0;             //
+
+  uint32_t                 ocssd_io_len    = 0 ;
+  char*                    ocssd_buf       = nullptr;
+  void*                    ocssd_bufferptr = nullptr;
 #endif
 
   explicit IOContext(CephContext* cct, void *p, bool allow_eio = false)
