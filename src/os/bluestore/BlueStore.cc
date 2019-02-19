@@ -9099,7 +9099,7 @@ void BlueStore::_txc_release_alloc(TransContext *txc)
       dout(10) << "ocssd::" << __func__  << "(async)" <<  txc << " " << std::hex
                << txc->released << std::dec << " to discard" << dendl;
       discard_to_gctrd(txc->released);
-    }git
+    }
 #else
     dout(10) << __func__ << "(sync) " << txc << " " << std::hex
              << txc->released << std::dec << dendl;
