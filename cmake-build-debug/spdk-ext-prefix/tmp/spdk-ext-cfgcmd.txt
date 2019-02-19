@@ -1,0 +1,1 @@
+cmd='./configure;--with-dpdk=/home/wuyue/ceph-13.2.2/cmake-build-debug/src/dpdk'

@@ -1,0 +1,805 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="ocssd_baidu"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\cmake\;CMake Files\cmake\modules\;CMake Files\cmake-build-debug\;CMake Files\cmake-build-debug\dpdk-ext-prefix\;CMake Files\cmake-build-debug\dpdk-ext-prefix\tmp\;CMake Files\cmake-build-debug\spdk-ext-prefix\;CMake Files\cmake-build-debug\spdk-ext-prefix\tmp\;CMake Files\cmake-build-debug\boost\;CMake Files\cmake-build-debug\boost\tmp\;CMake Files\cmake-build-debug\src\;CMake Files\cmake-build-debug\src\rocksdb_ext-prefix\;CMake Files\cmake-build-debug\src\rocksdb_ext-prefix\tmp\;CMake Files\cmake-build-debug\src\compressor\;CMake Files\cmake-build-debug\src\compressor\zstd\;CMake Files\cmake-build-debug\src\compressor\zstd\zstd_ext-prefix\;CMake Files\cmake-build-debug\src\compressor\zstd\zstd_ext-prefix\tmp\;CMake Files\src\;CMake Files\src\include\;CMake Files\src\json_spirit\;CMake Files\src\tracing\;CMake Files\src\global\;CMake Files\src\lua\;CMake Files\src\lua\src\;CMake Files\src\cls\;CMake Files\src\osdc\;CMake Files\src\librados\;CMake Files\src\libradosstriper\;CMake Files\src\pybind\;CMake Files\src\pybind\rados\;CMake Files\src\pybind\rbd\;CMake Files\src\pybind\cephfs\;CMake Files\src\pybind\rgw\;CMake Files\src\pybind\mgr\;CMake Files\src\pybind\mgr\dashboard\;CMake Files\src\ceph-disk\;CMake Files\src\ceph-volume\;CMake Files\src\ceph-detect-init\;CMake Files\src\mon\;CMake Files\src\kv\;CMake Files\src\libocssd\;CMake Files\src\os\;CMake Files\src\osd\;CMake Files\src\mds\;CMake Files\src\erasure-code\;CMake Files\src\erasure-code\jerasure\;CMake Files\src\erasure-code\lrc\;CMake Files\src\erasure-code\shec\;CMake Files\src\erasure-code\isa\;CMake Files\src\googletest\;CMake Files\src\googletest\googlemock\;CMake Files\src\googletest\googletest\;CMake Files\src\googletest\googletest\cmake\;CMake Files\src\test\;CMake Files\src\test\cls_hello\;CMake Files\src\test\cls_lock\;CMake Files\src\test\cls_log\;CMake Files\src\test\cls_numops\;CMake Files\src\test\cls_sdk\;CMake Files\src\test\cls_journal\;CMake Files\src\test\cls_rbd\;CMake Files\src\test\cls_refcount\;CMake Files\src\test\cls_replica_log\;CMake Files\src\test\cls_rgw\;CMake Files\src\test\cls_statelog\;CMake Files\src\test\cls_version\;CMake Files\src\test\cls_lua\;CMake Files\src\test\common\;CMake Files\src\test\compressor\;CMake Files\src\test\crush\;CMake Files\src\test\direct_messenger\;CMake Files\src\test\encoding\;CMake Files\src\test\erasure-code\;CMake Files\src\test\filestore\;CMake Files\src\test\fs\;CMake Files\src\test\journal\;CMake Files\src\test\libcephfs\;CMake Files\src\test\librados\;CMake Files\src\test\librados_test_stub\;CMake Files\src\test\libradosstriper\;CMake Files\src\test\librbd\;CMake Files\src\test\messenger\;CMake Files\src\test\mds\;CMake Files\src\test\mon\;CMake Files\src\test\mgr\;CMake Files\src\test\msgr\;CMake Files\src\test\ObjectMap\;CMake Files\src\test\objectstore\;CMake Files\src\test\os\;CMake Files\src\test\osd\;CMake Files\src\test\osdc\;CMake Files\src\test\pybind\;CMake Files\src\test\rgw\;CMake Files\src\test\rbd_mirror\;CMake Files\src\test\system\;CMake Files\src\compressor\;CMake Files\src\compressor\snappy\;CMake Files\src\compressor\zlib\;CMake Files\src\compressor\zstd\;CMake Files\src\compressor\lz4\;CMake Files\src\tools\;CMake Files\src\tools\cephfs\;CMake Files\src\tools\rbd\;CMake Files\src\tools\rbd_mirror\;CMake Files\src\tools\rbd_nbd\;CMake Files\src\dmclock\;CMake Files\src\dmclock\src\;CMake Files\src\crypto\;CMake Files\src\crypto\isa-l\;CMake Files\src\bash_completion\;CMake Files\src\client\;CMake Files\src\journal\;CMake Files\src\librbd\;CMake Files\src\rbd_fuse\;CMake Files\src\rbd_replay\;CMake Files\src\key_value_store\;CMake Files\src\rgw\;CMake Files\src\script\;CMake Files\.git\;CMake Files\.git\refs\;CMake Files\.git\refs\heads\;CMake Files\doc\;CMake Files\doc\man\;CMake Files\doc\man\8\;CMake Files\man\;CMake Files\systemd\;CMake Files\etc\;CMake Files\etc\sysctl\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lightnvm_so">
+				<Option output="/home/wuyue/ceph-13.2.2/cmake-build-debug/lib/liblightnvm.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-D__linux__"/>
+					<Add option="-DCEPH_LIBDIR=&quot;/usr/local/lib64&quot;"/>
+					<Add option="-DCEPH_PKGLIBDIR=&quot;/usr/local/lib64/ceph&quot;"/>
+					<Add option="-D_FILE_OFFSET_BITS=64"/>
+					<Add option="-D_GNU_SOURCE"/>
+					<Add option="-DLNVM_VERSION_MAJOR=0"/>
+					<Add option="-DLNVM_VERSION_MINOR=1"/>
+					<Add option="-DLNVM_VERSION_PATCH=0"/>
+					<Add option="-D__CHECK_ENDIAN__"/>
+					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
+					<Add option="-DGIT_SHA1=&quot;bacafd5&quot;"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
+					<Add directory="/usr/include/nss3"/>
+					<Add directory="/usr/include/nspr4"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/dmclock/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/dmclock/support/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_lightnvm"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/rapidjson/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/googletest/googletest/include"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7/x86_64-redhat-linux"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7/backward"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm_so"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lightnvm_so/fast">
+				<Option output="/home/wuyue/ceph-13.2.2/cmake-build-debug/lib/liblightnvm.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-D__linux__"/>
+					<Add option="-DCEPH_LIBDIR=&quot;/usr/local/lib64&quot;"/>
+					<Add option="-DCEPH_PKGLIBDIR=&quot;/usr/local/lib64/ceph&quot;"/>
+					<Add option="-D_FILE_OFFSET_BITS=64"/>
+					<Add option="-D_GNU_SOURCE"/>
+					<Add option="-DLNVM_VERSION_MAJOR=0"/>
+					<Add option="-DLNVM_VERSION_MINOR=1"/>
+					<Add option="-DLNVM_VERSION_PATCH=0"/>
+					<Add option="-D__CHECK_ENDIAN__"/>
+					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
+					<Add option="-DGIT_SHA1=&quot;bacafd5&quot;"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
+					<Add directory="/usr/include/nss3"/>
+					<Add directory="/usr/include/nspr4"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/dmclock/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/dmclock/support/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_lightnvm"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/rapidjson/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/googletest/googletest/include"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7/x86_64-redhat-linux"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7/backward"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm_so/fast"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lightnvm">
+				<Option output="/home/wuyue/ceph-13.2.2/cmake-build-debug/lib/liblightnvm.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-D__linux__"/>
+					<Add option="-DCEPH_LIBDIR=&quot;/usr/local/lib64&quot;"/>
+					<Add option="-DCEPH_PKGLIBDIR=&quot;/usr/local/lib64/ceph&quot;"/>
+					<Add option="-D_FILE_OFFSET_BITS=64"/>
+					<Add option="-D_GNU_SOURCE"/>
+					<Add option="-DLNVM_VERSION_MAJOR=0"/>
+					<Add option="-DLNVM_VERSION_MINOR=1"/>
+					<Add option="-DLNVM_VERSION_PATCH=0"/>
+					<Add option="-D__CHECK_ENDIAN__"/>
+					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
+					<Add option="-DGIT_SHA1=&quot;bacafd5&quot;"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
+					<Add directory="/usr/include/nss3"/>
+					<Add directory="/usr/include/nspr4"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/dmclock/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/dmclock/support/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_lightnvm"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/rapidjson/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/googletest/googletest/include"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7/x86_64-redhat-linux"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7/backward"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="lightnvm/fast">
+				<Option output="/home/wuyue/ceph-13.2.2/cmake-build-debug/lib/liblightnvm.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-D__linux__"/>
+					<Add option="-DCEPH_LIBDIR=&quot;/usr/local/lib64&quot;"/>
+					<Add option="-DCEPH_PKGLIBDIR=&quot;/usr/local/lib64/ceph&quot;"/>
+					<Add option="-D_FILE_OFFSET_BITS=64"/>
+					<Add option="-D_GNU_SOURCE"/>
+					<Add option="-DLNVM_VERSION_MAJOR=0"/>
+					<Add option="-DLNVM_VERSION_MINOR=1"/>
+					<Add option="-DLNVM_VERSION_PATCH=0"/>
+					<Add option="-D__CHECK_ENDIAN__"/>
+					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
+					<Add option="-DGIT_SHA1=&quot;bacafd5&quot;"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
+					<Add directory="/usr/include/nss3"/>
+					<Add directory="/usr/include/nspr4"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/dmclock/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/dmclock/support/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_lightnvm"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/rapidjson/include"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/googletest/googletest/include"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7/x86_64-redhat-linux"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/../../../../include/c++/7/backward"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/opt/rh/devtoolset-7/root/usr/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm/fast"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/include/liblightnvm.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/include/nvm_debug.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd-nvme.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd-nvme.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_lightnvm/nvm_be_ioctl.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_lightnvm/nvm_be_ioctl.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme/nvm_aer.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme/nvm_aer.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme/nvm_async.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme/nvm_async.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme/nvm_baidu.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme/nvm_cmb.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme/nvm_cmb.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_addr.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_bbt.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_be.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_be.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_buf.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_cmd.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_cmd.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_dev.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_dev.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_spec.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_spec.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_vblk.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/src/nvm_vblk.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/AddCephTest.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/BuildBoost.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/BuildDPDK.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/BuildRocksDB.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/BuildSPDK.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/CTags.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Distutils.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/FindBacktrace.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/FindCUnit.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/FindCython.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/FindLTTngUST.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/FindLZ4.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/FindNSPR.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/FindNSS.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/FindOpenLdap.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findaio.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findbabeltrace.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findblkid.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findfuse.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findgperftools.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findkeyutils.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findleveldb.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findliboath.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findrdma.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findsnappy.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findudev.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Finduuid.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/Findxfs.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/GetGitRevisionDescription.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/GetGitRevisionDescription.cmake.in">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake/modules/SIMDExt.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake-build-debug/dpdk-ext-prefix/tmp/dpdk-ext-cfgcmd.txt.in">
+			<Option virtualFolder="CMake Files\cmake-build-debug\dpdk-ext-prefix\tmp\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake-build-debug/spdk-ext-prefix/tmp/spdk-ext-cfgcmd.txt.in">
+			<Option virtualFolder="CMake Files\cmake-build-debug\spdk-ext-prefix\tmp\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/tmp/Boost-cfgcmd.txt.in">
+			<Option virtualFolder="CMake Files\cmake-build-debug\boost\tmp\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/rocksdb_ext-prefix/tmp/rocksdb_ext-cfgcmd.txt.in">
+			<Option virtualFolder="CMake Files\cmake-build-debug\src\rocksdb_ext-prefix\tmp\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/compressor/zstd/zstd_ext-prefix/tmp/zstd_ext-cfgcmd.txt.in">
+			<Option virtualFolder="CMake Files\cmake-build-debug\src\compressor\zstd\zstd_ext-prefix\tmp\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/ceph-coverage.in">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/ceph-debugpack.in">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/ceph-post-file.in">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/ceph.in">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/ceph_ver.h.in.cmake">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/init-ceph.in">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/include/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\include\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/include/config-h.in.cmake">
+			<Option virtualFolder="CMake Files\src\include\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/json_spirit/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\json_spirit\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/tracing/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\tracing\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/global/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\global\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/lua/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\lua\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/lua/src/luaconf.h.in">
+			<Option virtualFolder="CMake Files\src\lua\src\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/cls/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\cls\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/osdc/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\osdc\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/librados/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\librados\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libradosstriper/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\libradosstriper\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/pybind/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\pybind\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/pybind/rados/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\pybind\rados\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/pybind/rbd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\pybind\rbd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/pybind/cephfs/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\pybind\cephfs\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/pybind/rgw/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\pybind\rgw\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/pybind/mgr/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\pybind\mgr\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/pybind/mgr/dashboard/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\pybind\mgr\dashboard\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/ceph-disk/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\ceph-disk\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/ceph-volume/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\ceph-volume\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/ceph-detect-init/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\ceph-detect-init\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/mon/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\mon\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/kv/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\kv\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\libocssd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/os/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\os\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/osd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\osd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/mds/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\mds\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/erasure-code/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\erasure-code\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/erasure-code/jerasure/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\erasure-code\jerasure\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/erasure-code/lrc/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\erasure-code\lrc\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/erasure-code/shec/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\erasure-code\shec\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/erasure-code/isa/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\erasure-code\isa\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/googletest/googlemock/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\googletest\googlemock\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/googletest/googletest/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\googletest\googletest\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/googletest/googletest/cmake/internal_utils.cmake">
+			<Option virtualFolder="CMake Files\src\googletest\googletest\cmake\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_hello/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_hello\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_lock/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_lock\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_log/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_log\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_numops/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_numops\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_sdk/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_sdk\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_journal/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_journal\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_rbd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_rbd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_refcount/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_refcount\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_replica_log/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_replica_log\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_rgw/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_rgw\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_statelog/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_statelog\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_version/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_version\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/cls_lua/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\cls_lua\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/common/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\common\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/compressor/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\compressor\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/crush/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\crush\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/direct_messenger/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\direct_messenger\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/encoding/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\encoding\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/erasure-code/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\erasure-code\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/filestore/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\filestore\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/fs/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\fs\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/journal/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\journal\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/libcephfs/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\libcephfs\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/librados/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\librados\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/librados_test_stub/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\librados_test_stub\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/libradosstriper/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\libradosstriper\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/librbd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\librbd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/messenger/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\messenger\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/mds/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\mds\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/mon/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\mon\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/mgr/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\mgr\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/msgr/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\msgr\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/ObjectMap/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\ObjectMap\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/objectstore/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\objectstore\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/os/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\os\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/osd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\osd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/osdc/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\osdc\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/pybind/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\pybind\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/rgw/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\rgw\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/rbd_mirror/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\rbd_mirror\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/test/system/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test\system\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/compressor/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\compressor\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/compressor/snappy/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\compressor\snappy\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/compressor/zlib/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\compressor\zlib\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/compressor/zstd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\compressor\zstd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/compressor/lz4/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\compressor\lz4\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/tools/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\tools\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/tools/cephfs/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\tools\cephfs\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/tools/rbd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\tools\rbd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/tools/rbd_mirror/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\tools\rbd_mirror\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/tools/rbd_nbd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\tools\rbd_nbd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/dmclock/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\dmclock\src\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/crypto/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\crypto\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/crypto/isa-l/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\crypto\isa-l\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/bash_completion/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\bash_completion\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/client/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\client\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/journal/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\journal\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/librbd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\librbd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/rbd_fuse/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\rbd_fuse\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/rbd_replay/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\rbd_replay\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/key_value_store/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\key_value_store\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/rgw/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\rgw\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/script/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\script\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/script/cmake_uninstall.cmake.in">
+			<Option virtualFolder="CMake Files\src\script\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/.git/HEAD">
+			<Option virtualFolder="CMake Files\.git\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/.git/refs/heads/dev">
+			<Option virtualFolder="CMake Files\.git\refs\heads\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/doc/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\doc\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/doc/man/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\doc\man\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/doc/man/8/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\doc\man\8\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/man/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\man\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/systemd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\systemd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/systemd/ceph-fuse@.service.in">
+			<Option virtualFolder="CMake Files\systemd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/systemd/ceph-mds@.service.in">
+			<Option virtualFolder="CMake Files\systemd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/systemd/ceph-mgr@.service.in">
+			<Option virtualFolder="CMake Files\systemd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/systemd/ceph-mon@.service.in">
+			<Option virtualFolder="CMake Files\systemd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/systemd/ceph-osd@.service.in">
+			<Option virtualFolder="CMake Files\systemd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/systemd/ceph-radosgw@.service.in">
+			<Option virtualFolder="CMake Files\systemd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/systemd/ceph-rbd-mirror@.service.in">
+			<Option virtualFolder="CMake Files\systemd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/systemd/rbdmap.service.in">
+			<Option virtualFolder="CMake Files\systemd\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/etc/sysctl/90-ceph-osd.conf.in">
+			<Option virtualFolder="CMake Files\etc\sysctl\"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/etc/sysctl/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\etc\sysctl\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

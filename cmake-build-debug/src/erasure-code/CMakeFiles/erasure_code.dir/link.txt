@@ -1,0 +1,2 @@
+/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../lib/liberasure_code.a  CMakeFiles/erasure_code.dir/ErasureCodePlugin.cc.o
+/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../lib/liberasure_code.a

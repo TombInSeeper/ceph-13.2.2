@@ -1,0 +1,37 @@
+# The set of languages for which implicit dependencies are needed:
+set(CMAKE_DEPENDS_LANGUAGES
+  "CXX"
+  )
+# The set of files for implicit dependencies of each language:
+set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/wuyue/ceph-13.2.2/src/json_spirit/json_spirit_reader.cpp" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/json_spirit/CMakeFiles/json_spirit.dir/json_spirit_reader.cpp.o"
+  "/home/wuyue/ceph-13.2.2/src/json_spirit/json_spirit_writer.cpp" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/json_spirit/CMakeFiles/json_spirit.dir/json_spirit_writer.cpp.o"
+  )
+set(CMAKE_CXX_COMPILER_ID "GNU")
+
+# Preprocessor definitions for this target.
+set(CMAKE_TARGET_DEFINITIONS_CXX
+  "CEPH_LIBDIR=\"/usr/local/lib64\""
+  "CEPH_PKGLIBDIR=\"/usr/local/lib64/ceph\""
+  "_FILE_OFFSET_BITS=64"
+  "_GNU_SOURCE"
+  "__linux__"
+  )
+
+# The include file search paths:
+set(CMAKE_CXX_TARGET_INCLUDE_PATH
+  "src/include"
+  "../src"
+  "/usr/include/nss3"
+  "/usr/include/nspr4"
+  "boost/include"
+  "include"
+  )
+
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
+  "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/CMakeFiles/common_utf8.dir/DependInfo.cmake"
+  )
+
+# Fortran module output directory.
+set(CMAKE_Fortran_TARGET_MODULE_DIR "")

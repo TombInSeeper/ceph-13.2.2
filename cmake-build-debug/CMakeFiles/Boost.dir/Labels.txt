@@ -1,0 +1,13 @@
+# Target labels
+ Boost
+# Source files and their labels
+/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles/Boost
+/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles/Boost.rule
+/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles/Boost-complete.rule
+/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/src/Boost-stamp/Boost-install.rule
+/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/src/Boost-stamp/Boost-mkdir.rule
+/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/src/Boost-stamp/Boost-download.rule
+/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/src/Boost-stamp/Boost-update.rule
+/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/src/Boost-stamp/Boost-patch.rule
+/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/src/Boost-stamp/Boost-configure.rule
+/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/src/Boost-stamp/Boost-build.rule

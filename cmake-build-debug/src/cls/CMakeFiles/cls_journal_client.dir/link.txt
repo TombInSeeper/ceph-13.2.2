@@ -1,0 +1,2 @@
+/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../lib/libcls_journal_client.a  CMakeFiles/cls_journal_client.dir/journal/cls_journal_client.cc.o CMakeFiles/cls_journal_client.dir/journal/cls_journal_types.cc.o
+/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../lib/libcls_journal_client.a

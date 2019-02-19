@@ -1,0 +1,2 @@
+/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../lib/libcls_lua_client.a  CMakeFiles/cls_lua_client.dir/lua/cls_lua_client.cc.o
+/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../lib/libcls_lua_client.a
