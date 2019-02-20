@@ -3544,26 +3544,29 @@ void *BlueStore::MempoolThread::entry()
 void BlueStore::discard_to_gctrd(interval_set<uint64_t> &p) {
   gc_thread.lock.Lock();
   gc_thread.invalid_extents.insert(p);
-  gc_thread.cond.SignalOne();
+  if(gc_thread.invalid_extents.size() > 10 * OCSSD_SEG_SIZE)
+    gc_thread.cond.SignalOne();
   gc_thread.lock.Unlock();
 }
 
-void BlueStore::GCThread::may_trigger_gc( bool timeout , uint64_t sid)
+void BlueStore::GCThread::may_trigger_gc( bool timeout , std::set<uint32_t> &sids)
 {
   if(gc_policy == STUPID)
   {
       uint64_t victim_seg_id = 0;
-      auto it = segmentSummarys + sid;
-      if (it->invalid_bitmap.all())
-      {
-        victim_seg_id = sid;
-        interval_set<uint64_t> p;
-        p.insert(victim_seg_id * OCSSD_SEG_SIZE , OCSSD_SEG_SIZE );
-        //tell bdev to discard (erase) the entire segment;
-        store->bdev->queue_discard(p);
-        it->invalid_bitmap.reset();
-        //give back to Allocator
-        store->alloc->release(p);
+      for(auto sid : sids) {
+        auto it = segmentSummarys + sid;
+        if (it->invalid_bitmap.all())
+        {
+          victim_seg_id = sid;
+          interval_set<uint64_t> p;
+          p.insert(victim_seg_id * OCSSD_SEG_SIZE , OCSSD_SEG_SIZE );
+          //tell bdev to discard (erase) the entire segment;
+          store->bdev->queue_discard(p);
+          it->invalid_bitmap.reset();
+          //give back to Allocator
+          store->alloc->release(p);
+        }
       }
   }
 }
@@ -3592,7 +3595,7 @@ void *BlueStore::GCThread::entry()
       continue;
     }
     //---------------------------------------------------
-    uint64_t sid = 0;
+    std::set<uint32_t> sids;
     {
       //MARK INVALID
       for(auto it = invalid_set_local.begin() ; it != invalid_set_local.end(); it++)
@@ -3608,13 +3611,15 @@ void *BlueStore::GCThread::entry()
           segmentSummarys[sid].invalid_bitmap.set(idx);
           o += 0x1000;
           l -= 0x1000;
+
+          if(sids.count(sid) == 0 && sid != 0 )
+            sids.insert(sid);
         }
       }
-      sid = invalid_set_local.begin().get_start() / OCSSD_SEG_SIZE;
       //
       invalid_set_local.clear();
     }
-    may_trigger_gc(timeout,sid);
+    may_trigger_gc(timeout,sids);
 
     //RELOCK
     lock.Lock();

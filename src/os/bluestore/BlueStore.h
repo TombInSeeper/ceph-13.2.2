@@ -2002,7 +2002,7 @@ private:
     interval_set<uint64_t> invalid_extents;
     SegmentSummary  *segmentSummarys = nullptr;
 
-    void may_trigger_gc( bool timeout , uint64_t sid);
+    void may_trigger_gc( bool timeout , std::set<uint32_t> &sid);
 
     explicit GCThread(BlueStore *s)
           : store(s),

@@ -23,6 +23,7 @@
 SegmentBackEnd *SegmentBackEnd::create(std::string backend_type, CephContext *cct, std::string path) {
   /*if(backend_type == "ocssd")
     return new OCSSDBackEnd(cct,path);*/
+  dout(0) << __func__ << " backend_type= " << backend_type << dendl;
   if(backend_type == "mock")
     return new FileSegmentBackEnd(cct,path);
   if(backend_type == "ocssd")
@@ -271,7 +272,13 @@ int OCSSDBackEnd::seg_write(io_u *io)  {
 //OCDevice
 int OCDevice::open(const std::string &path) {
   this->dev_path = path;
-  this->sbe = SegmentBackEnd::create("mock",cct,dev_path);
+  if(cct->_conf->bdev_ocssd_backend == "mock")
+    this->sbe = SegmentBackEnd::create("mock",cct,dev_path);
+  else
+  {
+    this->dev_path = cct->_conf->bluestore_block_path;
+    this->sbe = SegmentBackEnd::create("ocssd",cct,dev_path);
+  }
   BlockDevice::size = sbe->get_size();
   BlockDevice::block_size = 0x1000;
   segmentSize = sbe->get_seg_size();
@@ -397,8 +404,8 @@ int OCDevice::aio_read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *i
     delete io;
     ioc->ocssd_io_queue.pop_front();
   }
-  //p.copy_in(0,len,ioc->ocssd_buf);
-  //delete ioc->ocssd_buf;
+  p.copy_in(0,len,ioc->ocssd_buf);
+  delete ioc->ocssd_buf;
   ioc->num_pending = 0;
   ioc->num_running = 0;
   return r;
@@ -455,18 +462,16 @@ int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *io
   char *buf = nullptr , *buf2 = nullptr;
   auto  count = 0U;
 
-  ioc->ocssd_bufferptr = pbl;
-  ioc->ocssd_io_len = len;
-  if(one){
+
+  if(likely(one)){
     if(ioc->ocssd_io_type == IO_WRITE){
       buf = new char[len];
       pbl->copy(0, len , buf);
     }
     else
     {
-      /*ioc->ocssd_buf = new char[len];
-      buf = ioc->ocssd_buf;*/
-      buf = pbl->c_str();
+      buf = new char[len];
+      ioc->ocssd_buf = buf;
     }
     io_u *_1 = new io_u;
     _1->obj_id =  static_cast<uint32_t>( (off / segmentSize));
@@ -495,9 +500,8 @@ int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *io
     }
     else
     {
-      /*ioc->ocssd_buf = new char[len];
-      buf = ioc->ocssd_buf;*/
-      buf = pbl->c_str();
+      ioc->ocssd_buf = new char[len];
+      buf = ioc->ocssd_buf;
       buf2 = buf + len1;
     }
     _1->data = buf;
@@ -506,7 +510,8 @@ int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *io
     ioc->ocssd_io_queue.push_back(_2);
     count += 2;
   }
-  ioc->num_pending += count;
+  ioc->ocssd_io_len += len;
+  ioc->num_pending  += count;
   return 0;
 }
 
@@ -518,13 +523,10 @@ void OCDevice::_aio_thread_entry() {
       &SegmentBackEnd::seg_read,
       &SegmentBackEnd::seg_write
   };
-  const char* fname[] = {
-      "NOOP",
-      "READ",
-      "WRITE"
-  };
+
   auto for_each_io_u = [](IOContext *ioctx, SegmentBackEnd*sbe, IOFunction f){
-      while(!ioctx->ocssd_io_queue.empty())
+
+    while(!ioctx->ocssd_io_queue.empty())
       {
         io_u *io = (io_u*)(ioctx->ocssd_io_queue.front());
         int r = (sbe->*f)(io);
@@ -547,32 +549,37 @@ void OCDevice::_aio_thread_entry() {
     //Swap and Unlock
     //if(!pending_io.empty())
     {
-      //dout(0) << __func__ << " queue depth: "  << pending_io.size() << dendl;
-      running_io.swap(pending_io);
+      const uint32_t max_io_length = 4 * 1024 *1024 ;
+      uint32_t io_length = 0;
+      dout(0) << __func__ << " queue depth: "  << pending_io.size() << dendl;
+      while(io_length < max_io_length && !pending_io.empty()){
+        IOContext *ioc = pending_io.front();
+        running_io.push_back(ioc);
+        pending_io.pop_front();
+        io_length += ioc->ocssd_io_len;
+      }
+      //running_io.swap(pending_io);
+      //dout(0) << __func__ << " running queue depth: "  << running_io.size() << dendl;
       l.unlock();
     }
     while(!running_io.empty())
     {
       IOContext *ioctx = running_io.front();
+      dout(0) << __func__ << " queue in one ioctx depth: "  << ioctx->num_running.load() << dendl;
       running_io.pop_front();
-      for_each_io_u(ioctx,sbe,ioFunction[ioctx->ocssd_io_type]);
+      while(!ioctx->ocssd_io_queue.empty())
+      {
+        io_u *io = (io_u*)(ioctx->ocssd_io_queue.front());
+        int r = sbe->seg_write(io);
+        ceph_assert( r == 0 );
+        delete io;
+        ioctx->ocssd_io_queue.pop_front();
+      }
       if(likely(ioctx->priv != NULL))
       {
         //for aio_write
         ioctx->num_running = 0;
         aio_callback(aio_callback_priv,ioctx->priv);
-      }
-      else
-      {
-        //for aio_read
-        ioctx->num_running = 1;
-        /*{
-          bufferptr p = buffer::create(ioctx->ocssd_io_len);
-          p.copy_in(0,ioctx->ocssd_io_len,ioctx->ocssd_buf);
-          ((bufferlist*)(ioctx->ocssd_bufferptr))->append(p);
-          delete ioctx->ocssd_buf;
-        }*/
-        ioctx->try_aio_wake();
       }
       //dout(0) << __func__ << " io_type:" << fname[(int)(ioctx->ocssd_io_type)] << " complete" << dendl;
     }
@@ -603,7 +610,7 @@ void OCDevice::aio_submit(IOContext *ioc) {
         ioc->num_pending = 0;
 
         //wake up aio_thread
-        aio_cv.notify_all();
+        aio_cv.notify_one();
 
       }
       break;
@@ -612,7 +619,7 @@ void OCDevice::aio_submit(IOContext *ioc) {
     {
       //Polling here
       while(ioc->ocssd_submit_seq != submitted_seq.load())
-                      ;
+                      usleep(1);
       ++submitted_seq;
       dout(10) << __func__ << " write: WAITING for aio_mtx " << dendl;
       {
@@ -626,7 +633,7 @@ void OCDevice::aio_submit(IOContext *ioc) {
         ioc->num_pending = 0;
 
         //wake up aio_thread
-        aio_cv.notify_all();
+        aio_cv.notify_one();
       }
       break;
     }

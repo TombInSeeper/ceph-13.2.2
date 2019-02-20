@@ -557,7 +557,7 @@ $DAEMONOPTS
         bluestore_min_alloc_size = 4096             ;must be 4KB
         bluestore_prefer_deferred_size_hdd = 0      ;must be 0
         bluestore_prefer_deferred_size_ssd = 0      ;must be 0
-
+	bluestore_max_blob_size = 131072
         ;;extra options
         ;;bluestore_csum_type = none ; default:crc32
         ;;bluestore_allocator = bitmap; default:stupid
