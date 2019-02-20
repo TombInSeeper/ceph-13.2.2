@@ -1,0 +1,2 @@
+gcc $(exe) -o objssd-nvme.c $(source_code) liblightnvm.a -laio -lpthread -lrt
+hahah
