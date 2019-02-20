@@ -5,8 +5,9 @@
 #ifndef CEPH_OS_BLUESTORE_OCDEVICE_H
 #define CEPH_OS_BLUESTORE_OCDEVICE_H
 
-
-#include "libocssd/objssd-nvme.h"
+extern "C" {
+  #include "libocssd/objssd/objssd-nvme.h"
+}
 #include "BlockDevice.h"
 
 //Using std

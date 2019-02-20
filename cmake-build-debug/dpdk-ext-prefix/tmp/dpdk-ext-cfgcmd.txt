@@ -1,0 +1,1 @@
+cmd='$(MAKE);config;O=/home/wuyue/ceph-13.2.2/cmake-build-debug/src/dpdk;T=x86_64-native-linuxapp-gcc'

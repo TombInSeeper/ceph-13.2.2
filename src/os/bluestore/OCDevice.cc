@@ -535,15 +535,17 @@ void OCDevice::_aio_thread_entry() {
   };
 
   //cond_variable pred
-  /*auto wait_pred = [&](){
-      return !pending_io.empty() ;
-  };*/
+  auto wait_pred = [&](){
+      return !pending_io.empty() || aio_stop;
+  };
 
   std::unique_lock<std::mutex> l(aio_mtx);
-  while (!aio_stop){
-    aio_cv.wait(l);
+  while (true){
+    aio_cv.wait(l,wait_pred);
+    if(aio_stop)
+      break;
     //Swap and Unlock
-    if(!pending_io.empty())
+    //if(!pending_io.empty())
     {
       //dout(0) << __func__ << " queue depth: "  << pending_io.size() << dendl;
       running_io.swap(pending_io);
@@ -577,8 +579,6 @@ void OCDevice::_aio_thread_entry() {
     //Relock
     l.lock();
   }
-  //Stop
-  l.unlock();
 }
 
 void OCDevice::aio_thread_work() {

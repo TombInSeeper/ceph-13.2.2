@@ -537,7 +537,6 @@ $DAEMONOPTS
 
         bdev_debug_use_ramdisk  = false
         bdev_ocssd_enable       = true
-        ;bdev_ocssd_gc_enable	= true
 	bdev_ocssd_backend	= mock
        
         ;;;;;bluestore block size file size = 500GB

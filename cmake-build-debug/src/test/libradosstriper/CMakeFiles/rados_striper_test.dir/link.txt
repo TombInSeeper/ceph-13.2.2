@@ -1,0 +1,2 @@
+/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../../lib/librados_striper_test.a  CMakeFiles/rados_striper_test.dir/TestCase.cc.o
+/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../../lib/librados_striper_test.a

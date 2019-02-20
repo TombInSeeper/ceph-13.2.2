@@ -1,0 +1,2 @@
+/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../lib/libosdc.a  CMakeFiles/osdc.dir/Filer.cc.o CMakeFiles/osdc.dir/ObjectCacher.cc.o CMakeFiles/osdc.dir/Objecter.cc.o CMakeFiles/osdc.dir/Striper.cc.o
+/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../lib/libosdc.a

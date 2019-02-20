@@ -1,0 +1,2 @@
+/opt/rh/devtoolset-7/root/usr/bin/ar qc ../../lib/libkv.a  CMakeFiles/kv_objs.dir/KeyValueDB.cc.o CMakeFiles/kv_objs.dir/MemDB.cc.o CMakeFiles/kv_objs.dir/RocksDBStore.cc.o CMakeFiles/kv_objs.dir/LevelDBStore.cc.o
+/opt/rh/devtoolset-7/root/usr/bin/ranlib ../../lib/libkv.a

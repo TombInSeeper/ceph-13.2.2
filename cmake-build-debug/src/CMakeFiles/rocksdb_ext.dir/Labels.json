@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/CMakeFiles/rocksdb_ext"
+		},
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/CMakeFiles/rocksdb_ext.rule"
+		},
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/CMakeFiles/rocksdb_ext-complete.rule"
+		},
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/rocksdb_ext-prefix/src/rocksdb_ext-stamp/rocksdb_ext-install.rule"
+		},
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/rocksdb_ext-prefix/src/rocksdb_ext-stamp/rocksdb_ext-mkdir.rule"
+		},
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/rocksdb_ext-prefix/src/rocksdb_ext-stamp/rocksdb_ext-download.rule"
+		},
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/rocksdb_ext-prefix/src/rocksdb_ext-stamp/rocksdb_ext-update.rule"
+		},
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/rocksdb_ext-prefix/src/rocksdb_ext-stamp/rocksdb_ext-patch.rule"
+		},
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/rocksdb_ext-prefix/src/rocksdb_ext-stamp/rocksdb_ext-configure.rule"
+		},
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/rocksdb_ext-prefix/src/rocksdb_ext-stamp/rocksdb_ext-build.rule"
+		},
+		{
+			"file" : "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/rocksdb_ext-prefix/src/rocksdb_ext-stamp/rocksdb_ext-forcebuild.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"rocksdb_ext"
+		],
+		"name" : "rocksdb_ext"
+	}
+}

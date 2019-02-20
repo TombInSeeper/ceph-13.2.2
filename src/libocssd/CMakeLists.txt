@@ -62,11 +62,17 @@ include_directories(src/be_lightnvm)
 
 set(HEADER_FILES
 	include/liblightnvm.h
-		include/nvm_debug.h
+	include/nvm_debug.h
 	src/nvm_spec.h
 	src/nvm_vblk.h
-		#---------------------------
-	objssd-nvme.h
+	
+	#---------------------------
+	objssd/objssd-nvme.h
+	objssd/objssd-bbt.h
+	objssd/objssd-map.h
+	objssd/objssd-thread.h
+	objssd/queue.h
+	objssd/type.h
     )
 
 set(SOURCE_FILES
@@ -83,16 +89,19 @@ set(SOURCE_FILES
 	src/be_nvme/nvm_async.c
     	src/be_nvme/nvm_cmb.c
 	src/be_nvme/nvm_aer.c
-
-
-
 #----------------------------
-	objssd-nvme.c
+	objssd/objssd-nvme.c
+	objssd/objssd-bbt.c
+	objssd/objssd-map.c
+	objssd/objssd-rw.c
+	objssd/objssd-thread.c
+	objssd/queue.c
 	)
 
 include_directories(utils)
 include_directories(include)
 include_directories(src/)
+include_directories(objssd/)
 
 set(LNAME "lightnvm")
 

@@ -3,7 +3,7 @@
 //
 extern "C"
 {
- #include "libocssd/objssd-nvme.h"
+ #include "libocssd/objssd/objssd-nvme.h"
 }
 #include "os/ObjectStore.h"
 

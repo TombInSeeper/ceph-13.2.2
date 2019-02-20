@@ -1,0 +1,1 @@
+cmd='CC=/opt/rh/devtoolset-7/root/usr/bin/cc;CXX=/opt/rh/devtoolset-7/root/usr/bin/c++;./bootstrap.sh;--prefix=<INSTALL_DIR>;--with-libraries=atomic,chrono,thread,system,regex,random,program_options,date_time,iostreams,python,context,coroutine,container'

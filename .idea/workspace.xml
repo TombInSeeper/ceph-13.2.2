@@ -481,7 +481,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="99ece62f-9a82-46f7-8d22-df7884a92722" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/os/bluestore/BlueStore.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/BlueStore.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -507,28 +508,28 @@
           <entry key="c" value="1" />
           <entry key="cc" value="26" />
           <entry key="condition_variable" value="1" />
-          <entry key="h" value="38" />
+          <entry key="h" value="39" />
           <entry key="sh" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="Bash" value="4" />
-          <entry key="ObjectiveC" value="66" />
+          <entry key="ObjectiveC" value="67" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="c" value="38" />
-          <entry key="cc" value="13835" />
-          <entry key="h" value="2921" />
+          <entry key="cc" value="13887" />
+          <entry key="h" value="2945" />
           <entry key="sh" value="25" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Bash" value="25" />
-          <entry key="ObjectiveC" value="16794" />
+          <entry key="ObjectiveC" value="16870" />
         </counts>
       </usages-collector>
     </session>
@@ -538,8 +539,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="20">
-              <caret line="547" column="8" selection-start-line="547" selection-start-column="8" selection-end-line="547" selection-end-column="8" />
+            <state relative-caret-position="-159">
+              <caret line="269" lean-forward="true" selection-start-line="269" selection-end-line="269" />
               <folding>
                 <element signature="e#0#2#0" />
                 <element signature="e#467#895#0" />
@@ -568,6 +569,7 @@
                 <element signature="e#10902#11439#0" />
                 <element signature="e#11441#11778#0" />
                 <element signature="e#11780#13884#0" />
+                <element signature="e#14475#16370#0" />
                 <element signature="e#15528#15690#0" />
                 <element signature="e#15692#17015#0" />
                 <element signature="e#17017#17136#0" />
@@ -577,10 +579,24 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="108">
+              <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+              <folding>
+                <element signature="e#116#149#0" expanded="true" />
+                <element signature="e#2215#2591#1" />
+                <element signature="e#2594#2958#1" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/os/bluestore/BlueStore.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="214">
-              <caret line="9101" column="5" lean-forward="true" selection-start-line="9101" selection-start-column="5" selection-end-line="9101" selection-end-column="5" />
+            <state relative-caret-position="-597">
+              <caret line="3570" column="27" selection-start-line="3570" selection-start-column="27" selection-end-line="3570" selection-end-column="27" />
               <folding>
                 <element signature="e#27#326#0" />
                 <element signature="e#2386#2388#0" />
@@ -832,6 +848,7 @@
                 <element signature="e#259726#260101#0" />
                 <element signature="e#260103#260513#0" />
                 <element signature="e#260515#262998#0" />
+                <element signature="e#263000#264372#0" />
                 <element signature="e#264377#264682#0" />
                 <element signature="e#264684#265367#0" />
                 <element signature="e#265369#266816#0" />
@@ -947,12 +964,12 @@
         <option value="$PROJECT_DIR$/src/vstart.sh" />
         <option value="$PROJECT_DIR$/src/libocssd/objssd-nvme.h" />
         <option value="$PROJECT_DIR$/src/libocssd/objssd-nvme.c" />
-        <option value="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" />
         <option value="$PROJECT_DIR$/src/os/bluestore/BlueStore.h" />
         <option value="$PROJECT_DIR$/src/common/buffer.cc" />
         <option value="$PROJECT_DIR$/src/os/bluestore/BlockDevice.h" />
-        <option value="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" />
         <option value="$PROJECT_DIR$/src/os/bluestore/BlueStore.cc" />
+        <option value="$PROJECT_DIR$/src/os/bluestore/OCDevice.cc" />
+        <option value="$PROJECT_DIR$/src/os/bluestore/OCDevice.h" />
       </list>
     </option>
   </component>
@@ -971,7 +988,7 @@
     </packageJsonPaths>
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="1">
     <option name="x" value="-4" />
     <option name="y" value="4" />
     <option name="width" value="1364" />
@@ -3866,15 +3883,15 @@
       <workItem from="1550485703200" duration="5162000" />
       <workItem from="1550494812958" duration="1042000" />
       <workItem from="1550540416973" duration="675000" />
-      <workItem from="1550541159748" duration="21581000" />
+      <workItem from="1550541159748" duration="24741000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="137510000" />
+    <option name="totallyTimeSpent" value="140670000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-4" y="4" width="1364" height="724" extended-state="0" />
+    <frame x="4" y="4" width="1364" height="724" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.14241487" />
@@ -3888,7 +3905,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49923196" visible="true" weight="0.2358156" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.49923196" visible="true" weight="0.28723404" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.50076807" side_tool="true" weight="0.2464539" />
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="CMake" order="11" weight="0.79432625" />
@@ -4104,18 +4121,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="15" column="20" selection-start-line="15" selection-start-column="20" selection-end-line="15" selection-end-column="20" />
-          <folding>
-            <element signature="e#224#2212#1" />
-            <element signature="e#2215#2591#1" />
-            <element signature="e#2594#2958#1" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/os/bluestore/BlueStore.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-86">
@@ -4130,10 +4135,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/os/bluestore/BlockDevice.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-220">
+          <caret line="97" column="7" selection-start-line="97" selection-start-column="7" selection-end-line="97" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="20">
-          <caret line="547" column="8" selection-start-line="547" selection-start-column="8" selection-end-line="547" selection-end-column="8" />
+        <state relative-caret-position="-159">
+          <caret line="269" lean-forward="true" selection-start-line="269" selection-end-line="269" />
           <folding>
             <element signature="e#0#2#0" />
             <element signature="e#467#895#0" />
@@ -4162,6 +4174,7 @@
             <element signature="e#10902#11439#0" />
             <element signature="e#11441#11778#0" />
             <element signature="e#11780#13884#0" />
+            <element signature="e#14475#16370#0" />
             <element signature="e#15528#15690#0" />
             <element signature="e#15692#17015#0" />
             <element signature="e#17017#17136#0" />
@@ -4169,17 +4182,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/os/bluestore/BlockDevice.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-220">
-          <caret line="97" column="7" selection-start-line="97" selection-start-column="7" selection-end-line="97" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/os/bluestore/BlueStore.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="214">
-          <caret line="9101" column="5" lean-forward="true" selection-start-line="9101" selection-start-column="5" selection-end-line="9101" selection-end-column="5" />
+        <state relative-caret-position="-597">
+          <caret line="3570" column="27" selection-start-line="3570" selection-start-column="27" selection-end-line="3570" selection-end-column="27" />
           <folding>
             <element signature="e#27#326#0" />
             <element signature="e#2386#2388#0" />
@@ -4431,6 +4437,7 @@
             <element signature="e#259726#260101#0" />
             <element signature="e#260103#260513#0" />
             <element signature="e#260515#262998#0" />
+            <element signature="e#263000#264372#0" />
             <element signature="e#264377#264682#0" />
             <element signature="e#264684#265367#0" />
             <element signature="e#265369#266816#0" />
@@ -4512,6 +4519,18 @@
             <element signature="e#375116#375445#0" />
             <element signature="e#375447#376286#0" />
             <element signature="e#376288#376346#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/os/bluestore/OCDevice.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+          <folding>
+            <element signature="e#116#149#0" expanded="true" />
+            <element signature="e#2215#2591#1" />
+            <element signature="e#2594#2958#1" />
           </folding>
         </state>
       </provider>
