@@ -33,8 +33,8 @@ try:
 except NameError:
     pass
 
-CEPH_GIT_VER = "a8fa37ed224a3f30d855f506fb33fd9f46704cfe"
-CEPH_GIT_NICE_VER = "8fa37e"
+CEPH_GIT_VER = "8ad25b47ce134e72e86a882f19c343a68eb700a6"
+CEPH_GIT_NICE_VER = "ad25b4"
 CEPH_RELEASE = "13"
 CEPH_RELEASE_NAME = "mimic"
 CEPH_RELEASE_TYPE = "stable"

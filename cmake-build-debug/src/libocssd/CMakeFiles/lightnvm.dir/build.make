@@ -226,18 +226,83 @@ src/libocssd/CMakeFiles/lightnvm.dir/src/be_nvme/nvm_aer.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/lightnvm.dir/src/be_nvme/nvm_aer.c.s"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme/nvm_aer.c -o CMakeFiles/lightnvm.dir/src/be_nvme/nvm_aer.c.s
 
-src/libocssd/CMakeFiles/lightnvm.dir/objssd-nvme.c.o: src/libocssd/CMakeFiles/lightnvm.dir/flags.make
-src/libocssd/CMakeFiles/lightnvm.dir/objssd-nvme.c.o: ../src/libocssd/objssd-nvme.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building C object src/libocssd/CMakeFiles/lightnvm.dir/objssd-nvme.c.o"
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/lightnvm.dir/objssd-nvme.c.o   -c /home/wuyue/ceph-13.2.2/src/libocssd/objssd-nvme.c
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.o: src/libocssd/CMakeFiles/lightnvm.dir/flags.make
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.o: ../src/libocssd/objssd/objssd-nvme.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building C object src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.o"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.o   -c /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-nvme.c
 
-src/libocssd/CMakeFiles/lightnvm.dir/objssd-nvme.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/lightnvm.dir/objssd-nvme.c.i"
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/wuyue/ceph-13.2.2/src/libocssd/objssd-nvme.c > CMakeFiles/lightnvm.dir/objssd-nvme.c.i
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.i"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-nvme.c > CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.i
 
-src/libocssd/CMakeFiles/lightnvm.dir/objssd-nvme.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/lightnvm.dir/objssd-nvme.c.s"
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/wuyue/ceph-13.2.2/src/libocssd/objssd-nvme.c -o CMakeFiles/lightnvm.dir/objssd-nvme.c.s
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.s"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-nvme.c -o CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.s
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.o: src/libocssd/CMakeFiles/lightnvm.dir/flags.make
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.o: ../src/libocssd/objssd/objssd-bbt.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.o"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.o   -c /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-bbt.c
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.i"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-bbt.c > CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.i
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.s"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-bbt.c -o CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.s
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-map.c.o: src/libocssd/CMakeFiles/lightnvm.dir/flags.make
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-map.c.o: ../src/libocssd/objssd/objssd-map.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-map.c.o"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/lightnvm.dir/objssd/objssd-map.c.o   -c /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-map.c
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-map.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/lightnvm.dir/objssd/objssd-map.c.i"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-map.c > CMakeFiles/lightnvm.dir/objssd/objssd-map.c.i
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-map.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/lightnvm.dir/objssd/objssd-map.c.s"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-map.c -o CMakeFiles/lightnvm.dir/objssd/objssd-map.c.s
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.o: src/libocssd/CMakeFiles/lightnvm.dir/flags.make
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.o: ../src/libocssd/objssd/objssd-rw.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.o"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.o   -c /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-rw.c
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.i"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-rw.c > CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.i
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.s"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-rw.c -o CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.s
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.o: src/libocssd/CMakeFiles/lightnvm.dir/flags.make
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.o: ../src/libocssd/objssd/objssd-thread.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building C object src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.o"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.o   -c /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-thread.c
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.i"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-thread.c > CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.i
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.s"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-thread.c -o CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.s
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/queue.c.o: src/libocssd/CMakeFiles/lightnvm.dir/flags.make
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/queue.c.o: ../src/libocssd/objssd/queue.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object src/libocssd/CMakeFiles/lightnvm.dir/objssd/queue.c.o"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/lightnvm.dir/objssd/queue.c.o   -c /home/wuyue/ceph-13.2.2/src/libocssd/objssd/queue.c
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/queue.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/lightnvm.dir/objssd/queue.c.i"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/wuyue/ceph-13.2.2/src/libocssd/objssd/queue.c > CMakeFiles/lightnvm.dir/objssd/queue.c.i
+
+src/libocssd/CMakeFiles/lightnvm.dir/objssd/queue.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/lightnvm.dir/objssd/queue.c.s"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && /opt/rh/devtoolset-7/root/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/wuyue/ceph-13.2.2/src/libocssd/objssd/queue.c -o CMakeFiles/lightnvm.dir/objssd/queue.c.s
 
 # Object files for target lightnvm
 lightnvm_OBJECTS = \
@@ -254,7 +319,12 @@ lightnvm_OBJECTS = \
 "CMakeFiles/lightnvm.dir/src/be_nvme/nvm_async.c.o" \
 "CMakeFiles/lightnvm.dir/src/be_nvme/nvm_cmb.c.o" \
 "CMakeFiles/lightnvm.dir/src/be_nvme/nvm_aer.c.o" \
-"CMakeFiles/lightnvm.dir/objssd-nvme.c.o"
+"CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.o" \
+"CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.o" \
+"CMakeFiles/lightnvm.dir/objssd/objssd-map.c.o" \
+"CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.o" \
+"CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.o" \
+"CMakeFiles/lightnvm.dir/objssd/queue.c.o"
 
 # External object files for target lightnvm
 lightnvm_EXTERNAL_OBJECTS =
@@ -272,10 +342,15 @@ lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/src/be_nvme/nvm_baidu.c.
 lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/src/be_nvme/nvm_async.c.o
 lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/src/be_nvme/nvm_cmb.c.o
 lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/src/be_nvme/nvm_aer.c.o
-lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/objssd-nvme.c.o
+lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.o
+lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.o
+lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-map.c.o
+lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.o
+lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.o
+lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/objssd/queue.c.o
 lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/build.make
 lib/liblightnvm.a: src/libocssd/CMakeFiles/lightnvm.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Linking C static library ../../lib/liblightnvm.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Linking C static library ../../lib/liblightnvm.a"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && $(CMAKE_COMMAND) -P CMakeFiles/lightnvm.dir/cmake_clean_target.cmake
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/lightnvm.dir/link.txt --verbose=$(VERBOSE)
 

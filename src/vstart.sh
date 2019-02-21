@@ -533,7 +533,7 @@ $DAEMONOPTS
         bluestore_cache_size = 0
         bluestore_cache_size_ssd = 0
         bluestore_cache_size_hdd = 0
-        bluestore_cache_trim_interval = 50000000
+        ;bluestore_cache_trim_interval = 50000000
 
         bdev_debug_use_ramdisk  = false
         bdev_ocssd_enable       = true

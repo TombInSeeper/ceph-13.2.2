@@ -37,9 +37,9 @@
 
 #define WITH_OCSSD
 #ifdef WITH_OCSSD
-#define OCSSD_SEG_SIZE              (312*1024*1024)
-#define OCSSD_NR_SEG_RESERVE        (1)
-#define OCSSD_NR_SEG_USER           (100)
+#define OCSSD_SEG_SIZE              (312*1024*1024ULL)
+#define OCSSD_NR_SEG_RESERVE        (1U)
+#define OCSSD_NR_SEG_USER           (100U)
 #endif
 
 class CephContext;
@@ -71,7 +71,9 @@ public:
 
 //For OCSSD
 #if 1
-  uint32_t                 ocssd_submit_seq = 0;          //  write op submit seq
+  atomic_bool              ocssd_ioctx_enable = false;
+  atomic_bool              ocssd_io_done = true;
+  uint32_t                 ocssd_submit_seq   = 0;          //  write op submit seq
   std::list<void*>         ocssd_io_queue;                //  void* -> io_u*
   uint8_t                  ocssd_io_type = 0;             //
 

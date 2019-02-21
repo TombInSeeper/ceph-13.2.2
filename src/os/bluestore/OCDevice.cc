@@ -93,7 +93,6 @@ FileSegmentBackEnd::FileSegmentBackEnd(CephContext *cct, std::string path) {
   }
   if (::access(core.c_str(), F_OK) != 0){
     dout(0) << __func__ << " ...mkfs..." << dendl;
-    ceph_assert(nr_reserved < 30);
     //If the core file doesn't exist , initialize seg_map
     mock_seg_id = 30 - nr_reserved;
     //Erase all segs
@@ -117,8 +116,9 @@ FileSegmentBackEnd::~FileSegmentBackEnd() {
 }
 
 int FileSegmentBackEnd::seg_erase(uint32_t seg_id) {
-  dout(0) << __func__ << " logical_id=" << seg_id << " physical_id=" << seg_map[seg_id].id << dendl;
+  //dout(0) << __func__ << " logical_id=" << seg_id << " physical_id=" << seg_map[seg_id].id << dendl;
   std::this_thread::sleep_for(chrono::operator""ms(1));
+  seg_map[seg_id].status =Segment::Usable;
   return 0;
 }
 
@@ -131,10 +131,8 @@ int FileSegmentBackEnd::seg_read(io_u *io) {
   auto seg = &seg_map[io->obj_id];
   io->obj_id = seg->id; // logical to physical
 
-  ceph_assert(seg->status == Segment::Usable);
-
-  auto lba_off = static_cast<uint32_t >(io->obj_id * segmentSize + io->obj_off * 0x1000);
-  auto lba_len = static_cast<uint32_t >(io->data_size * 0x1000);
+  auto lba_off = static_cast<uint64_t >(io->obj_id * segmentSize + io->obj_off * 0x1000);
+  auto lba_len = static_cast<uint64_t >(io->data_size * 0x1000);
   //dout(20) << __func__ << std::hex << " off=0x" << lba_off << " len=0x" << lba_len << std::dec << dendl;
 
   ssize_t r = ::pread(direct_fd,io->data,lba_len,lba_off);
@@ -157,7 +155,7 @@ int FileSegmentBackEnd::seg_read(io_u *io) {
 int FileSegmentBackEnd::seg_write(io_u *io) {
   auto seg = &seg_map[io->obj_id];
   io->obj_id = seg->id;
-  ceph_assert(seg->status == Segment::Usable);
+
   auto lba_off = (uint64_t)(io->obj_id * segmentSize + io->obj_off * 0x1000);
   auto lba_len = (uint64_t)(io->data_size * 0x1000);
   /*if(seg->off != io->obj_off * 0x1000)
@@ -317,42 +315,8 @@ int OCDevice::collect_metadata(const std::string &prefix, map<std::string, std::
 }
 
 int OCDevice::read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *ioc, bool buffered) {
-  (void)buffered;
-  (void)ioc;
-  //dout(0) << __func__ << std::hex << "...lba_off:" << "0x" << off << "...len:0x"<<  len << ""  << std::dec<< dendl;
-  bufferptr p = buffer::create(len);
-  char* buf   = new char[len];
-  auto  buf1  = buf;
-  auto  len1  = len;
-  auto  off1  = off;
-  while(len1){
-    io_u io;
-    io.data      = buf1;
-    io.obj_off   = (off1 % segmentSize) / 0x1000;
-    io.obj_id    = (uint32_t)(off1 / segmentSize);
-    io.data_size = 1;
-    // 4K read
-    sbe->seg_read(&io);
-    buf1 += 0x1000;
-    len1 -= 0x1000;
-    off1 += 0x1000;
-  }
-  //memmove(p.c_str(),buf,len);
-  pbl->append(p);
-  pbl->copy_in(0,len,buf);
-  delete []buf;
 
- /* aio_read(off,len,pbl,ioc);
-  aio_submit(ioc);
-  ioc->aio_wait();*/
-
-  ceph_assert(ioc->num_pending == 0);
-  ceph_assert(ioc->num_running == 0);
-
-  //ofstream of("/tmp/read.last",ios::binary);
-  //pbl->hexdump(of);
-
-  return 0;
+  return aio_read(off,len,pbl,ioc);
 }
 
 int OCDevice::read_random(uint64_t off, uint64_t len, char *buf, bool buffered) {
@@ -393,9 +357,8 @@ int OCDevice::aio_read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *i
   ioc->ocssd_io_type = IO_READ;
   bufferptr p = buffer::create(len);
   pbl->append(p);
-  dout(10) << __func__ << std::hex << "...off:" << "0x" << off << "...len:" << "0x" <<  len << std::dec<< dendl;
-  int r = _aio_rw(off,(uint32_t)len, pbl,ioc);
-  //int r = read(off,len,pbl,ioc,false);
+  dout(0) << __func__ << std::hex << "...off:" << "0x" << off << "...len:" << "0x" <<  len << std::dec<< dendl;
+  int r = _aio_rw(off,len, pbl,ioc);
   while(!ioc->ocssd_io_queue.empty())
   {
     io_u *io = (io_u*)(ioc->ocssd_io_queue.front());
@@ -461,8 +424,6 @@ int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *io
   bool one = (off / segmentSize) == ((off + len) / segmentSize ) && (len !=segmentSize);
   char *buf = nullptr , *buf2 = nullptr;
   auto  count = 0U;
-
-
   if(likely(one)){
     if(ioc->ocssd_io_type == IO_WRITE){
       buf = new char[len];
@@ -474,8 +435,8 @@ int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *io
       ioc->ocssd_buf = buf;
     }
     io_u *_1 = new io_u;
-    _1->obj_id =  static_cast<uint32_t>( (off / segmentSize));
-    _1->obj_off = static_cast<uint32_t>((off % segmentSize) / 0x1000);
+    _1->obj_id =  static_cast<uint64_t>( (off / segmentSize));
+    _1->obj_off = static_cast<uint64_t>((off % segmentSize) / 0x1000);
     _1->data_size = len / 0x1000 ;
     _1->data = buf;
     ioc->ocssd_io_queue.push_back(_1);
@@ -484,14 +445,14 @@ int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *io
   else
   {
     io_u * _1 = new io_u , *_2 = new io_u;
-    _1->obj_id = static_cast<uint32_t>( (off / segmentSize));
-    _2->obj_id = static_cast<uint32_t>( ( (off+len) / segmentSize));
+    _1->obj_id = static_cast<uint64_t>( (off / segmentSize));
+    _2->obj_id = static_cast<uint64_t>( ( (off+len) / segmentSize));
     _1->obj_off = (off % segmentSize) / 0x1000;
     _2->obj_off = 0;
     _1->data_size = segmentSize / 0x1000 - _1->obj_off;
     _2->data_size = len / 0x1000 - _1->data_size;
-    auto len1 = static_cast<uint32_t>(_1->data_size * 0x1000);
-    auto len2 = static_cast<uint32_t>(_2->data_size * 0x1000);
+    auto len1 = static_cast<uint64_t>(_1->data_size * 0x1000);
+    auto len2 = static_cast<uint64_t>(_2->data_size * 0x1000);
     if(ioc->ocssd_io_type == IO_WRITE){
       buf = new char[len1];
       buf2 = new char[len2];
@@ -510,6 +471,8 @@ int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *io
     ioc->ocssd_io_queue.push_back(_2);
     count += 2;
   }
+  if(ioc->ocssd_ioctx_enable.load() == false)
+    ioc->ocssd_ioctx_enable = true;
   ioc->ocssd_io_len += len;
   ioc->num_pending  += count;
   return 0;
@@ -579,6 +542,7 @@ void OCDevice::_aio_thread_entry() {
       {
         //for aio_write
         ioctx->num_running = 0;
+        //ioctx->ocssd_io_done = true;
         aio_callback(aio_callback_priv,ioctx->priv);
       }
       //dout(0) << __func__ << " io_type:" << fname[(int)(ioctx->ocssd_io_type)] << " complete" << dendl;

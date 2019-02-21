@@ -6322,7 +6322,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;a8fa37e&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;8ad25b4&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -6334,6 +6334,7 @@
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/objssd"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
@@ -6371,7 +6372,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;a8fa37e&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;8ad25b4&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -6383,6 +6384,7 @@
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/objssd"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
@@ -6420,7 +6422,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;a8fa37e&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;8ad25b4&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -6432,6 +6434,7 @@
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/objssd"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
@@ -6469,7 +6472,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;a8fa37e&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;8ad25b4&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -6481,6 +6484,7 @@
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
+					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/objssd"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
@@ -36545,11 +36549,51 @@
 			<Option target="lightnvm_so"/>
 			<Option target="lightnvm"/>
 		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd-nvme.c">
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-bbt.c">
 			<Option target="lightnvm_so"/>
 			<Option target="lightnvm"/>
 		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd-nvme.h">
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-bbt.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-map.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-map.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-nvme.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-nvme.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-rw.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-thread.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-thread.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/queue.c">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/queue.h">
+			<Option target="lightnvm_so"/>
+			<Option target="lightnvm"/>
+		</Unit>
+		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/type.h">
 			<Option target="lightnvm_so"/>
 			<Option target="lightnvm"/>
 		</Unit>

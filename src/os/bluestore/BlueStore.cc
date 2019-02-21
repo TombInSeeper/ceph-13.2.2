@@ -3544,7 +3544,7 @@ void *BlueStore::MempoolThread::entry()
 void BlueStore::discard_to_gctrd(interval_set<uint64_t> &p) {
   gc_thread.lock.Lock();
   gc_thread.invalid_extents.insert(p);
-  if(gc_thread.invalid_extents.size() > 10 * OCSSD_SEG_SIZE)
+  if(gc_thread.invalid_extents.size() > OCSSD_SEG_SIZE)
     gc_thread.cond.SignalOne();
   gc_thread.lock.Unlock();
 }
@@ -7747,8 +7747,6 @@ int BlueStore::_do_read(
   r = bl.length();
   ceph_assert( r >= 0 );
 
-
-  dout(0) << __func__ << "...End..." << dendl;
   return r;
 }
 
@@ -8726,8 +8724,9 @@ void BlueStore::_txc_state_proc(TransContext *txc)
     case TransContext::STATE_IO_DONE:
       //assert(txc->osr->qlock.is_locked());  // see _txc_finish_io
       if (txc->had_ios) {
-	++txc->osr->txc_with_unstable_io;
+	        ++txc->osr->txc_with_unstable_io;
       }
+
       txc->log_state_latency(logger, l_bluestore_state_io_done_lat);
       txc->state = TransContext::STATE_KV_QUEUED;
       if (cct->_conf->bluestore_sync_submit_transaction) {
@@ -9385,6 +9384,9 @@ void BlueStore::_kv_sync_thread()
 	  int r = cct->_conf->bluestore_debug_omit_kv_commit ? 0 : db->submit_transaction(txc->t);
 	  ceph_assert(r == 0);
 	  _txc_applied_kv(txc);
+
+	  txc->ioc.ocssd_io_done = true;
+
 	  --txc->osr->kv_committing_serially;
 	  txc->state = TransContext::STATE_KV_SUBMITTED;
 	  if (txc->osr->kv_submitted_waiters) {
@@ -9553,10 +9555,11 @@ void BlueStore::_kv_finalize_thread()
       dout(20) << __func__ << " deferred_stable " << deferred_stable << dendl;
 
       while (!kv_committed.empty()) {
-	TransContext *txc = kv_committed.front();
-	ceph_assert(txc->state == TransContext::STATE_KV_SUBMITTED);
-	_txc_state_proc(txc);
-	kv_committed.pop_front();
+            TransContext *txc = kv_committed.front();
+            ceph_assert(txc->state == TransContext::STATE_KV_SUBMITTED);
+            _txc_state_proc(txc);
+            kv_committed.pop_front();
+
       }
 
       for (auto b : deferred_stable) {
@@ -9833,7 +9836,7 @@ int BlueStore::queue_transactions(
 	    << dendl;
     for (auto& l : { on_applied, on_commit, on_applied_sync }) {
       for (auto c : l) {
-	delete c;
+	      delete c;
       }
     }
     return 0;
@@ -9865,7 +9868,6 @@ int BlueStore::queue_transactions(
     get_deferred_key(txc->deferred_txn->seq, &key);
     txc->t->set(PREFIX_DEFERRED, key, bl);
   }
-
   _txc_finalize_kv(txc, txc->t);
   if (handle)
     handle->suspend_tp_timeout();
@@ -9880,9 +9882,9 @@ int BlueStore::queue_transactions(
       ++deferred_aggressive;
       deferred_try_submit();
       {
-	// wake up any previously finished deferred events
-	std::lock_guard<std::mutex> l(kv_lock);
-	kv_cond.notify_one();
+          // wake up any previously finished deferred events
+          std::lock_guard<std::mutex> l(kv_lock);
+          kv_cond.notify_one();
       }
       throttle_deferred_bytes.get(txc->cost);
       --deferred_aggressive;
@@ -9898,11 +9900,20 @@ int BlueStore::queue_transactions(
   // execute (start)
   _txc_state_proc(txc);
 
+  /*if(cct->_conf->bdev_ocssd_enable == true ) {
+    while(txc->ioc.ocssd_io_done.load() == false){
+      dout(1) << " OCSSD: waiting for writing down " << dendl;
+      usleep(1);
+    }
+  }*/
+
   // we're immediately readable (unlike FileStore)
   for (auto c : on_applied_sync) {
+    dout(0) << __func__ << "OCSSD: Now I'm readable,sync" << dendl;
     c->complete(0);
   }
   for (auto c : on_applied) {
+    dout(0) << __func__ << "OCSSD:Now I'm readable,finishers " << dendl;
     finishers[osr->shard]->queue(c);
   }
 
