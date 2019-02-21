@@ -537,17 +537,17 @@ $DAEMONOPTS
 
         bdev_debug_use_ramdisk  = false
         bdev_ocssd_enable       = true
-	bdev_ocssd_backend	= mock
+		bdev_ocssd_backend		= ocssd
        
         ;;;;;bluestore block size file size = 500GB
-        bluestore block size = 536870912000
-    	bluestore block create = true
-	;bluestore block path   = /dev/nvme0n1
+        ;bluestore block size = 536870912000
+    	bluestore block create = false
+		bluestore block path   = /dev/nvme0n1
 		
-	bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
+		bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
         bluestore block db size = 10485760000
         bluestore block db create = true
-	bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
+		bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
         bluestore block wal size = 10485760000
         bluestore block wal create = true
 

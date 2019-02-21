@@ -80,6 +80,10 @@ void SegmentBackEnd::core_back() {
     decode(seg_map[seg_lid].id ,bl);
     decode(seg_map[seg_lid].off, bl);
     seg_map[seg_lid].status = Segment::Usable;
+
+	if(seg_map[seg_lid].id != 0xffffffff) {
+		mark_created(seg_map[seg_lid].id);
+	}
   }
   dout(0) << __func__ << " recovery End " << dendl;
 }
@@ -199,13 +203,14 @@ OCSSDBackEnd::OCSSDBackEnd(CephContext *cct, std::string path) {
   this->cct = cct;
   this->seg_map = (new Segment [nr_user_total + nr_reserved]);
 
-  char buf[129] = {0};
-  ::readlink(path.c_str(),buf,128);
+  //char buf[129] = {0};
+  //::readlink(path.c_str(),buf,128);
 
   //Open
-  this->dev = dev_open(buf);
-  ceph_assert(this->dev);
-
+  dout(0) << __func__ << " open ocssd dev " << dendl;
+  this->dev = dev_open(path.c_str());
+  ceph_assert(this->dev != NULL);
+  dout(0) << __func__ << "open ocssd device successfully. " << dendl;
   if (::access(core.c_str(), F_OK) != 0){
     dout(0) << __func__ << " ...mkfs..." << dendl;
     ceph_assert(nr_reserved < 30);
@@ -213,8 +218,8 @@ OCSSDBackEnd::OCSSDBackEnd(CephContext *cct, std::string path) {
     mock_seg_id = 30 - nr_reserved;
     //Erase all segs
     for(uint32_t i = 0 ; i < nr_reserved + nr_pre_create ; ++i){
-      seg_map[i].id = mock_seg_id++;
-      seg_erase(i);
+      seg_map[i].id = 0xffffffff;
+      //seg_erase(i);
       seg_map[i].off = 0;
       seg_map[i].status= Segment::Usable;
     }
@@ -250,11 +255,22 @@ int OCSSDBackEnd::seg_read(io_u *io) {
 
 int OCSSDBackEnd::seg_write(io_u *io)  {
   auto seg = &seg_map[io->obj_id];
+  
+  if(seg->id == 0xffffffff){
+	dout(0) << __func__ << " create new segment " << dendl;
+    uint32_t size;
+	obj_create(dev,&seg->id,&size);
+  }
+
+
   io->obj_id = seg->id;
+  
+
+
   ceph_assert(seg->status == Segment::Usable);
   auto lba_len = (uint32_t)(io->data_size * 0x1000);
   ceph_assert(seg->off == io->obj_off * 0x1000);
-
+  
   int r = obj_write(this->dev,io);
   ceph_assert(r == 0);
 
