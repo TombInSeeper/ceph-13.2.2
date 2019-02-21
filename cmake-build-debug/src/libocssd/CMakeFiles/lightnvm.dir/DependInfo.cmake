@@ -30,7 +30,7 @@ set(CMAKE_C_COMPILER_ID "GNU")
 set(CMAKE_TARGET_DEFINITIONS_C
   "CEPH_LIBDIR=\"/usr/local/lib64\""
   "CEPH_PKGLIBDIR=\"/usr/local/lib64/ceph\""
-  "GIT_SHA1=\"8ad25b4\""
+  "GIT_SHA1=\"7cb2cc3\""
   "LNVM_VERSION_MAJOR=0"
   "LNVM_VERSION_MINOR=1"
   "LNVM_VERSION_PATCH=0"
