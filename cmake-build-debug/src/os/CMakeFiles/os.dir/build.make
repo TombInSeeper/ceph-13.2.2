@@ -291,9 +291,22 @@ src/os/CMakeFiles/os.dir/fs/FS.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/os.dir/fs/FS.cc.s"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wuyue/ceph-13.2.2/src/os/fs/FS.cc -o CMakeFiles/os.dir/fs/FS.cc.s
 
+src/os/CMakeFiles/os.dir/bluestore/ocssd_aio.cc.o: src/os/CMakeFiles/os.dir/flags.make
+src/os/CMakeFiles/os.dir/bluestore/ocssd_aio.cc.o: ../src/os/bluestore/ocssd_aio.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/ocssd_aio.cc.o"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/ocssd_aio.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/ocssd_aio.cc
+
+src/os/CMakeFiles/os.dir/bluestore/ocssd_aio.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/os.dir/bluestore/ocssd_aio.cc.i"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wuyue/ceph-13.2.2/src/os/bluestore/ocssd_aio.cc > CMakeFiles/os.dir/bluestore/ocssd_aio.cc.i
+
+src/os/CMakeFiles/os.dir/bluestore/ocssd_aio.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/os.dir/bluestore/ocssd_aio.cc.s"
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wuyue/ceph-13.2.2/src/os/bluestore/ocssd_aio.cc -o CMakeFiles/os.dir/bluestore/ocssd_aio.cc.s
+
 src/os/CMakeFiles/os.dir/bluestore/Allocator.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/Allocator.cc.o: ../src/os/bluestore/Allocator.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/Allocator.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/Allocator.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/Allocator.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/Allocator.cc
 
 src/os/CMakeFiles/os.dir/bluestore/Allocator.cc.i: cmake_force
@@ -306,7 +319,7 @@ src/os/CMakeFiles/os.dir/bluestore/Allocator.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/BitmapFreelistManager.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/BitmapFreelistManager.cc.o: ../src/os/bluestore/BitmapFreelistManager.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BitmapFreelistManager.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BitmapFreelistManager.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/BitmapFreelistManager.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/BitmapFreelistManager.cc
 
 src/os/CMakeFiles/os.dir/bluestore/BitmapFreelistManager.cc.i: cmake_force
@@ -319,7 +332,7 @@ src/os/CMakeFiles/os.dir/bluestore/BitmapFreelistManager.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/BlockDevice.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/BlockDevice.cc.o: ../src/os/bluestore/BlockDevice.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BlockDevice.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BlockDevice.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/BlockDevice.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/BlockDevice.cc
 
 src/os/CMakeFiles/os.dir/bluestore/BlockDevice.cc.i: cmake_force
@@ -332,7 +345,7 @@ src/os/CMakeFiles/os.dir/bluestore/BlockDevice.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/BlueFS.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/BlueFS.cc.o: ../src/os/bluestore/BlueFS.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BlueFS.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BlueFS.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/BlueFS.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/BlueFS.cc
 
 src/os/CMakeFiles/os.dir/bluestore/BlueFS.cc.i: cmake_force
@@ -345,7 +358,7 @@ src/os/CMakeFiles/os.dir/bluestore/BlueFS.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/bluefs_types.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/bluefs_types.cc.o: ../src/os/bluestore/bluefs_types.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/bluefs_types.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/bluefs_types.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/bluefs_types.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/bluefs_types.cc
 
 src/os/CMakeFiles/os.dir/bluestore/bluefs_types.cc.i: cmake_force
@@ -358,7 +371,7 @@ src/os/CMakeFiles/os.dir/bluestore/bluefs_types.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/BlueRocksEnv.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/BlueRocksEnv.cc.o: ../src/os/bluestore/BlueRocksEnv.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BlueRocksEnv.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BlueRocksEnv.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/BlueRocksEnv.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/BlueRocksEnv.cc
 
 src/os/CMakeFiles/os.dir/bluestore/BlueRocksEnv.cc.i: cmake_force
@@ -371,7 +384,7 @@ src/os/CMakeFiles/os.dir/bluestore/BlueRocksEnv.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/BlueStore.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/BlueStore.cc.o: ../src/os/bluestore/BlueStore.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BlueStore.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BlueStore.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/BlueStore.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/BlueStore.cc
 
 src/os/CMakeFiles/os.dir/bluestore/BlueStore.cc.i: cmake_force
@@ -384,7 +397,7 @@ src/os/CMakeFiles/os.dir/bluestore/BlueStore.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/bluestore_types.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/bluestore_types.cc.o: ../src/os/bluestore/bluestore_types.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/bluestore_types.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/bluestore_types.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/bluestore_types.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/bluestore_types.cc
 
 src/os/CMakeFiles/os.dir/bluestore/bluestore_types.cc.i: cmake_force
@@ -397,7 +410,7 @@ src/os/CMakeFiles/os.dir/bluestore/bluestore_types.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/FreelistManager.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/FreelistManager.cc.o: ../src/os/bluestore/FreelistManager.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/FreelistManager.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/FreelistManager.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/FreelistManager.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/FreelistManager.cc
 
 src/os/CMakeFiles/os.dir/bluestore/FreelistManager.cc.i: cmake_force
@@ -410,7 +423,7 @@ src/os/CMakeFiles/os.dir/bluestore/FreelistManager.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/StupidAllocator.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/StupidAllocator.cc.o: ../src/os/bluestore/StupidAllocator.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/StupidAllocator.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/StupidAllocator.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/StupidAllocator.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/StupidAllocator.cc
 
 src/os/CMakeFiles/os.dir/bluestore/StupidAllocator.cc.i: cmake_force
@@ -423,7 +436,7 @@ src/os/CMakeFiles/os.dir/bluestore/StupidAllocator.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/BitMapAllocator.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/BitMapAllocator.cc.o: ../src/os/bluestore/BitMapAllocator.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BitMapAllocator.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BitMapAllocator.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/BitMapAllocator.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/BitMapAllocator.cc
 
 src/os/CMakeFiles/os.dir/bluestore/BitMapAllocator.cc.i: cmake_force
@@ -436,7 +449,7 @@ src/os/CMakeFiles/os.dir/bluestore/BitMapAllocator.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/BitAllocator.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/BitAllocator.cc.o: ../src/os/bluestore/BitAllocator.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BitAllocator.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/BitAllocator.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/BitAllocator.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/BitAllocator.cc
 
 src/os/CMakeFiles/os.dir/bluestore/BitAllocator.cc.i: cmake_force
@@ -449,7 +462,7 @@ src/os/CMakeFiles/os.dir/bluestore/BitAllocator.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/KernelDevice.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/KernelDevice.cc.o: ../src/os/bluestore/KernelDevice.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/KernelDevice.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/KernelDevice.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/KernelDevice.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/KernelDevice.cc
 
 src/os/CMakeFiles/os.dir/bluestore/KernelDevice.cc.i: cmake_force
@@ -462,7 +475,7 @@ src/os/CMakeFiles/os.dir/bluestore/KernelDevice.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/aio.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/aio.cc.o: ../src/os/bluestore/aio.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/aio.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/aio.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/aio.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/aio.cc
 
 src/os/CMakeFiles/os.dir/bluestore/aio.cc.i: cmake_force
@@ -475,7 +488,7 @@ src/os/CMakeFiles/os.dir/bluestore/aio.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/FuseStore.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/FuseStore.cc.o: ../src/os/FuseStore.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building CXX object src/os/CMakeFiles/os.dir/FuseStore.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building CXX object src/os/CMakeFiles/os.dir/FuseStore.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/FuseStore.cc.o -c /home/wuyue/ceph-13.2.2/src/os/FuseStore.cc
 
 src/os/CMakeFiles/os.dir/FuseStore.cc.i: cmake_force
@@ -488,7 +501,7 @@ src/os/CMakeFiles/os.dir/FuseStore.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/filestore/XfsFileStoreBackend.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/filestore/XfsFileStoreBackend.cc.o: ../src/os/filestore/XfsFileStoreBackend.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building CXX object src/os/CMakeFiles/os.dir/filestore/XfsFileStoreBackend.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building CXX object src/os/CMakeFiles/os.dir/filestore/XfsFileStoreBackend.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/filestore/XfsFileStoreBackend.cc.o -c /home/wuyue/ceph-13.2.2/src/os/filestore/XfsFileStoreBackend.cc
 
 src/os/CMakeFiles/os.dir/filestore/XfsFileStoreBackend.cc.i: cmake_force
@@ -501,7 +514,7 @@ src/os/CMakeFiles/os.dir/filestore/XfsFileStoreBackend.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/fs/XFS.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/fs/XFS.cc.o: ../src/os/fs/XFS.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building CXX object src/os/CMakeFiles/os.dir/fs/XFS.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building CXX object src/os/CMakeFiles/os.dir/fs/XFS.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/fs/XFS.cc.o -c /home/wuyue/ceph-13.2.2/src/os/fs/XFS.cc
 
 src/os/CMakeFiles/os.dir/fs/XFS.cc.i: cmake_force
@@ -514,7 +527,7 @@ src/os/CMakeFiles/os.dir/fs/XFS.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/NVMEDevice.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/NVMEDevice.cc.o: ../src/os/bluestore/NVMEDevice.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/NVMEDevice.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/NVMEDevice.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/NVMEDevice.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/NVMEDevice.cc
 
 src/os/CMakeFiles/os.dir/bluestore/NVMEDevice.cc.i: cmake_force
@@ -527,7 +540,7 @@ src/os/CMakeFiles/os.dir/bluestore/NVMEDevice.cc.s: cmake_force
 
 src/os/CMakeFiles/os.dir/bluestore/OCDevice.cc.o: src/os/CMakeFiles/os.dir/flags.make
 src/os/CMakeFiles/os.dir/bluestore/OCDevice.cc.o: ../src/os/bluestore/OCDevice.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/OCDevice.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Building CXX object src/os/CMakeFiles/os.dir/bluestore/OCDevice.cc.o"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && /opt/rh/devtoolset-7/root/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/os.dir/bluestore/OCDevice.cc.o -c /home/wuyue/ceph-13.2.2/src/os/bluestore/OCDevice.cc
 
 src/os/CMakeFiles/os.dir/bluestore/OCDevice.cc.i: cmake_force
@@ -558,6 +571,7 @@ os_OBJECTS = \
 "CMakeFiles/os.dir/kstore/KStore.cc.o" \
 "CMakeFiles/os.dir/kstore/kstore_types.cc.o" \
 "CMakeFiles/os.dir/fs/FS.cc.o" \
+"CMakeFiles/os.dir/bluestore/ocssd_aio.cc.o" \
 "CMakeFiles/os.dir/bluestore/Allocator.cc.o" \
 "CMakeFiles/os.dir/bluestore/BitmapFreelistManager.cc.o" \
 "CMakeFiles/os.dir/bluestore/BlockDevice.cc.o" \
@@ -603,6 +617,7 @@ lib/libos.a: src/os/CMakeFiles/os.dir/memstore/MemStore.cc.o
 lib/libos.a: src/os/CMakeFiles/os.dir/kstore/KStore.cc.o
 lib/libos.a: src/os/CMakeFiles/os.dir/kstore/kstore_types.cc.o
 lib/libos.a: src/os/CMakeFiles/os.dir/fs/FS.cc.o
+lib/libos.a: src/os/CMakeFiles/os.dir/bluestore/ocssd_aio.cc.o
 lib/libos.a: src/os/CMakeFiles/os.dir/bluestore/Allocator.cc.o
 lib/libos.a: src/os/CMakeFiles/os.dir/bluestore/BitmapFreelistManager.cc.o
 lib/libos.a: src/os/CMakeFiles/os.dir/bluestore/BlockDevice.cc.o
@@ -628,7 +643,7 @@ lib/libos.a: src/kv/CMakeFiles/kv_objs.dir/RocksDBStore.cc.o
 lib/libos.a: src/kv/CMakeFiles/kv_objs.dir/LevelDBStore.cc.o
 lib/libos.a: src/os/CMakeFiles/os.dir/build.make
 lib/libos.a: src/os/CMakeFiles/os.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Linking CXX static library ../../lib/libos.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_39) "Linking CXX static library ../../lib/libos.a"
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && $(CMAKE_COMMAND) -P CMakeFiles/os.dir/cmake_clean_target.cmake
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug/src/os && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/os.dir/link.txt --verbose=$(VERBOSE)
 

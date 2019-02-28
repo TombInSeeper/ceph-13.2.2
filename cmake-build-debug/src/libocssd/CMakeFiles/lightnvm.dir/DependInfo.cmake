@@ -4,12 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-bbt.c" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.o"
-  "/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-map.c" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-map.c.o"
   "/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-nvme.c" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.o"
-  "/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-rw.c" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.o"
-  "/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-thread.c" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.o"
-  "/home/wuyue/ceph-13.2.2/src/libocssd/objssd/queue.c" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/CMakeFiles/lightnvm.dir/objssd/queue.c.o"
   "/home/wuyue/ceph-13.2.2/src/libocssd/src/be_lightnvm/nvm_be_ioctl.c" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/CMakeFiles/lightnvm.dir/src/be_lightnvm/nvm_be_ioctl.c.o"
   "/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme/nvm_aer.c" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/CMakeFiles/lightnvm.dir/src/be_nvme/nvm_aer.c.o"
   "/home/wuyue/ceph-13.2.2/src/libocssd/src/be_nvme/nvm_async.c" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/CMakeFiles/lightnvm.dir/src/be_nvme/nvm_async.c.o"
@@ -30,7 +25,7 @@ set(CMAKE_C_COMPILER_ID "GNU")
 set(CMAKE_TARGET_DEFINITIONS_C
   "CEPH_LIBDIR=\"/usr/local/lib64\""
   "CEPH_PKGLIBDIR=\"/usr/local/lib64/ceph\""
-  "GIT_SHA1=\"7cb2cc3\""
+  "GIT_SHA1=\"9388234\""
   "LNVM_VERSION_MAJOR=0"
   "LNVM_VERSION_MINOR=1"
   "LNVM_VERSION_PATCH=0"
@@ -54,7 +49,6 @@ set(CMAKE_C_TARGET_INCLUDE_PATH
   "../src/libocssd/utils"
   "../src/libocssd/include"
   "../src/libocssd/src"
-  "../src/libocssd/objssd"
   "boost/include"
   "include"
   "../src/xxHash"

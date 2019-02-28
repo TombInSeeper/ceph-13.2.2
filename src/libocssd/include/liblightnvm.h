@@ -106,7 +106,7 @@ enum nvm_bbt_state {
  * Plane-mode access for IO
  */
 enum nvm_block_type {
-    NVM_FLASH_SLC_ENABLE  = 0x1 << 8   ///< STL Type
+    NVM_FLASH_SLC_ENABLE = 0x1 << 8   ///< STL Type
 };
 
 /**
@@ -117,7 +117,7 @@ enum nvm_block_type {
  * @see nvm_bbt_get, nvm_bbt_set, nvm_bbt_mark, nvm_bbt_free, and nvm_bbt_pr
  */
 struct nvm_bbt {
-    struct nvm_dev* dev;    ///< Device on which the bbt resides
+    struct nvm_dev *dev;    ///< Device on which the bbt resides
     struct nvm_addr addr;   ///< Address of the LUN described by the bbt
     uint64_t nblks;     ///< Total # of blocks in lun
     uint32_t nbad;      ///< # of manufacturer marked bad blocks
@@ -128,11 +128,7 @@ struct nvm_bbt {
 };
 
 enum nvm_error_inject {
-    INJECT_ERASE=0,
-    INJECT_Program,
-    INJECT_NAND_OVER_WRITE,
-    INJECT_Read_UNCORRECTABLE,
-    INJECT_Read_EMPTY_PAGE,
+    INJECT_ERASE = 0, INJECT_Program, INJECT_NAND_OVER_WRITE, INJECT_Read_UNCORRECTABLE, INJECT_Read_EMPTY_PAGE,
 };
 
 struct nvm_log_page {
@@ -143,10 +139,10 @@ struct nvm_log_page {
 
 struct cmd_ctx {
     int naddrs;
-    struct nvm_addr* addrs;
-    void* data;
-    void* meta;
-    void* private_data;
+    struct nvm_addr *addrs;
+    void *data;
+    void *meta;
+    void *private_data;
     uint8_t opcode;
     uint8_t flags;
     uint16_t control;
@@ -163,8 +159,9 @@ struct cmd_ctx {
 };
 
 struct result_ctx {
+    uint64_t t_ns;
     int max_count;
-    struct cmd_ctx* ctx[20];
+    struct cmd_ctx *ctx[20];
 };
 
 /**
@@ -193,7 +190,7 @@ void nvm_dev_close(struct nvm_dev *dev);
  *
  * @returns The geometry (struct nvm_geo) of given device handle
  */
-const struct nvm_geo* nvm_dev_get_geo(const struct nvm_dev* dev);
+const struct nvm_geo *nvm_dev_get_geo(const struct nvm_dev *dev);
 
 /**
  * Erase super block at given addresses
@@ -211,8 +208,8 @@ const struct nvm_geo* nvm_dev_get_geo(const struct nvm_dev* dev);
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_addr_erase_sb(struct nvm_dev* dev, struct nvm_addr addrs[], int naddrs,
-                          uint16_t flags, struct nvm_ret* ret);
+ssize_t
+nvm_addr_erase_sb(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs, uint16_t flags, struct nvm_ret *ret);
 
 /**
  * Handle complete command use async mode
@@ -224,7 +221,7 @@ ssize_t nvm_addr_erase_sb(struct nvm_dev* dev, struct nvm_addr addrs[], int nadd
  * @param rctx query result context
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  */
-ssize_t nvm_get_async_cmd_event(struct nvm_dev* dev, struct result_ctx* rctx);
+ssize_t nvm_get_async_cmd_event(struct nvm_dev *dev, struct result_ctx *rctx);
 
 /**
  * Read content of nvm at addresses into buf use async mode
@@ -240,8 +237,7 @@ ssize_t nvm_get_async_cmd_event(struct nvm_dev* dev, struct result_ctx* rctx);
  * @param no_meta Whether read with metadata
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly
  */
-ssize_t nvm_addr_async_read(struct nvm_dev* dev, struct cmd_ctx* ctx, uint16_t flags,
-                            int no_meta);
+ssize_t nvm_addr_async_read(struct nvm_dev *dev, struct cmd_ctx *ctx, uint16_t flags, int no_meta);
 
 /**
  * Write content of buf to nvm at address(es) with RAID5 protection use async mode
@@ -255,8 +251,9 @@ ssize_t nvm_addr_async_read(struct nvm_dev* dev, struct cmd_ctx* ctx, uint16_t f
  * @param no_meta Whether write with metadata
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly
  */
-ssize_t nvm_addr_async_protected_write(struct nvm_dev* dev, struct cmd_ctx* ctx, uint16_t flags,
-                                       int head_idx, int fake_write, int no_meta);
+ssize_t
+nvm_addr_async_protected_write(struct nvm_dev *dev, struct cmd_ctx *ctx, uint16_t flags, int head_idx, int fake_write,
+                               int no_meta);
 
 /**
  * Initialize the RAID5 engine for this super block
@@ -273,8 +270,7 @@ ssize_t nvm_addr_async_protected_write(struct nvm_dev* dev, struct cmd_ctx* ctx,
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_addr_parity_init(struct nvm_dev* dev, struct nvm_addr addrs[], int naddrs,
-                             struct nvm_ret* ret);
+ssize_t nvm_addr_parity_init(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs, struct nvm_ret *ret);
 /**
  * Indicate the RAID5 engine to write parity data to given address
  *
@@ -291,8 +287,7 @@ ssize_t nvm_addr_parity_init(struct nvm_dev* dev, struct nvm_addr addrs[], int n
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_addr_parity_out(struct nvm_dev* dev, struct nvm_addr* addrs, int naddrs,
-                            struct nvm_ret* ret);
+ssize_t nvm_addr_parity_out(struct nvm_dev *dev, struct nvm_addr *addrs, int naddrs, struct nvm_ret *ret);
 
 /**
  * Indicate the RAID5 engine to write parity data to given address use async mode
@@ -305,9 +300,9 @@ ssize_t nvm_addr_parity_out(struct nvm_dev* dev, struct nvm_addr* addrs, int nad
  * @param ctx cmd context
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly
  */
-ssize_t nvm_addr_async_parity_init(struct nvm_dev* dev, struct cmd_ctx* ctx);
+ssize_t nvm_addr_async_parity_init(struct nvm_dev *dev, struct cmd_ctx *ctx);
 
-ssize_t nvm_addr_async_parity_out(struct nvm_dev* dev, struct cmd_ctx* ctx);
+ssize_t nvm_addr_async_parity_out(struct nvm_dev *dev, struct cmd_ctx *ctx);
 
 /**
  * Read persistent memory data
@@ -324,8 +319,8 @@ ssize_t nvm_addr_async_parity_out(struct nvm_dev* dev, struct cmd_ctx* ctx);
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_read_pm(struct nvm_dev* dev, void* buf, uint16_t flags,
-                    unsigned int length, unsigned int offset, struct nvm_ret* ret);
+ssize_t nvm_read_pm(struct nvm_dev *dev, void *buf, uint16_t flags, unsigned int length, unsigned int offset,
+                    struct nvm_ret *ret);
 
 /**
  * Write data to persistent memory
@@ -342,8 +337,8 @@ ssize_t nvm_read_pm(struct nvm_dev* dev, void* buf, uint16_t flags,
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_write_pm(struct nvm_dev* dev, void* buf, uint16_t flags,
-                     unsigned int length, unsigned int offset, struct nvm_ret* ret);
+ssize_t nvm_write_pm(struct nvm_dev *dev, void *buf, uint16_t flags, unsigned int length, unsigned int offset,
+                     struct nvm_ret *ret);
 
 /**
  * Allocate a copy of the given bad-block-table
@@ -372,8 +367,7 @@ void nvm_bbt_free(struct nvm_bbt *bbt);
  * NULL is returned, `errno` set to indicate the error and ret filled with
  * lower-level result codes
  */
-const struct nvm_bbt *nvm_bbt_get(struct nvm_dev *dev, struct nvm_addr addr,
-                                  struct nvm_ret *ret);
+const struct nvm_bbt *nvm_bbt_get(struct nvm_dev *dev, struct nvm_addr addr, struct nvm_ret *ret);
 
 /**
  * Mark addresses good, bad, or host-bad.
@@ -394,8 +388,7 @@ const struct nvm_bbt *nvm_bbt_get(struct nvm_dev *dev, struct nvm_addr addr,
  * @returns On success, 0 is returned. On error, -1 is returned, `errno` set to
  * indicate the error and ret filled with lower-level result codes
  */
-int nvm_bbt_mark(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
-                 uint16_t flags, struct nvm_ret *ret);
+int nvm_bbt_mark(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs, uint16_t flags, struct nvm_ret *ret);
 
 /**
  * Erase nvm at given addresses
@@ -414,8 +407,7 @@ int nvm_bbt_mark(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_addr_erase(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
-                       uint16_t flags, struct nvm_ret *ret);
+ssize_t nvm_addr_erase(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs, uint16_t flags, struct nvm_ret *ret);
 
 /**
  * Write content of buf to nvm at address(es)
@@ -439,9 +431,8 @@ ssize_t nvm_addr_erase(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_addr_write(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
-                       const void *buf, const void *meta, uint16_t flags,
-                       struct nvm_ret *ret);
+ssize_t nvm_addr_write(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs, const void *buf, const void *meta,
+                       uint16_t flags, struct nvm_ret *ret);
 
 /**
  * Read content of nvm at addresses into buf
@@ -465,8 +456,7 @@ ssize_t nvm_addr_write(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_addr_read(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
-                      void *buf, void *meta, uint16_t flags,
+ssize_t nvm_addr_read(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs, void *buf, void *meta, uint16_t flags,
                       struct nvm_ret *ret);
 
 /**
@@ -504,7 +494,7 @@ void nvm_buf_free(void *buf);
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_get_mef_log(struct nvm_dev* dev, struct nvm_log_page* log);
+ssize_t nvm_get_mef_log(struct nvm_dev *dev, struct nvm_log_page *log);
 
 /**
  * Query write failed async error event, and get write failed log page
@@ -516,7 +506,7 @@ ssize_t nvm_get_mef_log(struct nvm_dev* dev, struct nvm_log_page* log);
  * @param log query log page context
  * @returns 0 on success. On error: returns -1
  */
-ssize_t nvm_get_async_error_event(struct nvm_dev* dev, struct nvm_log_page* log);
+ssize_t nvm_get_async_error_event(struct nvm_dev *dev, struct nvm_log_page *log);
 
 /**
  * Inject read error
@@ -533,8 +523,7 @@ ssize_t nvm_get_async_error_event(struct nvm_dev* dev, struct nvm_log_page* log)
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_addr_inject_read_failed(struct nvm_dev* dev, struct nvm_addr addrs[],
-                                    int naddrs, struct nvm_ret* ret);
+ssize_t nvm_addr_inject_read_failed(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs, struct nvm_ret *ret);
 
 /**
  * Inject program error
@@ -551,8 +540,7 @@ ssize_t nvm_addr_inject_read_failed(struct nvm_dev* dev, struct nvm_addr addrs[]
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_addr_inject_write_failed(struct nvm_dev* dev, struct nvm_addr addrs[],
-                                     int naddrs, struct nvm_ret* ret);
+ssize_t nvm_addr_inject_write_failed(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs, struct nvm_ret *ret);
 
 /**
  * Inject erase error
@@ -569,8 +557,7 @@ ssize_t nvm_addr_inject_write_failed(struct nvm_dev* dev, struct nvm_addr addrs[
  * @returns 0 on success. On error: returns -1, sets `errno` accordingly, and
  *          fills `ret` with lower-level result and status codes
  */
-ssize_t nvm_addr_inject_erase_failed(struct nvm_dev* dev, struct nvm_addr addrs[],
-                                     int naddrs, struct nvm_ret* ret);
+ssize_t nvm_addr_inject_erase_failed(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs, struct nvm_ret *ret);
 
 int nvm_ext_format(struct nvm_dev *dev);
 int nvm_ext_error_bit_count(struct nvm_dev *dev, struct nvm_addr address, uint32_t *ebc);
@@ -581,5 +568,8 @@ int nvm_ext_get_per_lun_blks_pe(struct nvm_dev *dev, struct nvm_addr addr, uint1
 int nvm_ext_get_blk_pe(struct nvm_dev *dev, struct nvm_addr address, uint32_t *count);
 int nvm_ext_aer_clean(struct nvm_dev *dev);
 int nvm_ext_aer_set(struct nvm_dev *dev, struct nvm_ret *ret);
+
+
+
 
 #endif //OCSSD_BAIDU_LIBNVM_H

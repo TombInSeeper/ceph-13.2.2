@@ -3580,7 +3580,7 @@ void *BlueStore::GCThread::entry()
   utime_t duration(t);
 
   interval_set<uint64_t> invalid_set_local;
-  segmentSummarys = new SegmentSummary[OCSSD_NR_SEG_RESERVE + OCSSD_NR_SEG_USER];
+  segmentSummarys = new SegmentSummary[store->bdev->get_size() / OCSSD_SEG_SIZE];
 
   bool timeout = false;
   while (!stop) {
@@ -4486,14 +4486,7 @@ int BlueStore::_open_bdev(bool create)
   //ADD PREFIX SO THAT BlockDevice::create CAN Identify It
   p = string("ocssd:") + p;
   dout(0) << __func__ << " ocdevice path : " << p << dendl;
-  if(create)
-  {
-#ifdef WITH_OCSSD
-    dout(10) << __func__ << " ocdevice(creating): delete core dump files " << dendl;
-    std::string cmd = std::string(" rm -rf ") + "/tmp" + string("/*.core");
-    system(cmd.c_str());
-#endif
-  }
+
 
   uint64_t dev_size;
   bdev = BlockDevice::create(cct, p, aio_cb, static_cast<void*>(this), discard_cb, static_cast<void*>(this));
@@ -4505,6 +4498,14 @@ int BlueStore::_open_bdev(bool create)
   int r = bdev->open(p);
   if (r < 0)
     goto fail;
+
+  if(create)
+  {
+#ifdef WITH_OCSSD
+    bdev->init_disk();
+#endif
+  }
+
 
   dev_size = bdev->get_size();
   if (create && cct->_conf->bdev_enable_discard) {
@@ -9385,7 +9386,6 @@ void BlueStore::_kv_sync_thread()
 	  ceph_assert(r == 0);
 	  _txc_applied_kv(txc);
 
-	  txc->ioc.ocssd_io_done = true;
 
 	  --txc->osr->kv_committing_serially;
 	  txc->state = TransContext::STATE_KV_SUBMITTED;
@@ -10955,7 +10955,7 @@ int BlueStore::_do_alloc_write(
     //------------------------------
     std::unique_lock<std::mutex> l(this->ocssd_data_log_lock);
     //if submit seq has not been get yet , get it
-    if(txc->ioc.ocssd_io_queue.empty()){
+    if(txc->ioc.num_pending.load() == 0){
       txc->ioc.ocssd_submit_seq = bdev->get_submit_seq(&(txc->ioc));
     }
     prealloc_left = alloc->allocate(need, min_alloc_size, need, 0, &prealloc);

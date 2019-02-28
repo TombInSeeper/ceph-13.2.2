@@ -13,7 +13,7 @@
 #include "nvm_async.h"
 #include <mqueue.h>
 
-#define NVM_BE_LBD_ASYNC_DEFAULT_IODEPTH 256
+#define NVM_BE_LBD_ASYNC_DEFAULT_IODEPTH 4096
 //#define AIO_ALIGN
 
 struct nvm_async_ctx {
@@ -78,13 +78,25 @@ struct nvm_async_ctx *nvm_async_init(int fd, uint32_t depth)
     LOG_INFO("unlink %s = %d", name, mq_unlink(name));
 
     ctx->mqd = mq_open(name, O_RDWR | O_CREAT, 0666, NULL);
-    LOG_INFO("mqueue open %s = %d", name, ctx->mqd);
+    LOG_DEBUG("mqueue open %s = %d", name, ctx->mqd);
+
+    struct mq_attr attr;
+    mq_getattr(ctx->mqd,&attr);
+
+    attr.mq_maxmsg = depth / 2;
+
+    mq_setattr(ctx->mqd,&attr,NULL);
+    LOG_DEBUG("mqueue max depth=%lu", attr.mq_maxmsg);
+
+
     if (ctx->mqd < 0) {
         LOG_ERROR("mq_open error=%d", ctx->mqd);
         return NULL;
     }
 
     pthread_create(&ctx->pthread_write, NULL, thread_write, ctx);
+
+    pthread_setname_np(&ctx->pthread_write,"ocssd_write");
 
     return ctx;
 }
@@ -388,6 +400,8 @@ static void *thread_write(void *arg)
     struct async_private *obj = NULL;
     cpu_set_t mask;
 
+    pthread_setname_np(pthread_self(),"nvm_write_thread");
+
     CPU_ZERO(&mask);
     CPU_SET(0, &mask);
     pthread_setaffinity_np(pthread_self(), sizeof(mask), &mask);
@@ -406,7 +420,6 @@ static void *thread_write(void *arg)
         pthread_mutex_lock(&aio->mutex);
         {
             LOG_INFO("out[%d] obj=%p, ppa=0x%016lx", aio->outstanding, obj, obj->ctx->addrs[0].ppa);
-
             struct iocb *iocb = aio->iocbs[aio->outstanding++];
             io_prep_pwrite(iocb, aio->fd, obj->data_align, obj->data_len, obj->offset);
             iocb->data = obj;
@@ -441,11 +454,11 @@ ssize_t nvm_addr_async_protected_write(struct nvm_dev *dev, struct cmd_ctx *ctx,
     memcpy(obj->data_align, ctx->data, obj->data_len);
     obj->do_write = true;
 
-    while (1) {
+    /*while (1) {
         uint32_t outstanding = nvm_async_get_outstanding(aio);
         if (outstanding < aio->depth)
             break;
-    }
+    }*/
 #if 1
     obj->offset = nvm_addr_gen2dev(dev, ctx->addrs[0]) * 512;
     LOG_RAW("write ");
@@ -463,6 +476,8 @@ ssize_t nvm_addr_async_protected_write(struct nvm_dev *dev, struct cmd_ctx *ctx,
     ssize_t rlt = mq_send(aio->mqd, (void *) &obj, sizeof(obj), 0);
     if (rlt != 0) {
         LOG_ERROR("mq_send=%ld", rlt);
+        free(obj);
+        return -1;
     }
 #else
     pthread_mutex_lock(&aio->mutex);
@@ -501,13 +516,16 @@ ssize_t nvm_addr_async_read(struct nvm_dev *dev, struct cmd_ctx *ctx, uint16_t f
     obj->do_write = false;
     LOG_INFO("obj=%p, data=%p, data_align=%p, size=%ld", obj, ctx->data, obj->data_align, obj->data_len);
 
-    while (1) {
-        uint32_t outstanding = nvm_async_get_outstanding(aio);
-        if (outstanding < aio->depth)
-            break;
-    }
-
     pthread_mutex_lock(&aio->mutex);
+    {
+        uint32_t outstanding = (aio)->outstanding;
+        if (outstanding >= aio->depth)
+        {
+            free(obj);
+            pthread_mutex_unlock(&aio->mutex);
+            return -1;
+        }
+    }
     iocb = aio->iocbs[aio->outstanding++];
     pthread_mutex_unlock(&aio->mutex);
 
@@ -528,8 +546,10 @@ ssize_t nvm_addr_async_read(struct nvm_dev *dev, struct cmd_ctx *ctx, uint16_t f
 ssize_t nvm_get_async_cmd_event(struct nvm_dev *dev, struct result_ctx *rctx)
 {
     struct nvm_async_ctx *aio = dev->aio;
-    struct timespec timeout = {.tv_sec=10, .tv_nsec=0};
-
+    struct timespec timeout = {
+        .tv_sec  = 0,
+        .tv_nsec = rctx->t_ns
+    };
     uint32_t nevents = 0;
     rctx->max_count = 0;
     uint32_t idx = 0;

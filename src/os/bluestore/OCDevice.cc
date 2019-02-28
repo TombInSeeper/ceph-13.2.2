@@ -11,615 +11,167 @@
 #include "common/io_priority.h"
 #include <fstream>
 
-#include "OCDevice.h"
 
+#include "OCDevice.h"
 #undef dout_context
 #define dout_context g_ceph_context
 #define dout_subsys ceph_subsys_bdev
 #undef dout_prefix
 #define dout_prefix *_dout << "OCDevice "
 
-// Base BackEnd Factory Function
-SegmentBackEnd *SegmentBackEnd::create(std::string backend_type, CephContext *cct, std::string path) {
-  /*if(backend_type == "ocssd")
-    return new OCSSDBackEnd(cct,path);*/
-  dout(0) << __func__ << " backend_type= " << backend_type << dendl;
-  if(backend_type == "mock")
-    return new FileSegmentBackEnd(cct,path);
-  if(backend_type == "ocssd")
-    return new OCSSDBackEnd(cct,path);
 
-  ceph_assert(nullptr == "Unsupported SegmentBackEnd");
-  return nullptr;
-}
 
-void SegmentBackEnd::core_dump() {
-  dout(0) << __func__ << " to " << core << dendl;
-  auto begin = seg_map;
-  auto end = seg_map + (nr_user_total + nr_reserved);
-  auto n = static_cast<uint32_t>
-      ( count_if(begin,end,[](const Segment& s){ return s.status == Segment::Usable ;}) );
+static OCDevice *oc = nullptr;
 
-  dout(0) << __func__ << " seg_map usable segs number: " << n << dendl;
-  bufferlist bl;
-  encode(n,bl);
-  for(auto s = begin ; s != end ; s ++ ){
-    if(s->status == Segment::Usable){
-      encode((uint32_t)(s - begin),bl); //seg_lid
-      encode(s->id,bl);     //seg_pid
-      encode(s->off,bl);    //seg_off
+
+void OCDevice::_init_blk_map(struct nvm_dev *dev) {
+  unsigned int blk_start = 80;
+  unsigned int blk_idx = 0;
+  unsigned int ref_idx;
+  int i, j;
+  const struct nvm_geo *geo;
+
+  srand((unsigned int)time(NULL) + getpid());
+  blk_start += (int)(1000.0);
+  ref_idx = blk_start;
+
+  geo = nvm_dev_get_geo(dev);
+
+  while (blk_idx < OCSSD_MAX_BLK_NUM) {
+    bool is_bad = false;
+    for (i = 0; i < geo->nchannels; i++) {
+      for (j = 0; j < geo->nluns; j++) {
+        if (g_bbt[i][j]->blks[blk_start*2] != NVM_BBT_FREE || g_bbt[i][j]->blks[blk_start*2+1] != NVM_BBT_FREE) {
+          is_bad = true;
+          break;
+        }
+      }
+      if (is_bad) {
+        break;
+      }
+    }
+    if (is_bad == false) {
+      // Find a good block
+      g_pm_data.sblk_map[blk_idx] = blk_start;
+      blk_idx++;
+    }
+    blk_start++;
+    if (blk_start >= geo->nblocks) {
+      blk_start = 0;
+    }
+    if (blk_start == ref_idx) {
+      break;
     }
   }
-  ofstream f(core, ios::binary);
-  bl.write_stream(f);
+  g_pm_data.sblk_map[blk_idx] = -1;
+  g_pm_data.nr_sblks = blk_idx;
 
-  dout(20) << __func__ << " dump length =  " << bl.length() << dendl;
-  dout(20) << __func__ << " dump buffer content = ";
-  bl.hexdump(*_dout);
-  *_dout << dendl;
+
+  dout(0) << __func__ << "..done..,nr_blks=" << g_pm_data.nr_sblks << dendl;
+  ceph_assert( g_pm_data.nr_sblks == 1148);
+
+
 }
 
-void SegmentBackEnd::core_back() {
-  dout(0) << __func__ << " recovery " << dendl;
-  ifstream f(core.c_str(), ios::binary);
-  ostringstream os;
-  os << f.rdbuf();
-  string s = os.str();
-  dout(10) << __func__ << " dump file size probed by string s = " << s.size() << dendl;
-  bufferlist b;
-  b.append(s);
-  bufferlist::iterator bl = b.begin();
-  dout(10) << __func__ << " dump file size probed by bl = " << b.length() << dendl;
-  uint32_t n;
-  decode(n, bl);
-  dout(0) << __func__ << " seg_map usable segs number: " << n << dendl;
-  while (n--)
+void OCDevice::_init_blk_ofst(struct nvm_dev *dev) {
+  int i ;
+  for (i = 0 ; i < g_pm_data.nr_sblks ; ++i)
+    g_pm_data.sblk_ofst[i].fin_ofst = 0;
+  dout(0) << __func__ << "..done.." << dendl;
+}
+
+void OCDevice::_aio_start()
+{
+  dout(0) << __func__ << "..doing.." << dendl;
+  aio_stop = false;
+  aio_thread.init();
+  dout(0) << __func__ << "..done.." << dendl;
+}
+
+void OCDevice::_aio_stop()
+{
+  dout(0) << __func__ << "..doing.." << dendl;
+  aio_stop = true;
+  aio_thread.shutdown();
+  dout(0) << __func__ << "..done.." << dendl;
+}
+int OCDevice::open(const std::string &path)
+{
+  (void)(path);
+
+
+  oc = this;
+
+  dout(0) << __func__ << "..doing.." << dendl;
+  dev = nvm_dev_open("/dev/nvme0n1");
+
+  if(dev == NULL)
   {
-    uint32_t seg_lid;
-    decode(seg_lid, bl);
-    decode(seg_map[seg_lid].id ,bl);
-    decode(seg_map[seg_lid].off, bl);
-    seg_map[seg_lid].status = Segment::Usable;
-
-	if(seg_map[seg_lid].id != 0xffffffff) {
-		mark_created(seg_map[seg_lid].id);
-	}
+    derr << "openchannel device open err!" << dendl;
+    ceph_abort();
   }
-  dout(0) << __func__ << " recovery End " << dendl;
-}
+  //-------- get geo
+  g_geo = nvm_dev_get_geo(dev);
 
-//FileBackEnd
-FileSegmentBackEnd::FileSegmentBackEnd(CephContext *cct, std::string path) {
-  this->cct = cct;
-  this->seg_map = (new Segment [nr_user_total + nr_reserved]);
-  if( ( direct_fd = ::open(path.c_str(),O_RDWR | O_DIRECT) ) < 0 ){
-    ceph_assert(nullptr =="File open error");
-  }
-  if (::access(core.c_str(), F_OK) != 0){
-    dout(0) << __func__ << " ...mkfs..." << dendl;
-    //If the core file doesn't exist , initialize seg_map
-    mock_seg_id = 30 - nr_reserved;
-    //Erase all segs
-    for(uint32_t i = 0 ; i < nr_reserved + nr_pre_create ; ++i){
-      seg_map[i].id = mock_seg_id++;
-      seg_erase(i);
-      seg_map[i].off = 0;
-      seg_map[i].status= Segment::Usable;
+  //-------- get bbt
+  int i,j;
+  struct nvm_ret ret;
+  {
+    const struct nvm_geo *geo = nvm_dev_get_geo(dev);
+    for (i = 0; i < geo->nchannels; i++) {
+      for (j = 0; j < geo->nluns; j++) {
+        struct nvm_addr addr;
+        memset(&addr, 0, sizeof(struct nvm_addr));
+        addr.g.ch = i;
+        addr.g.lun = j;
+        g_bbt[i][j] = nvm_bbt_get(dev, addr, &ret);
+      }
     }
-    return;
   }
-  //Else Replay core file
-  core_back();
-}
 
-FileSegmentBackEnd::~FileSegmentBackEnd() {
-  //
-  ::close(direct_fd);
-  //
-  core_dump();
-}
-
-int FileSegmentBackEnd::seg_erase(uint32_t seg_id) {
-  //dout(0) << __func__ << " logical_id=" << seg_id << " physical_id=" << seg_map[seg_id].id << dendl;
-  std::this_thread::sleep_for(chrono::operator""ms(1));
-  seg_map[seg_id].status =Segment::Usable;
-  return 0;
-}
-
-int FileSegmentBackEnd::seg_noop(io_u *io) {
-  (void)io;
-  return 0;
-}
-
-int FileSegmentBackEnd::seg_read(io_u *io) {
-  auto seg = &seg_map[io->obj_id];
-  io->obj_id = seg->id; // logical to physical
-
-  auto lba_off = static_cast<uint64_t >(io->obj_id * segmentSize + io->obj_off * 0x1000);
-  auto lba_len = static_cast<uint64_t >(io->data_size * 0x1000);
-  //dout(20) << __func__ << std::hex << " off=0x" << lba_off << " len=0x" << lba_len << std::dec << dendl;
-
-  ssize_t r = ::pread(direct_fd,io->data,lba_len,lba_off);
-
-//  bufferlist  bl;
-//  bl.append_zero(lba_len);
-//  bl.copy_in(0, lba_len,(char*)io->data);
-//  dout(20) << __func__ << " dump length =  " << bl.length() << dendl;
-//  dout(20) << __func__ << " dump buffer content = ";
-//  bl.hexdump(*_dout);
-//  *_dout << dendl;
-//
-//  ofstream of("/tmp/seg_read.last",ios::binary);
-//  bl.hexdump(of);
-
-  ceph_assert( r == lba_len );
-  return 0;
-}
-
-int FileSegmentBackEnd::seg_write(io_u *io) {
-  auto seg = &seg_map[io->obj_id];
-  io->obj_id = seg->id;
-
-  auto lba_off = (uint64_t)(io->obj_id * segmentSize + io->obj_off * 0x1000);
-  auto lba_len = (uint64_t)(io->data_size * 0x1000);
-  /*if(seg->off != io->obj_off * 0x1000)
+  // get pm_data
   {
-    dout(0) << __func__ << std::hex << " seg->off=0x" << seg->off << " (io->obj_off*0x1000)=" << io->obj_off * 0x1000 << dendl;
-    ceph_assert(seg->off == io->obj_off * 0x1000);
-  }*/
-  //dout(20) << __func__ << std::hex << " off=0x" << lba_off << " len=0x" << lba_len << std::dec << dendl;
-  ssize_t r = ::pwrite(direct_fd,io->data,lba_len,(uint64_t)lba_off);
-  ceph_assert( r == lba_len );
-  seg->off += lba_len;
-
-  //Don't forget
-  delete (char*)(io->data);
-
-//  bufferlist  bl;
-//  bl.append_zero(lba_len);
-//  bl.copy_in(0, lba_len,(char*)io->data);
-//  dout(20) << __func__ << " dump length =  " << bl.length() << dendl;
-//  dout(20) << __func__ << " dump buffer content = ";
-//  bl.hexdump(*_dout);
-//  *_dout << dendl;
-//
-//  ofstream of("/tmp/seg_write.last",ios::binary);
-//  bl.hexdump(of);
-
-  return 0;
-}
-
-//OCSSD BackEnd
-
-int OCSSDBackEnd::seg_erase(uint32_t seg_id) {
-
-  auto p_obj_id = seg_map[seg_id].id;
-  obj_delete(this->dev,p_obj_id);
-  dout(0) << __func__ << " Good, logical_id=" << seg_id << " physical_id=" << seg_map[seg_id].id << " erased successfully." << dendl;
-  return 0;
-}
-
-OCSSDBackEnd::OCSSDBackEnd(CephContext *cct, std::string path) {
-  this->cct = cct;
-  this->seg_map = (new Segment [nr_user_total + nr_reserved]);
-
-  //char buf[129] = {0};
-  //::readlink(path.c_str(),buf,128);
-
-  //Open
-  dout(0) << __func__ << " open ocssd dev " << dendl;
-  this->dev = dev_open(path.c_str());
-  ceph_assert(this->dev != NULL);
-  dout(0) << __func__ << "open ocssd device successfully. " << dendl;
-  if (::access(core.c_str(), F_OK) != 0){
-    dout(0) << __func__ << " ...mkfs..." << dendl;
-    ceph_assert(nr_reserved < 30);
-    //If the core file doesn't exist , initialize seg_map
-    mock_seg_id = 30 - nr_reserved;
-    //Erase all segs
-    for(uint32_t i = 0 ; i < nr_reserved + nr_pre_create ; ++i){
-      seg_map[i].id = 0xffffffff;
-      //seg_erase(i);
-      seg_map[i].off = 0;
-      seg_map[i].status= Segment::Usable;
-    }
-    return;
-  }
-  //Else Replay core file
-  core_back();
-}
-
-OCSSDBackEnd::~OCSSDBackEnd() {
-  //
-  dev_close(this->dev);
-  //
-  core_dump();
-}
-
-int OCSSDBackEnd::seg_noop(io_u *io) {
-  (void)(io);
-  return 0;
-}
-
-int OCSSDBackEnd::seg_read(io_u *io) {
-
-  auto seg = &seg_map[io->obj_id];
-  io->obj_id = seg->id;
-  ceph_assert(seg->status == Segment::Usable);
-
-  int r = obj_read(this->dev,io);
-  ceph_assert( r == 0 );
-
-  return 0;
-}
-
-int OCSSDBackEnd::seg_write(io_u *io)  {
-  auto seg = &seg_map[io->obj_id];
-  
-  if(seg->id == 0xffffffff){
-	dout(0) << __func__ << " create new segment " << dendl;
-    uint32_t size;
-	obj_create(dev,&seg->id,&size);
+    nvm_read_pm(dev,&g_pm_data,0,sizeof(g_pm_data),0u,&ret);
   }
 
 
-  io->obj_id = seg->id;
-  
+  uint64_t width = g_geo->nchannels * g_geo->nluns * g_geo->nplanes;
+  uint64_t segsize  = width * g_geo->npages * g_geo->page_nbytes;
+
+  ceph_assert( OCSSD_SEG_SIZE == (segsize));
+
+  //BlockDevice
+  BlockDevice::block_size = 4096;
+  BlockDevice::size = g_pm_data.nr_sblks * (OCSSD_SEG_SIZE);
+  BlockDevice::rotational = false;
 
 
-  ceph_assert(seg->status == Segment::Usable);
-  auto lba_len = (uint32_t)(io->data_size * 0x1000);
-  ceph_assert(seg->off == io->obj_off * 0x1000);
-  
-  int r = obj_write(this->dev,io);
-  ceph_assert(r == 0);
+  // aio_start
+  _aio_start();
 
-  seg->off += lba_len;
+  dout(0) << __func__ << "..done.. segs_num:" << g_pm_data.nr_sblks << "" << dendl;
 
-  //Don't forget
-  delete (char*)(io->data);
-
-  return 0;
-}
-
-
-//OCDevice
-int OCDevice::open(const std::string &path) {
-  this->dev_path = path;
-  if(cct->_conf->bdev_ocssd_backend == "mock")
-    this->sbe = SegmentBackEnd::create("mock",cct,dev_path);
-  else
-  {
-    this->dev_path = cct->_conf->bluestore_block_path;
-    this->sbe = SegmentBackEnd::create("ocssd",cct,dev_path);
-  }
-  BlockDevice::size = sbe->get_size();
-  BlockDevice::block_size = 0x1000;
-  segmentSize = sbe->get_seg_size();
-  dout(0) << __func__ << " bdev_size: " << byte_u_t(size) <<
-        " block_size: " << byte_u_t(block_size) << dendl;
-
-
-  //aio_thread startup
-  {
-    aio_thread = std::thread([this]() { this->aio_thread_work(); });
-  }
 
   return 0;
 }
 
 void OCDevice::close() {
-  //aio_thread stop
+
+
+  dout(0) << __func__ << "..doing.." << dendl;
+
+  // aio stop
+  _aio_stop();
+
+  // write_back pm_data
   {
-    std::unique_lock<std::mutex> l(aio_mtx);
-    aio_stop = true;
-    l.unlock();
-    aio_cv.notify_all();
-    aio_thread.join();
+    struct nvm_ret ret;
+    nvm_write_pm(dev,&g_pm_data,0,sizeof(g_pm_data),0u,&ret);
   }
-  delete sbe;
-}
 
-int OCDevice::collect_metadata(const std::string &prefix, map<std::string, std::string> *pm) const {
-  (*pm)[prefix + "rotational"] = "0";
-  (*pm)[prefix + "size"] = stringify(get_size());
-  (*pm)[prefix + "block_size"] = stringify(get_block_size());
-  (*pm)[prefix + "driver"] = "libocssd";
-  (*pm)[prefix + "type"] = "OCSSD";
-  (*pm)[prefix + "access_mode"] = "libocssd";
-  return 0;
-}
+  nvm_dev_close(dev);
 
-int OCDevice::read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *ioc, bool buffered) {
-
-  return aio_read(off,len,pbl,ioc);
-}
-
-int OCDevice::read_random(uint64_t off, uint64_t len, char *buf, bool buffered) {
-  dout(0) << __func__ << ".." << dendl;
-  (void)buffered;
-  bufferlist bl;
-  read(off,len,&bl, nullptr,false);
-  memmove(buf,bl.c_str(),len);
-  return 0;
-}
-
-int OCDevice::write(uint64_t off, bufferlist &bl, bool buffered) {
-  (void)buffered;
-  dout(0) << __func__ << std::hex << "...off:" << "0x" << off << "...len:" << "0x" <<  bl.length() << std::dec<< dendl;
-  char* buf   = bl.c_str();
-  auto  len1  = bl.length();
-  auto  off1  = off;
-  while(len1){
-    io_u io;
-    io.data = buf;
-    io.obj_off  = (off1 % segmentSize) / 0x1000;
-    io.obj_id   = static_cast<uint32_t>(off1 / segmentSize);
-    io.data_size = 1;
-    // 4K append
-
-    sbe->seg_write(&io);
-
-    buf  += 0x1000;
-    len1 -= 0x1000;
-    off1 += 0x1000;
-  }
-  return 0;
-}
-
-int OCDevice::aio_read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *ioc) {
-  //dout(0) << __func__ << std::hex << "...off:" << "0x" << off << "...len:" << "0x" <<  len << std::dec<< dendl;
-  //return read(off,len,pbl,ioc,false);
-  ioc->ocssd_io_type = IO_READ;
-  bufferptr p = buffer::create(len);
-  pbl->append(p);
-  dout(0) << __func__ << std::hex << "...off:" << "0x" << off << "...len:" << "0x" <<  len << std::dec<< dendl;
-  int r = _aio_rw(off,len, pbl,ioc);
-  while(!ioc->ocssd_io_queue.empty())
-  {
-    io_u *io = (io_u*)(ioc->ocssd_io_queue.front());
-    r = sbe->seg_read(io);
-    ceph_assert( r == 0 );
-    delete io;
-    ioc->ocssd_io_queue.pop_front();
-  }
-  p.copy_in(0,len,ioc->ocssd_buf);
-  delete ioc->ocssd_buf;
-  ioc->num_pending = 0;
-  ioc->num_running = 0;
-  return r;
-}
-
-int OCDevice::aio_write(uint64_t off, bufferlist &bl, IOContext *ioc, bool buffered) {
-  //dout(0) << __func__ << std::hex << "...off:" << "0x" << off << "...len:" << "0x" <<  bl.length() << std::dec<< dendl;
-  //return write(off,bl,buffered);
-  (void)buffered;
-  /*dout(10) << __func__ << std::hex <<
-    "...off:" << "0x" << off << "...len:" << "0x" <<  bl.length() << std::dec <<
-    " num_pengding=" << ioc->num_pending.load() <<
-    dendl;*/
-  ioc->ocssd_io_type = IO_WRITE;
-  int r = _aio_rw(off,bl.length(),&bl,ioc);
-  return r;
-}
-
-int OCDevice::queue_discard(interval_set<uint64_t> &p) {
-  dout(0) << std::hex << __func__ << " p=" << p << " ,size :" << p.size() << dendl;
-  if(!p.empty()){
-    auto it = p.begin();
-    auto off = it.get_start();
-    ceph_assert(it.get_len() == segmentSize);
-    auto lid = off / segmentSize;
-    sbe->seg_erase(lid);
-  }
-  return 0;
-}
-
-int OCDevice::_aio_rw(uint64_t off, uint32_t len, bufferlist *pbl, IOContext *ioc) {
-  //Split to 4K Segs
-//  auto  off1  = off;
-//  auto  len1 =
-
-  /*while(len1){
-    io_u *io     = new io_u;
-    io->data     = buf;
-    if(ioc->ocssd_io_type == IO_WRITE){
-       io->data = new char[0x1000];
-       memmove(io->data,buf,0x1000);
-    }
-    io->obj_off   = (off1 % segmentSize) / 0x1000;
-    io->obj_id    = static_cast<uint32_t>(off1 / segmentSize);
-    io->data_size = 1;
-    // 4K append
-    ioc->ocssd_io_queue.push_back(io);
-    buf  += 0x1000;
-    len1 -= 0x1000;
-    off1 += 0x1000;
-    count++;
-  }*/
-  bool one = (off / segmentSize) == ((off + len) / segmentSize ) && (len !=segmentSize);
-  char *buf = nullptr , *buf2 = nullptr;
-  auto  count = 0U;
-  if(likely(one)){
-    if(ioc->ocssd_io_type == IO_WRITE){
-      buf = new char[len];
-      pbl->copy(0, len , buf);
-    }
-    else
-    {
-      buf = new char[len];
-      ioc->ocssd_buf = buf;
-    }
-    io_u *_1 = new io_u;
-    _1->obj_id =  static_cast<uint64_t>( (off / segmentSize));
-    _1->obj_off = static_cast<uint64_t>((off % segmentSize) / 0x1000);
-    _1->data_size = len / 0x1000 ;
-    _1->data = buf;
-    ioc->ocssd_io_queue.push_back(_1);
-    count += 1 ;
-  }
-  else
-  {
-    io_u * _1 = new io_u , *_2 = new io_u;
-    _1->obj_id = static_cast<uint64_t>( (off / segmentSize));
-    _2->obj_id = static_cast<uint64_t>( ( (off+len) / segmentSize));
-    _1->obj_off = (off % segmentSize) / 0x1000;
-    _2->obj_off = 0;
-    _1->data_size = segmentSize / 0x1000 - _1->obj_off;
-    _2->data_size = len / 0x1000 - _1->data_size;
-    auto len1 = static_cast<uint64_t>(_1->data_size * 0x1000);
-    auto len2 = static_cast<uint64_t>(_2->data_size * 0x1000);
-    if(ioc->ocssd_io_type == IO_WRITE){
-      buf = new char[len1];
-      buf2 = new char[len2];
-      pbl->copy(0,(len1),buf);
-      pbl->copy((len1),(len2),buf2);
-    }
-    else
-    {
-      ioc->ocssd_buf = new char[len];
-      buf = ioc->ocssd_buf;
-      buf2 = buf + len1;
-    }
-    _1->data = buf;
-    _2->data = buf2;
-    ioc->ocssd_io_queue.push_back(_1);
-    ioc->ocssd_io_queue.push_back(_2);
-    count += 2;
-  }
-  if(ioc->ocssd_ioctx_enable.load() == false)
-    ioc->ocssd_ioctx_enable = true;
-  ioc->ocssd_io_len += len;
-  ioc->num_pending  += count;
-  return 0;
-}
-
-void OCDevice::_aio_thread_entry() {
-  std::list<IOContext*> running_io;
-  using IOFunction = int (SegmentBackEnd::*)(io_u *);
-  IOFunction  ioFunction[] = {
-      &SegmentBackEnd::seg_noop,
-      &SegmentBackEnd::seg_read,
-      &SegmentBackEnd::seg_write
-  };
-
-  auto for_each_io_u = [](IOContext *ioctx, SegmentBackEnd*sbe, IOFunction f){
-
-    while(!ioctx->ocssd_io_queue.empty())
-      {
-        io_u *io = (io_u*)(ioctx->ocssd_io_queue.front());
-        int r = (sbe->*f)(io);
-        ceph_assert( r == 0 );
-        delete io;
-        ioctx->ocssd_io_queue.pop_front();
-      }
-  };
-
-  //cond_variable pred
-  auto wait_pred = [&](){
-      return !pending_io.empty() || aio_stop;
-  };
-
-  std::unique_lock<std::mutex> l(aio_mtx);
-  while (true){
-    aio_cv.wait(l,wait_pred);
-    if(aio_stop)
-      break;
-    //Swap and Unlock
-    //if(!pending_io.empty())
-    {
-      const uint32_t max_io_length = 4 * 1024 *1024 ;
-      uint32_t io_length = 0;
-      dout(0) << __func__ << " queue depth: "  << pending_io.size() << dendl;
-      while(io_length < max_io_length && !pending_io.empty()){
-        IOContext *ioc = pending_io.front();
-        running_io.push_back(ioc);
-        pending_io.pop_front();
-        io_length += ioc->ocssd_io_len;
-      }
-      //running_io.swap(pending_io);
-      //dout(0) << __func__ << " running queue depth: "  << running_io.size() << dendl;
-      l.unlock();
-    }
-    while(!running_io.empty())
-    {
-      IOContext *ioctx = running_io.front();
-      dout(0) << __func__ << " queue in one ioctx depth: "  << ioctx->num_running.load() << dendl;
-      running_io.pop_front();
-      while(!ioctx->ocssd_io_queue.empty())
-      {
-        io_u *io = (io_u*)(ioctx->ocssd_io_queue.front());
-        int r = sbe->seg_write(io);
-        ceph_assert( r == 0 );
-        delete io;
-        ioctx->ocssd_io_queue.pop_front();
-      }
-      if(likely(ioctx->priv != NULL))
-      {
-        //for aio_write
-        ioctx->num_running = 0;
-        //ioctx->ocssd_io_done = true;
-        aio_callback(aio_callback_priv,ioctx->priv);
-      }
-      //dout(0) << __func__ << " io_type:" << fname[(int)(ioctx->ocssd_io_type)] << " complete" << dendl;
-    }
-    //Relock
-    l.lock();
-  }
-}
-
-void OCDevice::aio_thread_work() {
-  dout(0) << __func__ << "...Startup..." << dendl;
-  _aio_thread_entry();
-  dout(0) << __func__ << "...Shutdown..." << dendl;
-}
-
-void OCDevice::aio_submit(IOContext *ioc) {
-  switch (ioc->ocssd_io_type){
-    case(IO_NOOP):
-    case(IO_READ):
-    {
-      dout(10) << __func__ << " read: WAITING for aio_mtx " << dendl;
-      {
-        std::lock_guard<std::mutex> l(aio_mtx);
-        dout(10) << __func__ << " GET aio_mtx, pid=" << getpid() << " io_type = read , current queue depth= " << pending_io.size()
-                << std::dec << dendl;
-        pending_io.push_back(ioc);
-
-        ioc->num_running = ioc->num_pending.load();
-        ioc->num_pending = 0;
-
-        //wake up aio_thread
-        aio_cv.notify_one();
-
-      }
-      break;
-    }
-    case(IO_WRITE):
-    {
-      //Polling here
-      while(ioc->ocssd_submit_seq != submitted_seq.load())
-                      usleep(1);
-      ++submitted_seq;
-      dout(10) << __func__ << " write: WAITING for aio_mtx " << dendl;
-      {
-        dout(10) << __func__ << " GET aio_mtx, pid=" << getpid()
-                 << " io_type = write , current queue depth= " << pending_io.size()
-                 << std::dec << dendl;
-        std::lock_guard<std::mutex> l(aio_mtx);
-        pending_io.push_back(ioc);
-
-        ioc->num_running = ioc->num_pending.load();
-        ioc->num_pending = 0;
-
-        //wake up aio_thread
-        aio_cv.notify_one();
-      }
-      break;
-    }
-    default:
-      break;
-  }
+  dout(0) << __func__ << "..done.." << dendl;
 
 }
 
@@ -629,6 +181,508 @@ uint32_t OCDevice::get_submit_seq(IOContext * ioc){
   return id;
 }
 
+void OCDevice::virtual2physical(struct nvm_addr *addr) {
+  addr->g.blk = (g_pm_data.sblk_map[addr->g.blk]);
+}
+
+void OCDevice::init_disk() {
+  int i;
+  nvm_ret  ret ;
+  nvm_addr addr;
+  memset(&addr,0,sizeof(addr));
+
+
+  _init_blk_map(dev);
+  _init_blk_ofst(dev);
+
+  //Erase all blks
+
+
+  dout(0) << __func__ << "..doing..nr_sblks=" << g_pm_data.nr_sblks << dendl;
+  {
+    for (i = 0; i < g_pm_data.nr_sblks; ++i) {
+      addr.g.blk = (uint64_t) i;
+      virtual2physical(&addr);
+      nvm_addr_erase_sb(dev, &addr, 1, 0, &ret);
+      assert(ret.result == 0);
+    }
+  }
+  g_pm_data.magic = 0x0705;
+  BlockDevice::size = g_pm_data.nr_sblks * (OCSSD_SEG_SIZE);
+  nvm_write_pm(dev,&g_pm_data,0,sizeof(g_pm_data),0,&ret);
+
+  dout(0) << __func__ << "..done.."  << dendl;
+
+
+}
+
+void OCDevice::incr_virtual(const struct nvm_geo *geo, struct nvm_addr *addr) {
+  unsigned int page = addr->g.pg;
+  // We ensure program/read will complete a multi-plane within a lun.
+  // One page is done within the first plane and then the second plane.
+  // This compliance with how device auto increase address
+  addr->g.sec++;
+  if (addr->g.sec == geo->nsectors) {
+    addr->g.sec = 0;
+    addr->g.pl++;
+    if (addr->g.pl == geo->nplanes) {
+      addr->g.pl = 0;
+      addr->g.pg++;
+      if (addr->g.pg % 3 == 0) {
+        addr->g.pg = page - (page % 3);
+        addr->g.lun++;
+        if (addr->g.lun == geo->nluns) {
+          addr->g.lun = 0;
+          addr->g.ch++;
+          if (addr->g.ch == geo->nchannels) {
+            // Return to first lun and increase page
+            addr->g.ch = 0;
+            addr->g.pg = page + 1;
+          }
+        }
+      }
+    }
+  }
+  if (addr->g.pg == geo->npages) {
+    // Increase block
+    addr->g.pg = 0;
+    addr->g.blk++;
+  }
+}
+
+int OCDevice::aio_read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *ioc) {
+
+  ceph_assert( len <= (OCSSD_MAX_IO_SIZE));
+  dout(0) << __func__ << "..doing.." << dendl;
+  uint64_t nr_align = len / (OCSSD_MAX_IO_SIZE);
+  uint64_t nr_unalign = len % (OCSSD_MAX_IO_SIZE);
+  uint64_t i;
+  uint64_t _off = off , _len = len;
+
+  ocssd_aio_t new_aio;
+  ioc->ocssd_pending_aios.push_back(std::move(new_aio));
+  ioc->num_pending++;
+
+  ocssd_aio_t &aio = ioc->ocssd_pending_aios.back();
+  aio.lba_off = off;
+  aio.lba_len = len;
+  aio.priv = ioc;
+  aio.io_type = OCSSD_IO_READ;
+  aio.io_depth = (uint8_t)(nr_align + (nr_unalign > 0));
+
+
+  dout(0) << __func__ << "..ocssd_aio_t.io_depth=" << (int)aio.io_depth << dendl;
+
+  {
+      cmd_ctx *ctx = &(aio.ctx);
+      uint64_t _clen = _len >= OCSSD_MAX_IO_SIZE ? OCSSD_MAX_IO_SIZE : _len;
+      bufferptr  p = buffer::create(_clen);
+
+      ctx->data = p.c_str();
+      ctx->data_len = (uint32_t)_clen;
+      ctx->addrs = aio.addrs;
+      ctx->private_data = &aio;
+
+      logical2virtual(g_geo,_off, _clen,
+          &(ctx->naddrs),
+           ctx->addrs);
+
+      for(int j = 0 ; j < ctx->naddrs ; ++j)
+        virtual2physical(&(ctx->addrs[j]));
+
+      aio.bl.append(std::move(p));
+
+      _off += _clen;
+      _len -= _clen;
+  }
+
+  ceph_assert(_len == 0);
+
+  pbl->append(aio.bl);
+  dout(0) << __func__ << "..done.." << dendl;
+
+  return 0;
+}
+
+int OCDevice::aio_write(uint64_t off, bufferlist &bl, IOContext *ioc, bool buffered){
+  (void)buffered;
+
+  //dout(0) << __func__ << "..doing.." << dendl;
+
+  auto len = bl.length();
+  ceph_assert( len <= (OCSSD_MAX_IO_SIZE));
+
+  uint64_t nr_align = len / (OCSSD_MAX_IO_SIZE);
+  uint64_t nr_unalign = len % (OCSSD_MAX_IO_SIZE);
+  uint64_t i;
+  uint64_t _off = off , _len = len;
+
+  ocssd_aio_t new_aio;
+  ioc->ocssd_pending_aios.push_back(std::move(new_aio));
+  ioc->num_pending++;
+  ocssd_aio_t& aio = ioc->ocssd_pending_aios.back();
+
+  aio.lba_off = off;
+  aio.lba_len = len;
+  aio.priv = ioc;
+  aio.bl.claim_append(bl);
+  aio.io_type = OCSSD_IO_WRITE;
+  aio.io_depth = (uint8_t)(nr_align + (nr_unalign > 0));
+
+
+  //dout(0) << __func__ << "..ocssd_aio_t.io_depth=" << (int)aio.io_depth << dendl;
+
+  char *p = aio.bl.c_str();
+
+  {
+    cmd_ctx *ctx = &(aio.ctx);
+    uint64_t _clen = _len >= OCSSD_MAX_IO_SIZE ? OCSSD_MAX_IO_SIZE : _len;
+
+
+    ctx->data = p;
+    ctx->data_len = (uint32_t)_clen;
+    ctx->addrs = aio.addrs;
+    ctx->private_data = &aio;
+
+    logical2virtual(g_geo,_off, _clen,
+                    &(ctx->naddrs),
+                    ctx->addrs);
+
+    for(int j = 0 ; j < ctx->naddrs ; ++j)
+      virtual2physical(&(ctx->addrs[j]));
+
+
+    p     += _clen;
+    _off  += _clen;
+    _len  -= _clen;
+  }
+
+  ceph_assert(_len == 0);
+  dout(0) << __func__ << std::hex <<  " off=" << off << " len=" << len << std::dec << " done.." << dendl;
+  return 0;
+}
+
+void OCDevice::aio_submit(IOContext *ioc)
+{
+
+  dout(0) << __func__ << "..doing.." << dendl;
+
+  if(ioc->num_pending.load() == 0)
+    return;
+
+
+  ioc->ocssd_running_aios.swap(ioc->ocssd_pending_aios);
+  ceph_assert(ioc->ocssd_pending_aios.empty());
+
+  int pending = ioc->num_pending.load();
+  ioc->num_pending -= pending;
+  ioc->num_running += pending;
+
+  uint8_t io_type = ioc->ocssd_running_aios.front().io_type;
+  ssize_t r = 0;
+
+
+  /*while(aio_queue_depth.load() + ioc->num_running.load() >= OCSSD_MAX_IODEPTH)
+  {
+    usleep(125);
+    dout(0) << __func__ << " can i submit? :" << aio_queue_depth.load() << dendl;
+  }*/
+
+  switch (io_type){
+    case OCSSD_IO_WRITE:
+    {
+      while(ioc->ocssd_submit_seq != submitted_seq.load()){
+       	  dout(0) << __func__ << " blocking here as seq is not updated yet " << dendl;
+		      usleep(50);
+	    }
+      dout(0) << __func__ << "..submitting seq=" << ioc->ocssd_submit_seq << dendl;
+
+      std::lock_guard<mutex> l(aio_submit_mtx);
+      for(auto it = ioc->ocssd_running_aios.begin() ; it != ioc->ocssd_running_aios.end() ; it++)
+      {
+        ocssd_aio_t &aio = *it;
+        int aio_depth = aio.io_depth;
+        ceph_assert( aio_depth == 1);
+
+        int i;
+        dout(0) << __func__ << std::hex <<  " off=" << aio.lba_off << " len=" << aio.lba_len << std::dec << dendl;
+        {
+          r = nvm_addr_async_protected_write(dev, &aio.ctx, 0, 0, 0, 0);
+          if( r != 0 )
+          {
+            ceph_assert( 0 == "WTF?");
+          }
+
+          aio_queue_depth++;
+        }
+
+        uint64_t o = aio.lba_off;
+        uint64_t l = aio.lba_len;
+        ceph_assert( o % OCSSD_SEG_SIZE == g_pm_data.sblk_ofst[ o / OCSSD_SEG_SIZE ].fin_ofst );
+        while(l)
+        {
+          g_pm_data.sblk_ofst[ o / OCSSD_SEG_SIZE ].fin_ofst += 0x1000;
+          o+=0x1000;
+          l-=0x1000;
+        }
+      }
+      ++submitted_seq;
+      break;
+    }
+    case OCSSD_IO_READ:
+    {
+      for(auto it = ioc->ocssd_running_aios.begin() ; it != ioc->ocssd_running_aios.end() ; it++)
+      {
+        ocssd_aio_t &aio = *it;
+        int aio_depth = aio.io_depth;
+        int i;
+        for (i = 0 ; i < aio_depth ; ++i)
+        {
+            r = nvm_addr_async_read(dev, &aio.ctx, 0, 0);
+            if( r != 0 )
+            {
+              ceph_assert( 0 == "WTF?");
+            }
+            aio_queue_depth++;
+        }
+      }
+      break;
+    }
+    default:
+    {
+      derr << "unknown io-type" << dendl;
+      ceph_abort();
+      break;
+    }
+  }
+  dout(0) << __func__ << "..done.." << dendl;
+
+}
+
+int OCDevice::read(uint64_t off, uint64_t len, bufferlist *pbl, IOContext *ioc, bool buffered)
+{
+
+   dout(0) << __func__ << std::hex <<  " off=" << off << " len=" << len << std::dec << dendl;
+
+   int r = aio_read(off,len,pbl,ioc);
+   aio_submit(ioc);
+   ioc->aio_wait();
+
+   return r;
+}
+
+int OCDevice::read_random(uint64_t off, uint64_t len, char *buf, bool buffered)
+{
+  derr << __func__ << "Not implmented" << dendl;
+  ceph_abort();
+}
+int OCDevice::write(uint64_t off, bufferlist &bl, bool buffered)
+{
+  derr << __func__ << "Not implmented" << dendl;
+  ceph_abort();
+}
+
+static int get_next_completed(struct nvm_dev *dev , int min , ocssd_aio_t *aios[] , int *rctx_max_count)
+{
+  //dout(0) << __func__ << "..doing.." << dendl;
+
+  int i;
+  int aio_cnt = 0;
+  //Polling time wait 1.5s
+  uint64_t t_base_ns = (uint64_t)(1*1e9);
+  result_ctx rctx;
+
+
+  rctx.t_ns = t_base_ns;
+  while(true)
+  {
+    int r = nvm_get_async_cmd_event(dev,&rctx);
+    *rctx_max_count = rctx.max_count;
+
+    if ( r != 0 )
+    {
+      ceph_assert( 0 == "WTF?");
+    }
+
+
+    for(i = 0 ; i < rctx.max_count ;++i)
+    {
+      ocssd_aio_t* aio = (ocssd_aio_t *)(rctx.ctx[i]->private_data);
+      if(--aio->io_depth == 0)
+       aios[aio_cnt++] = aio;
+    }
+    if(aio_cnt >= min)
+      break;
+  }
+
+  //dout(0) << __func__ << "..done.." << dendl;
+
+  return aio_cnt;
+}
+
+void OCDevice::aio_thread_work()
+{
+
+  int rctx_max_count = 0;
+
+  while(!aio_stop)
+  {
+
+  	ocssd_aio_t *completed_aios[512] = {0};
+
+    int r = get_next_completed(dev,0,completed_aios , &rctx_max_count);
+    if(rctx_max_count > 0)
+    {
+      //dout(0) << __func__<< "  rctx_max_count=" << rctx_max_count << dendl;
+      //dout(0) << __func__ << " aio_queue_depth: " << aio_queue_depth.load() << "" << dendl;
+      aio_queue_depth -= rctx_max_count;
+    }
+    int i;
+    for (i = 0 ; i < r ; ++i)
+    {
+
+      IOContext* ioc =(IOContext *)(completed_aios[i]->priv);
+      if(ioc->priv)
+      {
+        if(--ioc->num_running == 0)
+        {
+          //dout(0) << __func__ << " IOContext: " << ioc << " done, seq=" << ioc->ocssd_submit_seq << dendl;
+          aio_callback(aio_callback_priv,ioc->priv);
+		      //dout(0) << __func__ << " call back done" << dendl;
+        }
+      }
+      else
+      {
+        ioc->try_aio_wake();
+      }
+    }
+  }
+}
+
+void OCDevice::logical2virtual(const struct nvm_geo *geo, uint64_t lba_off, uint64_t lba_len, int *cnt,
+                               struct nvm_addr *addrs) {
+  struct nvm_addr addr;
+  unsigned long long ofst;
+  unsigned int wl, pg_in_wl;
+  unsigned int i;
+
+
+#if DEBUG_VERBOSE_PPA_CALC
+  printf("Debug: calculate initial PPA\n");
+#endif
+  // Calculate initial PPA address
+  addr.g.blk = lba_off / (geo->nchannels * geo->nluns * geo->nplanes * geo->npages * geo->page_nbytes);
+  ofst       = lba_off % (geo->nchannels * geo->nluns * geo->nplanes * geo->npages * geo->page_nbytes);
+#if DEBUG_VERBOSE_PPA_CALC
+  printf("     : blk      %d, ofst %lld\n", addr.g.blk, ofst);
+#endif
+
+  wl   = ofst / (geo->nchannels * geo->nluns * geo->nplanes * geo->page_nbytes * 3);
+  ofst = ofst % (geo->nchannels * geo->nluns * geo->nplanes * geo->page_nbytes * 3);
+#if DEBUG_VERBOSE_PPA_CALC
+  printf("     : wl       %d, ofst %lld\n", wl, ofst);
+#endif
+
+/*
+    pg_in_wl = ofst / (geo->nchannels * geo->nluns * geo->nplanes * geo->page_nbytes);
+    ofst     = ofst % (geo->nchannels * geo->nluns * geo->nplanes * geo->page_nbytes);
+#if DEBUG_VERBOSE_PPA_CALC
+    printf("     : pg_in_wl %d, ofst %lld\n", pg_in_wl, ofst);
+#endif
+
+    addr.g.pg = wl * 3 + pg_in_wl;
+*/
+
+  addr.g.ch = ofst / (geo->nluns * geo->nplanes * geo->page_nbytes * 3);
+  ofst      = ofst % (geo->nluns * geo->nplanes * geo->page_nbytes * 3);
+#if DEBUG_VERBOSE_PPA_CALC
+  printf("     : ch       %d, ofst %lld\n", addr.g.ch, ofst);
+#endif
+
+  addr.g.lun = ofst / (geo->nplanes * geo->page_nbytes * 3);
+  ofst       = ofst % (geo->nplanes * geo->page_nbytes * 3);
+#if DEBUG_VERBOSE_PPA_CALC
+  printf("     : lun      %d, ofst %lld\n", addr.g.lun, ofst);
+#endif
+
+  pg_in_wl = ofst / (geo->nplanes * geo->page_nbytes);
+  ofst     = ofst % (geo->nplanes * geo->page_nbytes);
+#if DEBUG_VERBOSE_PPA_CALC
+  printf("     : pg_in_wl %d, ofst %lld\n", pg_in_wl, ofst);
+#endif
+  addr.g.pg = wl * 3 + pg_in_wl;
+
+
+  addr.g.pl  = ofst / (geo->page_nbytes);
+  ofst       = ofst % (geo->page_nbytes);
+#if DEBUG_VERBOSE_PPA_CALC
+  printf("     : pl       %d, ofst %lld\n", addr.g.pl, ofst);
+#endif
+
+
+  addr.g.sec = ofst / (geo->sector_nbytes);
+#if DEBUG_VERBOSE_PPA_CALC
+  printf("     : pg       %d\n", addr.g.pg);
+    printf("     : sec      %d\n", addr.g.sec);
+    printf("Debug: calc done\n");
+#endif
+
+  // Fill command context
+  *cnt = lba_len / 4096;
+  for (i = 0; i < *cnt; i++) {
+    addrs[i] = addr;
+    incr_virtual(geo, &addr);
+  }
+
+}
+
+//Garbage Collection
+int OCDevice::queue_discard(interval_set<uint64_t> &p)
+{
+  for(auto it = p.begin() ; it != p.end() ; ++it)
+  {
+    ceph_assert(it.get_start() % OCSSD_SEG_SIZE == 0);
+    ceph_assert(it.get_len() % OCSSD_SEG_SIZE == 0);
+    uint64_t bg_id = it.get_start() / OCSSD_SEG_SIZE;
+    uint64_t end_id = (it.get_start()+it.get_len()) / OCSSD_SEG_SIZE;
+    uint64_t i;
+    for (i= bg_id ; i < end_id ;++i)
+    {
+      nvm_ret  ret  = {0};
+      nvm_addr addr = {0};
+      addr.g.blk = i;
+      virtual2physical(&addr);
+      nvm_addr_erase_sb(dev, &addr, 1, 0, &ret);
+      assert(ret.result == 0);
+    }
+  }
+
+  return 0;
+}
+
+int OCDevice::collect_metadata(const string &prefix, map<string, string> *pm) const
+{
+  (*pm)[prefix + "rotational"] = "0";
+  (*pm)[prefix + "size"] = stringify(get_size());
+  (*pm)[prefix + "block_size"] = stringify(get_block_size());
+  (*pm)[prefix + "driver"] = "libobj";
+  (*pm)[prefix + "type"] = "OCSSD";
+  (*pm)[prefix + "access_mode"] = "libobj";
+  return 0;
+}
+
+void OCDevice::get_written_extents(interval_set<uint64_t> &p) {
+
+  int i ;
+  for ( i = 0 ; i < g_pm_data.nr_sblks ; ++i)
+  {
+    uint32_t ofst = g_pm_data.sblk_ofst[i].fin_ofst;
+    if(ofst)
+    {
+      p.insert( (uint32_t)i*OCSSD_SEG_SIZE , ofst);
+    }
+  }
+}
 
 ////// THIS function is called by Bluestore::_open_alloc
 ////// Allocator will compare FreeList and WrittenList to know what extents are invalid

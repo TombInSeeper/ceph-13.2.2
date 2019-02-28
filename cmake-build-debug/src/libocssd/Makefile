@@ -197,66 +197,6 @@ lightnvm/fast:
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/build
 .PHONY : lightnvm/fast
 
-objssd/objssd-bbt.o: objssd/objssd-bbt.c.o
-
-.PHONY : objssd/objssd-bbt.o
-
-# target to build an object file
-objssd/objssd-bbt.c.o:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-bbt.c.o
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.o
-.PHONY : objssd/objssd-bbt.c.o
-
-objssd/objssd-bbt.i: objssd/objssd-bbt.c.i
-
-.PHONY : objssd/objssd-bbt.i
-
-# target to preprocess a source file
-objssd/objssd-bbt.c.i:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-bbt.c.i
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.i
-.PHONY : objssd/objssd-bbt.c.i
-
-objssd/objssd-bbt.s: objssd/objssd-bbt.c.s
-
-.PHONY : objssd/objssd-bbt.s
-
-# target to generate assembly for a file
-objssd/objssd-bbt.c.s:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-bbt.c.s
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.s
-.PHONY : objssd/objssd-bbt.c.s
-
-objssd/objssd-map.o: objssd/objssd-map.c.o
-
-.PHONY : objssd/objssd-map.o
-
-# target to build an object file
-objssd/objssd-map.c.o:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-map.c.o
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-map.c.o
-.PHONY : objssd/objssd-map.c.o
-
-objssd/objssd-map.i: objssd/objssd-map.c.i
-
-.PHONY : objssd/objssd-map.i
-
-# target to preprocess a source file
-objssd/objssd-map.c.i:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-map.c.i
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-map.c.i
-.PHONY : objssd/objssd-map.c.i
-
-objssd/objssd-map.s: objssd/objssd-map.c.s
-
-.PHONY : objssd/objssd-map.s
-
-# target to generate assembly for a file
-objssd/objssd-map.c.s:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-map.c.s
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-map.c.s
-.PHONY : objssd/objssd-map.c.s
-
 objssd/objssd-nvme.o: objssd/objssd-nvme.c.o
 
 .PHONY : objssd/objssd-nvme.o
@@ -286,96 +226,6 @@ objssd/objssd-nvme.c.s:
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-nvme.c.s
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.s
 .PHONY : objssd/objssd-nvme.c.s
-
-objssd/objssd-rw.o: objssd/objssd-rw.c.o
-
-.PHONY : objssd/objssd-rw.o
-
-# target to build an object file
-objssd/objssd-rw.c.o:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-rw.c.o
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.o
-.PHONY : objssd/objssd-rw.c.o
-
-objssd/objssd-rw.i: objssd/objssd-rw.c.i
-
-.PHONY : objssd/objssd-rw.i
-
-# target to preprocess a source file
-objssd/objssd-rw.c.i:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-rw.c.i
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.i
-.PHONY : objssd/objssd-rw.c.i
-
-objssd/objssd-rw.s: objssd/objssd-rw.c.s
-
-.PHONY : objssd/objssd-rw.s
-
-# target to generate assembly for a file
-objssd/objssd-rw.c.s:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-rw.c.s
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.s
-.PHONY : objssd/objssd-rw.c.s
-
-objssd/objssd-thread.o: objssd/objssd-thread.c.o
-
-.PHONY : objssd/objssd-thread.o
-
-# target to build an object file
-objssd/objssd-thread.c.o:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-thread.c.o
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.o
-.PHONY : objssd/objssd-thread.c.o
-
-objssd/objssd-thread.i: objssd/objssd-thread.c.i
-
-.PHONY : objssd/objssd-thread.i
-
-# target to preprocess a source file
-objssd/objssd-thread.c.i:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-thread.c.i
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.i
-.PHONY : objssd/objssd-thread.c.i
-
-objssd/objssd-thread.s: objssd/objssd-thread.c.s
-
-.PHONY : objssd/objssd-thread.s
-
-# target to generate assembly for a file
-objssd/objssd-thread.c.s:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/objssd-thread.c.s
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.s
-.PHONY : objssd/objssd-thread.c.s
-
-objssd/queue.o: objssd/queue.c.o
-
-.PHONY : objssd/queue.o
-
-# target to build an object file
-objssd/queue.c.o:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/queue.c.o
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/queue.c.o
-.PHONY : objssd/queue.c.o
-
-objssd/queue.i: objssd/queue.c.i
-
-.PHONY : objssd/queue.i
-
-# target to preprocess a source file
-objssd/queue.c.i:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/queue.c.i
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/queue.c.i
-.PHONY : objssd/queue.c.i
-
-objssd/queue.s: objssd/queue.c.s
-
-.PHONY : objssd/queue.s
-
-# target to generate assembly for a file
-objssd/queue.c.s:
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm_so.dir/build.make src/libocssd/CMakeFiles/lightnvm_so.dir/objssd/queue.c.s
-	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/libocssd/CMakeFiles/lightnvm.dir/build.make src/libocssd/CMakeFiles/lightnvm.dir/objssd/queue.c.s
-.PHONY : objssd/queue.c.s
 
 src/be_lightnvm/nvm_be_ioctl.o: src/be_lightnvm/nvm_be_ioctl.c.o
 
@@ -782,24 +632,9 @@ help:
 	@echo "... test"
 	@echo "... lightnvm"
 	@echo "... edit_cache"
-	@echo "... objssd/objssd-bbt.o"
-	@echo "... objssd/objssd-bbt.i"
-	@echo "... objssd/objssd-bbt.s"
-	@echo "... objssd/objssd-map.o"
-	@echo "... objssd/objssd-map.i"
-	@echo "... objssd/objssd-map.s"
 	@echo "... objssd/objssd-nvme.o"
 	@echo "... objssd/objssd-nvme.i"
 	@echo "... objssd/objssd-nvme.s"
-	@echo "... objssd/objssd-rw.o"
-	@echo "... objssd/objssd-rw.i"
-	@echo "... objssd/objssd-rw.s"
-	@echo "... objssd/objssd-thread.o"
-	@echo "... objssd/objssd-thread.i"
-	@echo "... objssd/objssd-thread.s"
-	@echo "... objssd/queue.o"
-	@echo "... objssd/queue.i"
-	@echo "... objssd/queue.s"
 	@echo "... src/be_lightnvm/nvm_be_ioctl.o"
 	@echo "... src/be_lightnvm/nvm_be_ioctl.i"
 	@echo "... src/be_lightnvm/nvm_be_ioctl.s"

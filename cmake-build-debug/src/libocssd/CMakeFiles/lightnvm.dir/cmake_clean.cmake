@@ -13,11 +13,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/lightnvm.dir/src/be_nvme/nvm_cmb.c.o"
   "CMakeFiles/lightnvm.dir/src/be_nvme/nvm_aer.c.o"
   "CMakeFiles/lightnvm.dir/objssd/objssd-nvme.c.o"
-  "CMakeFiles/lightnvm.dir/objssd/objssd-bbt.c.o"
-  "CMakeFiles/lightnvm.dir/objssd/objssd-map.c.o"
-  "CMakeFiles/lightnvm.dir/objssd/objssd-rw.c.o"
-  "CMakeFiles/lightnvm.dir/objssd/objssd-thread.c.o"
-  "CMakeFiles/lightnvm.dir/objssd/queue.c.o"
   "../../lib/liblightnvm.pdb"
   "../../lib/liblightnvm.a"
 )

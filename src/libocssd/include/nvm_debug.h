@@ -89,6 +89,7 @@
             printf("[ERROR] %s: %s(%d): " FIRST(__VA_ARGS__) "\n" , \
             strrchr(__FILE__,'/')+1, __func__, __LINE__ REST(__VA_ARGS__));\
             fflush(stdout);\
+            exit(1);\
     }} while(0);
 
 /**

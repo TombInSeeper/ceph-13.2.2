@@ -11,10 +11,10 @@
 				<Option working_dir="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="lightnvm_so">
@@ -34,7 +34,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;7cb2cc3&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;9388234&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -46,7 +46,6 @@
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
-					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/objssd"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
@@ -61,10 +60,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm_so"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm_so"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="lightnvm_so/fast">
@@ -84,7 +83,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;7cb2cc3&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;9388234&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -96,7 +95,6 @@
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
-					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/objssd"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
@@ -111,10 +109,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm_so/fast"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm_so/fast"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="lightnvm">
@@ -134,7 +132,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;7cb2cc3&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;9388234&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -146,7 +144,6 @@
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
-					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/objssd"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
@@ -161,10 +158,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="lightnvm/fast">
@@ -184,7 +181,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;7cb2cc3&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;9388234&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -196,7 +193,6 @@
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/utils"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/src"/>
-					<Add directory="/home/wuyue/ceph-13.2.2/src/libocssd/objssd"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/boost/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src/xxHash"/>
@@ -211,10 +207,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm/fast"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 lightnvm/fast"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/libocssd/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
@@ -226,51 +222,11 @@
 			<Option target="lightnvm_so"/>
 			<Option target="lightnvm"/>
 		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-bbt.c">
-			<Option target="lightnvm_so"/>
-			<Option target="lightnvm"/>
-		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-bbt.h">
-			<Option target="lightnvm_so"/>
-			<Option target="lightnvm"/>
-		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-map.c">
-			<Option target="lightnvm_so"/>
-			<Option target="lightnvm"/>
-		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-map.h">
-			<Option target="lightnvm_so"/>
-			<Option target="lightnvm"/>
-		</Unit>
 		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-nvme.c">
 			<Option target="lightnvm_so"/>
 			<Option target="lightnvm"/>
 		</Unit>
 		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-nvme.h">
-			<Option target="lightnvm_so"/>
-			<Option target="lightnvm"/>
-		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-rw.c">
-			<Option target="lightnvm_so"/>
-			<Option target="lightnvm"/>
-		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-thread.c">
-			<Option target="lightnvm_so"/>
-			<Option target="lightnvm"/>
-		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/objssd-thread.h">
-			<Option target="lightnvm_so"/>
-			<Option target="lightnvm"/>
-		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/queue.c">
-			<Option target="lightnvm_so"/>
-			<Option target="lightnvm"/>
-		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/queue.h">
-			<Option target="lightnvm_so"/>
-			<Option target="lightnvm"/>
-		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/src/libocssd/objssd/type.h">
 			<Option target="lightnvm_so"/>
 			<Option target="lightnvm"/>
 		</Unit>
@@ -797,7 +753,7 @@
 		<Unit filename="/home/wuyue/ceph-13.2.2/.git/HEAD">
 			<Option virtualFolder="CMake Files\.git\"/>
 		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/.git/refs/heads/dev">
+		<Unit filename="/home/wuyue/ceph-13.2.2/.git/refs/heads/async-rw">
 			<Option virtualFolder="CMake Files\.git\refs\heads\"/>
 		</Unit>
 		<Unit filename="/home/wuyue/ceph-13.2.2/doc/CMakeLists.txt">

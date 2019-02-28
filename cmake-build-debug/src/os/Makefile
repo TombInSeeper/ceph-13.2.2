@@ -737,6 +737,33 @@ bluestore/bluestore_types.cc.s:
 	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/os/CMakeFiles/os.dir/build.make src/os/CMakeFiles/os.dir/bluestore/bluestore_types.cc.s
 .PHONY : bluestore/bluestore_types.cc.s
 
+bluestore/ocssd_aio.o: bluestore/ocssd_aio.cc.o
+
+.PHONY : bluestore/ocssd_aio.o
+
+# target to build an object file
+bluestore/ocssd_aio.cc.o:
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/os/CMakeFiles/os.dir/build.make src/os/CMakeFiles/os.dir/bluestore/ocssd_aio.cc.o
+.PHONY : bluestore/ocssd_aio.cc.o
+
+bluestore/ocssd_aio.i: bluestore/ocssd_aio.cc.i
+
+.PHONY : bluestore/ocssd_aio.i
+
+# target to preprocess a source file
+bluestore/ocssd_aio.cc.i:
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/os/CMakeFiles/os.dir/build.make src/os/CMakeFiles/os.dir/bluestore/ocssd_aio.cc.i
+.PHONY : bluestore/ocssd_aio.cc.i
+
+bluestore/ocssd_aio.s: bluestore/ocssd_aio.cc.s
+
+.PHONY : bluestore/ocssd_aio.s
+
+# target to generate assembly for a file
+bluestore/ocssd_aio.cc.s:
+	cd /home/wuyue/ceph-13.2.2/cmake-build-debug && $(MAKE) -f src/os/CMakeFiles/os.dir/build.make src/os/CMakeFiles/os.dir/bluestore/ocssd_aio.cc.s
+.PHONY : bluestore/ocssd_aio.cc.s
+
 filestore/BtrfsFileStoreBackend.o: filestore/BtrfsFileStoreBackend.cc.o
 
 .PHONY : filestore/BtrfsFileStoreBackend.o
@@ -1298,6 +1325,9 @@ help:
 	@echo "... bluestore/bluestore_types.o"
 	@echo "... bluestore/bluestore_types.i"
 	@echo "... bluestore/bluestore_types.s"
+	@echo "... bluestore/ocssd_aio.o"
+	@echo "... bluestore/ocssd_aio.i"
+	@echo "... bluestore/ocssd_aio.s"
 	@echo "... filestore/BtrfsFileStoreBackend.o"
 	@echo "... filestore/BtrfsFileStoreBackend.i"
 	@echo "... filestore/BtrfsFileStoreBackend.s"

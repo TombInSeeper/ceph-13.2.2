@@ -37,9 +37,8 @@
 
 #define WITH_OCSSD
 #ifdef WITH_OCSSD
-#define OCSSD_SEG_SIZE              (312*1024*1024ULL)
-#define OCSSD_NR_SEG_RESERVE        (1U)
-#define OCSSD_NR_SEG_USER           (100U)
+#define OCSSD_SEG_SIZE              (384*1024*1024ULL)
+#include "ocssd_aio.h"
 #endif
 
 class CephContext;
@@ -70,16 +69,10 @@ public:
 #endif
 
 //For OCSSD
-#if 1
-  atomic_bool              ocssd_ioctx_enable = false;
-  atomic_bool              ocssd_io_done = true;
-  uint32_t                 ocssd_submit_seq   = 0;          //  write op submit seq
-  std::list<void*>         ocssd_io_queue;                //  void* -> io_u*
-  uint8_t                  ocssd_io_type = 0;             //
-
-  uint32_t                 ocssd_io_len    = 0 ;
-  char*                    ocssd_buf       = nullptr;
-  void*                    ocssd_bufferptr = nullptr;
+#ifdef WITH_OCSSD
+    uint32_t ocssd_submit_seq = 0 ;
+    std::list<ocssd_aio_t> ocssd_pending_aios;
+    std::list<ocssd_aio_t> ocssd_running_aios;
 #endif
 
   explicit IOContext(CephContext* cct, void *p, bool allow_eio = false)
@@ -225,6 +218,7 @@ public:
   virtual uint64_t  get_reserve_size() const { return 0 ;}
   virtual void      get_written_extents(interval_set<uint64_t>& p) {  };
   virtual uint32_t  get_submit_seq( IOContext *ioc )  { return 0; };
+  virtual void      init_disk() { };
 
 protected:
   bool is_valid_io(uint64_t off, uint64_t len) const {

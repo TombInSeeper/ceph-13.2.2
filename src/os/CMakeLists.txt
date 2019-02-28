@@ -16,7 +16,9 @@ set(libos_srcs
   memstore/MemStore.cc
   kstore/KStore.cc
   kstore/kstore_types.cc
-  fs/FS.cc)
+  fs/FS.cc
+        bluestore/ocssd_aio.cc
+        bluestore/ocssd_aio.h)
 
 if(WITH_BLUESTORE)
   list(APPEND libos_srcs

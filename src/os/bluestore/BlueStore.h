@@ -1978,12 +1978,12 @@ private:
   constexpr static uint32_t  N_SLOTS = OCSSD_SEG_SIZE / (4096);
   struct SegmentSummary{
       std::bitset<N_SLOTS> invalid_bitmap;
-      struct parent_t{
+      /*struct parent_t{
           coll_t     cid;
           ghobject_t oid;
           uint32_t   off;
       };
-      parent_t  parents[N_SLOTS];
+      parent_t  parents[N_SLOTS];*/
   };
 
   struct GCThread : public Thread {

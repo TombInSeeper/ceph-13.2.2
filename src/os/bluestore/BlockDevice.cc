@@ -107,7 +107,7 @@ BlockDevice *BlockDevice::create(CephContext* cct, const string& path,
     }
     else
     {
-      dout(10) << __func__ << " Not main block device : " << path << dendl;
+      dout(10) << __func__ << " Not OCSSD main block device : " << path << dendl;
     }
   }
 #else

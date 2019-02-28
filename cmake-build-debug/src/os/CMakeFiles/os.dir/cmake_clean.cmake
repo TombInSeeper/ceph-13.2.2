@@ -17,6 +17,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/os.dir/kstore/KStore.cc.o"
   "CMakeFiles/os.dir/kstore/kstore_types.cc.o"
   "CMakeFiles/os.dir/fs/FS.cc.o"
+  "CMakeFiles/os.dir/bluestore/ocssd_aio.cc.o"
   "CMakeFiles/os.dir/bluestore/Allocator.cc.o"
   "CMakeFiles/os.dir/bluestore/BitmapFreelistManager.cc.o"
   "CMakeFiles/os.dir/bluestore/BlockDevice.cc.o"

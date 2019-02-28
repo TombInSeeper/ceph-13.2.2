@@ -11,10 +11,10 @@
 				<Option working_dir="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="gmock_main">
@@ -52,10 +52,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 gmock_main"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 gmock_main"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="gmock_main/fast">
@@ -93,10 +93,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 gmock_main/fast"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 gmock_main/fast"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="gmock">
@@ -134,10 +134,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 gmock"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 gmock"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="gmock/fast">
@@ -175,10 +175,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 gmock/fast"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 gmock/fast"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="gtest">
@@ -214,10 +214,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 gtest"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 gtest"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="gtest/fast">
@@ -253,10 +253,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 gtest/fast"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 gtest/fast"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="gtest_main">
@@ -292,10 +292,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 gtest_main"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 gtest_main"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="gtest_main/fast">
@@ -331,10 +331,10 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 gtest_main/fast"/>
-					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j48 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 gtest_main/fast"/>
+					<CompileFile command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/opt/rh/devtoolset-7/root/usr/bin/gmake -j4 -f &quot;/home/wuyue/ceph-13.2.2/cmake-build-debug/src/googletest/googlemock/gtest/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
@@ -788,7 +788,7 @@
 		<Unit filename="/home/wuyue/ceph-13.2.2/.git/HEAD">
 			<Option virtualFolder="CMake Files\.git\"/>
 		</Unit>
-		<Unit filename="/home/wuyue/ceph-13.2.2/.git/refs/heads/dev">
+		<Unit filename="/home/wuyue/ceph-13.2.2/.git/refs/heads/async-rw">
 			<Option virtualFolder="CMake Files\.git\refs\heads\"/>
 		</Unit>
 		<Unit filename="/home/wuyue/ceph-13.2.2/doc/CMakeLists.txt">

@@ -23,6 +23,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/wuyue/ceph-13.2.2/src/os/bluestore/aio.cc" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/os/CMakeFiles/os.dir/bluestore/aio.cc.o"
   "/home/wuyue/ceph-13.2.2/src/os/bluestore/bluefs_types.cc" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/os/CMakeFiles/os.dir/bluestore/bluefs_types.cc.o"
   "/home/wuyue/ceph-13.2.2/src/os/bluestore/bluestore_types.cc" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/os/CMakeFiles/os.dir/bluestore/bluestore_types.cc.o"
+  "/home/wuyue/ceph-13.2.2/src/os/bluestore/ocssd_aio.cc" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/os/CMakeFiles/os.dir/bluestore/ocssd_aio.cc.o"
   "/home/wuyue/ceph-13.2.2/src/os/filestore/BtrfsFileStoreBackend.cc" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/os/CMakeFiles/os.dir/filestore/BtrfsFileStoreBackend.cc.o"
   "/home/wuyue/ceph-13.2.2/src/os/filestore/DBObjectMap.cc" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/os/CMakeFiles/os.dir/filestore/DBObjectMap.cc.o"
   "/home/wuyue/ceph-13.2.2/src/os/filestore/FileJournal.cc" "/home/wuyue/ceph-13.2.2/cmake-build-debug/src/os/CMakeFiles/os.dir/filestore/FileJournal.cc.o"
