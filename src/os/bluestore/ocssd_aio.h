@@ -14,8 +14,8 @@ extern "C" {
 
 
 
-#define     OCSSD_MAX_BLK_NUM   (3000U)
-#define     OCSSD_MAX_IO_SIZE   (8*4096UL)
+#define     OCSSD_MAX_BLK_NUM   (1500U)
+#define     OCSSD_MAX_IO_SIZE   (16*4096UL)
 #define     OCSSD_IO_READ       (0x1)
 #define     OCSSD_IO_WRITE      (0x2)
 
@@ -26,7 +26,6 @@ struct ocssd_offset_t {
 
 
 struct ocssd_sb_summary_t{
-    int magic;
     int nr_sblks;
     int sblk_map[OCSSD_MAX_BLK_NUM];
     ocssd_offset_t sblk_ofst[OCSSD_MAX_BLK_NUM];

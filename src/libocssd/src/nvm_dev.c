@@ -376,20 +376,24 @@ struct nvm_dev * nvm_dev_openf(const char *dev_path, int flags) {
 	return dev;
 }
 
+
+static dev_open_times = 0 ;
+static dev_close_times = 0 ;
+
 struct nvm_dev *nvm_dev_open(const char *dev_path)
 {
+
+	LOG_DEBUG("open nvm_dev %d times",++dev_open_times);
 	return nvm_dev_openf(dev_path, 0x0);
 }
 
 void nvm_dev_close(struct nvm_dev *dev)
 {
+	LOG_DEBUG("close nvm_dev %d times",++dev_close_times);
 	if (!dev)
 		return;
-
 	nvm_bbt_flush_all(dev, NULL);
-
 	dev->be->close(dev);
-
 	free(dev->bbts);
 	free(dev);
 }

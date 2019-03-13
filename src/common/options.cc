@@ -3662,6 +3662,10 @@ std::vector<Option> get_global_options() {
     .set_description("Skip O_DIRECT when open a device file"),
 
 
+    Option("bdev_debug_write_verify", Option::TYPE_BOOL, Option::LEVEL_DEV)
+        .set_default(false)
+        .set_description("When 4K data was written , read up immediately "),
+
     //--------------------------------
     Option("bdev_debug_inflight_ios", Option::TYPE_BOOL, Option::LEVEL_DEV)
     .set_default(false)

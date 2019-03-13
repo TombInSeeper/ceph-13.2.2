@@ -40,7 +40,7 @@ d9fc969feef3bf8814e9271ec826fcd2 include/tracing/oprequest.h
 920ad81a94ded37a01cf3f0a8a5e0f56 include/tracing/pg.h
 4b4e284c96bfe365c9624599e11f5a43 include/tracing/rgw_op.h
 12ae823184e4f3042839e8d2ae79504e include/tracing/rgw_rados.h
-22de609b022719f469b706002419eec9 spdk-ext-prefix/src/spdk-ext-stamp/spdk-ext-build
+22b61a3c604f378c799ac55485669150 spdk-ext-prefix/src/spdk-ext-stamp/spdk-ext-build
 7c66aaa578092a99b8ed01da581961ff spdk-ext-prefix/src/spdk-ext-stamp/spdk-ext-configure
 955cdf99227907ae4e083a6e2eb3e11a spdk-ext-prefix/src/spdk-ext-stamp/spdk-ext-download
 250f77e3cb6ee2d32fd437a638677919 spdk-ext-prefix/src/spdk-ext-stamp/spdk-ext-install

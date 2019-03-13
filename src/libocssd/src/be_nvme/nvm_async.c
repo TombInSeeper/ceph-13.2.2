@@ -13,7 +13,7 @@
 #include "nvm_async.h"
 #include <mqueue.h>
 
-#define NVM_BE_LBD_ASYNC_DEFAULT_IODEPTH 4096
+#define NVM_BE_LBD_ASYNC_DEFAULT_IODEPTH 512
 //#define AIO_ALIGN
 
 struct nvm_async_ctx {
@@ -73,7 +73,7 @@ struct nvm_async_ctx *nvm_async_init(int fd, uint32_t depth)
     ctx->event_max = 20;
     ctx->event_min = 1;
 
-    char name[16];
+    /*char name[16];
     sprintf(name, "/nvm_mq_%05d", getpid());
     LOG_INFO("unlink %s = %d", name, mq_unlink(name));
 
@@ -93,11 +93,7 @@ struct nvm_async_ctx *nvm_async_init(int fd, uint32_t depth)
         LOG_ERROR("mq_open error=%d", ctx->mqd);
         return NULL;
     }
-
-    pthread_create(&ctx->pthread_write, NULL, thread_write, ctx);
-
-    pthread_setname_np(&ctx->pthread_write,"ocssd_write");
-
+    pthread_create(&ctx->pthread_write, NULL, thread_write, ctx);*/
     return ctx;
 }
 
@@ -105,7 +101,7 @@ int nvm_async_term(struct nvm_async_ctx *ctx)
 {
     int err;
 
-    pthread_cancel(ctx->pthread_write);
+    /*pthread_cancel(ctx->pthread_write);
     pthread_join(ctx->pthread_write, NULL);
 
     if (0 != mq_close(ctx->mqd)) {
@@ -114,7 +110,7 @@ int nvm_async_term(struct nvm_async_ctx *ctx)
     char name[16];
     sprintf(name, "/nvm_mq_%05d", getpid());
     if (mq_unlink(name) != 0)
-        LOG_ERROR("mq_unlink error");
+        LOG_ERROR("mq_unlink error");*/
 
     for (unsigned int i = 0; i < ctx->depth; i++) {
         free(ctx->iocbs[i]);
@@ -399,8 +395,6 @@ static void *thread_write(void *arg)
     struct nvm_async_ctx *aio = arg;
     struct async_private *obj = NULL;
     cpu_set_t mask;
-
-    pthread_setname_np(pthread_self(),"nvm_write_thread");
 
     CPU_ZERO(&mask);
     CPU_SET(0, &mask);

@@ -34,7 +34,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;9388234&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;0c21e5a&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -83,7 +83,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;9388234&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;0c21e5a&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -132,7 +132,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;9388234&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;0c21e5a&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>
@@ -181,7 +181,7 @@
 					<Add option="-DLNVM_VERSION_PATCH=0"/>
 					<Add option="-D__CHECK_ENDIAN__"/>
 					<Add option="-DNVM_BE_SYSFS_ENABLED"/>
-					<Add option="-DGIT_SHA1=&quot;9388234&quot;"/>
+					<Add option="-DGIT_SHA1=&quot;0c21e5a&quot;"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/cmake-build-debug/src/include"/>
 					<Add directory="/home/wuyue/ceph-13.2.2/src"/>
 					<Add directory="/usr/include/nss3"/>

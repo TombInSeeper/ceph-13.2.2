@@ -29,11 +29,20 @@ public:
   }
 
 private:
+
+
+    bool                            trick = false;
+
+    std::list<IOContext*>           aio_queue;
+    std::condition_variable         aio_cv;
+    std::mutex                      aio_submit_mtx;
+
+
     atomic_uint                     aio_queue_depth = {0};
     atomic_uint                     pre_alloc_seq = {0};
     atomic_uint                     submitted_seq = {0};
     bool                            aio_stop = false;
-    std::mutex                      aio_submit_mtx;
+
 
 
     struct AioThread : public Thread {
@@ -48,23 +57,28 @@ private:
           ocDevice->aio_thread_work();
         }
         void init(){
-          create("ocssd_aio_cb");
+          create("ocssd_wrt");
         }
         void shutdown() {
           join();
         }
     } aio_thread;
 
-
+    //MOCK
+    int                             fd  = -1;
     //OCSSD
-    nvm_dev                         *dev = NULL;
-    const nvm_geo                   *g_geo = NULL;
+    nvm_dev                         *dev = nullptr;
+    const nvm_geo                   *g_geo = nullptr;
     const nvm_bbt                   *g_bbt[8][32];
     pm_data_t                       g_pm_data;
 
 
     void _init_blk_map(struct nvm_dev* dev);
     void _init_blk_ofst(struct nvm_dev *dev);
+    void _erase_sb(struct nvm_dev* dev,int blk_id);
+
+    void __open_ocssd();
+    void __close_ocssd();
 
 
     // Increase physical address

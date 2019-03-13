@@ -2388,6 +2388,10 @@ float OSD::get_osd_recovery_sleep()
     return cct->_conf->osd_recovery_sleep_hdd;
 }
 
+
+
+//static osd_mount_times = 0;
+
 int OSD::init()
 {
   CompatSet initial, diff;
@@ -2401,10 +2405,10 @@ int OSD::init()
   service.recovery_sleep_timer.init();
 
   // mount.
-  dout(2) << "init " << dev_path
+  dout(0) << "init " << dev_path
 	  << " (looks like " << (store_is_rotational ? "hdd" : "ssd") << ")"
 	  << dendl;
-  dout(2) << "journal " << journal_path << dendl;
+  dout(0) << "journal " << journal_path << dendl;
   assert(store);  // call pre_init() first!
 
   store->set_cache_shards(get_num_op_shards());

@@ -86,6 +86,10 @@ void IOContext::release_running_aios()
   // release aio contexts (including pinned buffers).
   running_aios.clear();
 #endif
+
+#ifdef WITH_OCSSD
+  ocssd_running_aios.clear();
+#endif
 }
 
 BlockDevice *BlockDevice::create(CephContext* cct, const string& path,

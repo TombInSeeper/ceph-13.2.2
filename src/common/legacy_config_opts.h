@@ -911,11 +911,11 @@ OPTION(memstore_page_size, OPT_U64)
 
 
 
-
+//OCSSD
 OPTION(bdev_ocssd_enable, OPT_BOOL)
 OPTION(bdev_ocssd_backend, OPT_STR)
 OPTION(bdev_debug_use_ramdisk, OPT_BOOL)
-
+OPTION(bdev_debug_write_verify, OPT_BOOL)
 
 OPTION(bdev_debug_inflight_ios, OPT_BOOL)
 OPTION(bdev_inject_crash, OPT_INT)  // if N>0, then ~ 1/N IOs will complete before we crash on flush.

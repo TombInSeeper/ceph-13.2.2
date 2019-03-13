@@ -530,6 +530,9 @@ $DAEMONOPTS
         osd_client_message_size_cap = 0           ;MARK this option is mentioned by report
         osd_client_message_cap = 0                ;MARK this option is mentioned by report
 
+
+
+		bluestore_rocksdb_options = "max_write_buffer_number=8,write_buffer_size=536870912,min_write_buffer_number_to_merge=8,recycle_log_file_num=8,compaction_threads=8"
         ;bluestore_cache_size = 0
         ;bluestore_cache_size_ssd = 0
         ;bluestore_cache_size_hdd = 0
@@ -538,15 +541,22 @@ $DAEMONOPTS
         bdev_debug_use_ramdisk  = false
         bdev_ocssd_enable       = true
 		bdev_ocssd_backend		= ocssd
-       
+		;bdev_debug_write_verify = false        
+ 
         ;;;;;bluestore block size file size = 500GB
         ;bluestore block size = 536870912000
     	bluestore block create = false
-		bluestore block path   = /dev/nvme0n1
+		bluestore block path   = /dev/sdb
 		
-		bluestore block db path = /dev/sdb
+		bluestore block db path = /dev/sdc
         ;bluestore block db size = 10485760000
         bluestore block db create = false
+		
+		;bluestore block db path = $CEPH_DEV_DIR/osd\$id/block.db.file
+        ;bluestore block db size = 10485760000
+		;bluestore block db path = /dev/sdc
+        ;bluestore block db create = false
+		
 		;bluestore block wal path = $CEPH_DEV_DIR/osd\$id/block.wal.file
         ;bluestore block wal size = 10485760000
         bluestore block wal create = false

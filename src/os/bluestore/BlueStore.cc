@@ -6111,6 +6111,15 @@ int BlueStore::_fsck(bool deep, bool repair)
 	  << " <<<START>>>"
 	  << (repair ? " repair" : " check")
 	  << (deep ? " (deep)" : " (shallow)") << " start" << dendl;
+
+
+  dout(1) << __func__
+          << " <<<END>>>"
+          << (repair ? " repair" : " check")
+          << (deep ? " (deep)" : " (shallow)") << " start" << dendl;
+
+  return 0 ;
+
   int errors = 0;
   unsigned repaired = 0;
 
@@ -7655,7 +7664,7 @@ int BlueStore::_do_read(
           }
           ceph_assert(r == 0);
         }
-	//ceph_assert(reg.bl.length() == r_len);
+	      ceph_assert(reg.bl.length() == r_len);
       }
     }
   }
@@ -9909,11 +9918,11 @@ int BlueStore::queue_transactions(
 
   // we're immediately readable (unlike FileStore)
   for (auto c : on_applied_sync) {
-    dout(0) << __func__ << "OCSSD: Now I'm readable,sync" << dendl;
+    dout(0) << __func__ << " OCSSD: Now I'm readable,sync" << dendl;
     c->complete(0);
   }
   for (auto c : on_applied) {
-    dout(0) << __func__ << "OCSSD:Now I'm readable,finishers " << dendl;
+    dout(0) << __func__ << " OCSSD:Now I'm readable,finishers " << dendl;
     finishers[osr->shard]->queue(c);
   }
 
@@ -11163,7 +11172,7 @@ void BlueStore::_ocssd_do_write_data(
   auto fall_within_same_block = (offset/min_alloc_size == (end - 1)/min_alloc_size
       && (length != min_alloc_size));
 
-  dout(30) << __func__ << "\toffset: " << offset << "\tlength: " <<length << dendl;
+  dout(0) << __func__ << "\toffset: " << offset << "\tlength: " <<length << dendl;
   //
   // read a page which offset fall within
   // and
@@ -11245,7 +11254,7 @@ void BlueStore::_ocssd_do_write_data(
 
   }
   auto blp = bl.begin();
-  dout(30) << __func__ << std::hex << "\taligned_offset: " << aligned_offset << "\taligned_length: " <<aligned_length << dendl;
+  dout(0) << __func__ << std::hex << "\taligned_offset: " << aligned_offset << "\taligned_length: " <<aligned_length << dendl;
   _do_write_big(txc,c,o, aligned_offset, aligned_length, blp ,wctx);
 
 

@@ -109,7 +109,7 @@ spdk-ext-prefix/src/spdk-ext-stamp/spdk-ext-configure: spdk-ext-prefix/src/spdk-
 
 spdk-ext-prefix/src/spdk-ext-stamp/spdk-ext-build: spdk-ext-prefix/src/spdk-ext-stamp/spdk-ext-configure
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/wuyue/ceph-13.2.2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Performing build step for 'spdk-ext'"
-	cd /home/wuyue/ceph-13.2.2/src/spdk && env -i PATH=/opt/rh/devtoolset-7/root/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/root/bin CC=/opt/rh/devtoolset-7/root/usr/bin/cc $(MAKE) EXTRA_CFLAGS=\"-fPIC\"
+	cd /home/wuyue/ceph-13.2.2/src/spdk && env -i PATH=/opt/rh/devtoolset-7/root/usr/bin:/opt/rh/devtoolset-7/root/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/root/bin CC=/opt/rh/devtoolset-7/root/usr/bin/cc $(MAKE) EXTRA_CFLAGS=\"-fPIC\"
 	cd /home/wuyue/ceph-13.2.2/src/spdk && /home/wuyue/clion-2018.2.5/bin/cmake/linux/bin/cmake -E touch /home/wuyue/ceph-13.2.2/cmake-build-debug/spdk-ext-prefix/src/spdk-ext-stamp/spdk-ext-build
 
 spdk-ext: CMakeFiles/spdk-ext
