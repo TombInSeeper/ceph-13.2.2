@@ -16,9 +16,10 @@ add_definitions(-DLNVM_VERSION_MAJOR=${NVM_VERSION_MAJOR})
 add_definitions(-DLNVM_VERSION_MINOR=${NVM_VERSION_MINOR})
 add_definitions(-DLNVM_VERSION_PATCH=${NVM_VERSION_PATCH})
 
-add_definitions("-std=gnu99")
-add_definitions("-Wall")
-add_definitions("-Wextra")
+add_compile_options("-std=gnu99")
+add_compile_options("-Wall")
+add_compile_options("-Wextra")
+
 add_definitions("-D__CHECK_ENDIAN__")
 add_definitions("-D_GNU_SOURCE")
 
@@ -66,7 +67,7 @@ set(HEADER_FILES
 	src/nvm_spec.h
 	src/nvm_vblk.h
 		#---------------------------
-	objssd/objssd-nvme.h
+	objssd-nvme.h
     )
 
 set(SOURCE_FILES
@@ -87,7 +88,7 @@ set(SOURCE_FILES
 
 
 #----------------------------
-	objssd/objssd-nvme.c
+	objssd-nvme.c
 	)
 
 include_directories(utils)

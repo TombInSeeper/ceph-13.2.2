@@ -36,10 +36,8 @@
 #define SPDK_PREFIX "spdk:"
 
 #define WITH_OCSSD
-#ifdef WITH_OCSSD
 #define OCSSD_SEG_SIZE              (384*1024*1024ULL)
 #include "ocssd_aio.h"
-#endif
 
 class CephContext;
 /// track in-flight io

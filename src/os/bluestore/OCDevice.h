@@ -5,12 +5,13 @@
 #ifndef CEPH_OS_BLUESTORE_OCDEVICE_H
 #define CEPH_OS_BLUESTORE_OCDEVICE_H
 
-
-#include "BlockDevice.h"
-
 //Using std
 #include <common/Thread.h>
 #include <mutex>
+
+
+#include "BlockDevice.h"
+
 
 
 
@@ -55,6 +56,7 @@ private:
         void *entry()
         {
           ocDevice->aio_thread_work();
+          return NULL;
         }
         void init(){
           create("ocssd_wrt");
@@ -67,29 +69,7 @@ private:
     //MOCK
     int                             fd  = -1;
     //OCSSD
-    nvm_dev                         *dev = nullptr;
-    const nvm_geo                   *g_geo = nullptr;
-    const nvm_bbt                   *g_bbt[8][32];
-    pm_data_t                       g_pm_data;
-
-
-    void _init_blk_map(struct nvm_dev* dev);
-    void _init_blk_ofst(struct nvm_dev *dev);
-    void _erase_sb(struct nvm_dev* dev,int blk_id);
-
-    void __open_ocssd();
-    void __close_ocssd();
-
-
-    // Increase physical address
-    void incr_virtual(const struct nvm_geo *geo, struct nvm_addr *addr);
-
-// Calculate virtual physical address by given logical address (byte address)
-
-    void logical2virtual(const struct nvm_geo *geo, uint64_t lba_off , uint64_t lba_len ,  int *cnt , struct nvm_addr *addrs);
-
-    void virtual2physical(struct nvm_addr *addr);
-
+    struct ocssd_t                  *ocssd = nullptr;
 
     void _aio_start();
 
@@ -97,10 +77,11 @@ private:
 
 
 public:
+
+    //
     int open(const std::string &path) override;
     void close() override;
     void init_disk() override;
-
 
     //Async IO
     void aio_thread_work() ;
@@ -121,14 +102,9 @@ public:
     void get_written_extents(interval_set<uint64_t> &p) override ;
     int  collect_metadata(const std::string &prefix, map<std::string, std::string> *pm) const override;
 
-
-
     //Do nothing
     int flush() override { return 0 ; }
     bool supported_bdev_label() override { return false; }
     int invalidate_cache(uint64_t off, uint64_t len) override { return 0 ; }
-
-
-
 };
 #endif //CEPH_OS_BLUESTORE_OCDEVICE_H
